@@ -1,0 +1,278 @@
+﻿using System;
+using System.Collections.Generic;
+using CourseProjectAPI.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace CourseProjectAPI.Data;
+
+public partial class AutoSalonContext : DbContext
+{
+    public AutoSalonContext()
+    {
+    }
+
+    public AutoSalonContext(DbContextOptions<AutoSalonContext> options)
+        : base(options)
+    {
+    }
+
+    public virtual DbSet<AdditionalOption> AdditionalOptions { get; set; }
+
+    public virtual DbSet<Brand> Brands { get; set; }
+
+    public virtual DbSet<Car> Cars { get; set; }
+
+    public virtual DbSet<Configuration> Configurations { get; set; }
+
+    public virtual DbSet<Model> Models { get; set; }
+
+    public virtual DbSet<Order> Orders { get; set; }
+
+    public virtual DbSet<OrderOption> OrderOptions { get; set; }
+
+    public virtual DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
+
+    public virtual DbSet<Role> Roles { get; set; }
+
+    public virtual DbSet<User> Users { get; set; }
+
+    public virtual DbSet<UserProfiles> UserProfiles { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=DESKTOP-H4KVEGT;Database=AutoSalon;Trusted_Connection=true;TrustServerCertificate=true;");
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AdditionalOption>(entity =>
+        {
+            entity.HasKey(e => e.OptionId).HasName("PK__Addition__92C7A1DF1C48BBCA");
+
+            entity.Property(e => e.OptionId).HasColumnName("OptionID");
+            entity.Property(e => e.Category).HasMaxLength(50);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.OptionName).HasMaxLength(100);
+            entity.Property(e => e.OptionPrice).HasColumnType("decimal(15, 2)");
+        });
+
+        modelBuilder.Entity<Brand>(entity =>
+        {
+            entity.HasKey(e => e.BrandId).HasName("PK__Brands__DAD4F3BE1FBD0878");
+
+            entity.HasIndex(e => e.BrandName, "UQ__Brands__2206CE9BE376F531").IsUnique();
+
+            entity.Property(e => e.BrandId).HasColumnName("BrandID");
+            entity.Property(e => e.BrandName).HasMaxLength(100);
+            entity.Property(e => e.Country).HasMaxLength(50);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.LogoUrl)
+                .HasMaxLength(500)
+                .HasColumnName("LogoURL");
+        });
+
+        modelBuilder.Entity<Car>(entity =>
+        {
+            entity.HasKey(e => e.CarId).HasName("PK__Cars__68A0340ED23855BA");
+
+            entity.HasIndex(e => e.Status, "IX_Cars_Status");
+
+            entity.HasIndex(e => e.Vin, "UQ__Cars__C5DF234CB587C62F").IsUnique();
+
+            entity.Property(e => e.CarId).HasColumnName("CarID");
+            entity.Property(e => e.Color).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Mileage).HasDefaultValue(0);
+            entity.Property(e => e.ModelId).HasColumnName("ModelID");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValue("Available");
+            entity.Property(e => e.Vin)
+                .HasMaxLength(17)
+                .HasColumnName("VIN");
+
+            entity.HasOne(d => d.Model).WithMany(p => p.Cars)
+                .HasForeignKey(d => d.ModelId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Cars_Models");
+        });
+
+        modelBuilder.Entity<Configuration>(entity =>
+        {
+            entity.HasKey(e => e.ConfigurationId).HasName("PK__Configur__95AA539BA454B50F");
+
+            entity.Property(e => e.ConfigurationId).HasColumnName("ConfigurationID");
+            entity.Property(e => e.AdditionalPrice).HasColumnType("decimal(15, 2)");
+            entity.Property(e => e.ConfigurationName).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.ModelId).HasColumnName("ModelID");
+
+            entity.HasOne(d => d.Model).WithMany(p => p.Configurations)
+                .HasForeignKey(d => d.ModelId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Configurations_Models");
+        });
+
+        modelBuilder.Entity<Model>(entity =>
+        {
+            entity.HasKey(e => e.ModelId).HasName("PK__Models__E8D7A1CC3A8CD188");
+
+            entity.HasIndex(e => e.BrandId, "IX_Models_BrandID");
+
+            entity.Property(e => e.ModelId).HasColumnName("ModelID");
+            entity.Property(e => e.BasePrice).HasColumnType("decimal(15, 2)");
+            entity.Property(e => e.BodyType).HasMaxLength(50);
+            entity.Property(e => e.BrandId).HasColumnName("BrandID");
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.EngineCapacity).HasColumnType("decimal(4, 2)");
+            entity.Property(e => e.FuelType).HasMaxLength(20);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.ModelName).HasMaxLength(100);
+
+            entity.HasOne(d => d.Brand).WithMany(p => p.Models)
+                .HasForeignKey(d => d.BrandId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Models_Brands");
+        });
+
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.HasKey(e => e.OrderId).HasName("PK__Orders__C3905BAF5870167A");
+
+            entity.ToTable(tb => tb.HasTrigger("tr_Orders_StatusChange"));
+
+            entity.HasIndex(e => e.OrderStatus, "IX_Orders_Status");
+
+            entity.HasIndex(e => e.UserId, "IX_Orders_UserID");
+
+            entity.Property(e => e.OrderId).HasColumnName("OrderID");
+            entity.Property(e => e.CarId).HasColumnName("CarID");
+            entity.Property(e => e.ConfigurationId).HasColumnName("ConfigurationID");
+            entity.Property(e => e.Notes).HasMaxLength(1000);
+            entity.Property(e => e.OrderDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.OrderStatus)
+                .HasMaxLength(20)
+                .HasDefaultValue("Pending");
+            entity.Property(e => e.TotalPrice).HasColumnType("decimal(15, 2)");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+
+            entity.HasOne(d => d.Car).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.CarId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Orders_Cars");
+
+            entity.HasOne(d => d.Configuration).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.ConfigurationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Orders_Configurations");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Orders_Users");
+        });
+
+        modelBuilder.Entity<OrderOption>(entity =>
+        {
+            entity.HasKey(e => e.OrderOptionId).HasName("PK__OrderOpt__59E1EBBC50C34C36");
+
+            entity.Property(e => e.OrderOptionId).HasColumnName("OrderOptionID");
+            entity.Property(e => e.OptionId).HasColumnName("OptionID");
+            entity.Property(e => e.OrderId).HasColumnName("OrderID");
+            entity.Property(e => e.PriceAtOrder).HasColumnType("decimal(15, 2)");
+            entity.Property(e => e.Quantity).HasDefaultValue(1);
+
+            entity.HasOne(d => d.Option).WithMany(p => p.OrderOptions)
+                .HasForeignKey(d => d.OptionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_OrderOptions_AdditionalOptions");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderOptions)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_OrderOptions_Orders");
+        });
+
+        modelBuilder.Entity<OrderStatusHistory>(entity =>
+        {
+            entity.HasKey(e => e.HistoryId).HasName("PK__OrderSta__4D7B4ADDAA186F83");
+
+            entity.ToTable("OrderStatusHistory");
+
+            entity.Property(e => e.HistoryId).HasColumnName("HistoryID");
+            entity.Property(e => e.ChangedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.Property(e => e.OrderId).HasColumnName("OrderID");
+            entity.Property(e => e.Status).HasMaxLength(20);
+
+            entity.HasOne(d => d.ChangedByNavigation).WithMany(p => p.OrderStatusHistories)
+                .HasForeignKey(d => d.ChangedBy)
+                .HasConstraintName("FK_OrderStatusHistory_Users");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderStatusHistories)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_OrderStatusHistory_Orders");
+        });
+
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.HasKey(e => e.RoleId).HasName("PK__Roles__8AFACE3A71737522");
+
+            entity.HasIndex(e => e.RoleName, "UQ__Roles__8A2B61609852683A").IsUnique();
+
+            entity.Property(e => e.RoleId).HasColumnName("RoleID");
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.RoleName).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CCAC05B3A282");
+
+            entity.ToTable(tb =>
+                {
+                    tb.HasTrigger("tr_Users_PreventDuplicateEmail");
+                    tb.HasTrigger("tr_Users_UpdateTimestamp");
+                });
+
+            entity.HasIndex(e => e.Email, "IX_Users_Email");
+
+            entity.HasIndex(e => e.Email, "UQ__Users__A9D1053433B6664A").IsUnique();
+
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Email).HasMaxLength(255);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.PasswordHash).HasMaxLength(255);
+            entity.Property(e => e.RoleId).HasColumnName("RoleID");
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.Users)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Users_Roles");
+        });
+
+        modelBuilder.Entity<UserProfiles>(entity =>
+        {
+            entity.HasKey(e => e.ProfileId).HasName("PK__UserProf__290C8884920A62CC");
+
+            entity.HasIndex(e => e.UserId, "UQ__UserProf__1788CCAD084141F5").IsUnique();
+
+            entity.Property(e => e.ProfileId).HasColumnName("ProfileID");
+            entity.Property(e => e.Address).HasMaxLength(500);
+            entity.Property(e => e.FirstName).HasMaxLength(100);
+            entity.Property(e => e.LastName).HasMaxLength(100);
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+
+            entity.HasOne(d => d.User).WithOne(p => p.UserProfiles)
+                .HasForeignKey<UserProfiles>(d => d.UserId)
+                .HasConstraintName("FK_UserProfiles_Users");
+        });
+
+        OnModelCreatingPartial(modelBuilder);
+    }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+}
