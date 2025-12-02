@@ -56,12 +56,25 @@ namespace CourseProjectAPI.Controllers
         }
 
         [HttpGet("{carId}/configurations")]
-        public async Task<ActionResult<List<Configuration>>> GetConfigurations(int carId)
+        public async Task<ActionResult<List<ConfigurationDto>>> GetConfigurations(int carId)
         {
             try
             {
                 var configurations = await _carService.GetConfigurationsAsync(carId);
-                return Ok(configurations);
+                var configurationDtos = configurations.Select(c => new ConfigurationDto
+                {
+                    ConfigurationId = c.ConfigurationId,
+                    ModelId = c.ModelId,
+                    ConfigurationName = c.ConfigurationName,
+                    Description = c.Description,
+                    AdditionalPrice = c.AdditionalPrice,
+                    EnginePower = c.EnginePower,
+                    EngineCapacity = c.EngineCapacity,
+                    FuelType = c.FuelType,
+                    TransmissionType = c.TransmissionType
+                }).ToList();
+                
+                return Ok(configurationDtos);
             }
             catch (Exception ex)
             {
@@ -148,6 +161,48 @@ namespace CourseProjectAPI.Controllers
                     cars = cars.Where(c => c.FuelType == fuelType).ToList();
 
                 return Ok(cars);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("colors")]
+        public async Task<ActionResult<List<ColorDto>>> GetAvailableColors()
+        {
+            try
+            {
+                var colors = await _carService.GetAvailableColorsAsync();
+                return Ok(colors);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("engines")]
+        public async Task<ActionResult<List<EngineDto>>> GetAvailableEngines([FromQuery] int? modelId = null)
+        {
+            try
+            {
+                var engines = await _carService.GetAvailableEnginesAsync(modelId);
+                return Ok(engines);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("transmissions")]
+        public async Task<ActionResult<List<TransmissionDto>>> GetAvailableTransmissions([FromQuery] int? modelId = null)
+        {
+            try
+            {
+                var transmissions = await _carService.GetAvailableTransmissionsAsync(modelId);
+                return Ok(transmissions);
             }
             catch (Exception ex)
             {

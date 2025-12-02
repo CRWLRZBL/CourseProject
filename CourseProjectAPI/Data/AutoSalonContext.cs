@@ -105,6 +105,10 @@ public partial class AutoSalonContext : DbContext
             entity.Property(e => e.ConfigurationName).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.ModelId).HasColumnName("ModelID");
+            entity.Property(e => e.EnginePower).HasColumnName("EnginePower");
+            entity.Property(e => e.EngineCapacity).HasColumnType("decimal(4, 2)").HasColumnName("EngineCapacity");
+            entity.Property(e => e.FuelType).HasMaxLength(20).HasColumnName("FuelType");
+            entity.Property(e => e.TransmissionType).HasMaxLength(20).HasColumnName("TransmissionType");
 
             entity.HasOne(d => d.Model).WithMany(p => p.Configurations)
                 .HasForeignKey(d => d.ModelId)
