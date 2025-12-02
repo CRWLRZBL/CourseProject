@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Button, Badge, Spinner } from 'react-bootstrap';
 import { Car } from '../../services/models/car';
 import { useNavigate } from 'react-router-dom';
-import { utils, CAR_STATUS } from '../../utils/constants';
+import { utils, CAR_STATUS, BODY_TYPE_LABELS, FUEL_TYPE_LABELS } from '../../utils/constants';
 
 interface CarCardProps {
   car: Car;
@@ -60,10 +60,10 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
       <Card.Body className="d-flex flex-column">
         <div className="mb-2">
           <Badge bg="light" text="dark" className="me-2">
-            {car.bodyType}
+            {BODY_TYPE_LABELS[car.bodyType] || car.bodyType}
           </Badge>
           <Badge bg="light" text="dark">
-            {car.fuelType}
+            {FUEL_TYPE_LABELS[car.fuelType] || car.fuelType}
           </Badge>
         </div>
         

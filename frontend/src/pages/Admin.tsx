@@ -6,6 +6,7 @@ import { Order } from '../services/models/order';
 import { Car } from '../services/models/car';
 import { orderService } from '../services/api/orderService';
 import { carService } from '../services/api/carService';
+import { ORDER_STATUS_LABELS, CAR_STATUS_LABELS } from '../utils/constants';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorAlert from '../components/common/ErrorAlert';
 
@@ -80,12 +81,22 @@ const Admin: React.FC = () => {
   const availableCars = cars.filter(car => car.status === 'Available');
 
   return (
-    <Container fluid>
-      <Row>
-        <Col>
-          <h1 className="mb-4">Админ-панель</h1>
-        </Col>
-      </Row>
+    <div className="admin-page">
+      <Container fluid>
+        {/* Заголовок страницы */}
+        <Row className="mb-4">
+          <Col>
+            <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
+              <div>
+                <h1 className="display-5 fw-bold mb-2">Админ-панель</h1>
+                <p className="text-muted mb-0">Управление заказами, автомобилями и отчеты</p>
+              </div>
+              <Badge bg="danger" className="fs-6 px-3 py-2">
+                🔐 Администратор
+              </Badge>
+            </div>
+          </Col>
+        </Row>
 
       {error && (
         <ErrorAlert 
@@ -97,35 +108,46 @@ const Admin: React.FC = () => {
 
       <Row>
         <Col lg={3}>
-          <Card>
-            <Card.Header>
+          <Card className="shadow-sm border-0 mb-4">
+            <Card.Header className="bg-primary text-white">
+              <h5 className="mb-0">Меню</h5>
+            </Card.Header>
+            <Card.Body className="p-0">
               <Nav variant="pills" className="flex-column">
                 <Nav.Link 
                   active={activeTab === 'dashboard'} 
                   onClick={() => setActiveTab('dashboard')}
+                  className="px-4 py-3"
                 >
-                  📊 Дашборд
+                  <span className="me-2">📊</span>
+                  Дашборд
                 </Nav.Link>
                 <Nav.Link 
                   active={activeTab === 'orders'} 
                   onClick={() => setActiveTab('orders')}
+                  className="px-4 py-3"
                 >
-                  📦 Управление заказами
+                  <span className="me-2">📦</span>
+                  Управление заказами
                 </Nav.Link>
                 <Nav.Link 
                   active={activeTab === 'cars'} 
                   onClick={() => setActiveTab('cars')}
+                  className="px-4 py-3"
                 >
-                  🚗 Управление автомобилями
+                  <span className="me-2">🚗</span>
+                  Управление автомобилями
                 </Nav.Link>
                 <Nav.Link 
                   active={activeTab === 'reports'} 
                   onClick={() => setActiveTab('reports')}
+                  className="px-4 py-3"
                 >
-                  📈 Отчеты по продажам
+                  <span className="me-2">📈</span>
+                  Отчеты по продажам
                 </Nav.Link>
               </Nav>
-            </Card.Header>
+            </Card.Body>
           </Card>
         </Col>
 
@@ -134,9 +156,11 @@ const Admin: React.FC = () => {
             
             {/* Дашборд */}
             <Tab eventKey="dashboard" title="Дашборд">
-              <Card>
+              <Card className="shadow-sm border-0">
+                <Card.Header className="bg-light">
+                  <h4 className="mb-0">📊 Общая статистика</h4>
+                </Card.Header>
                 <Card.Body>
-                  <h4>Общая статистика</h4>
                   
                   <Row className="mt-4">
                     <Col md={3}>
@@ -209,9 +233,11 @@ const Admin: React.FC = () => {
 
             {/* Управление заказами */}
             <Tab eventKey="orders" title="Заказы">
-              <Card>
+              <Card className="shadow-sm border-0">
+                <Card.Header className="bg-light">
+                  <h4 className="mb-0">📦 Управление заказами</h4>
+                </Card.Header>
                 <Card.Body>
-                  <h4>Управление заказами</h4>
                   
                   <Table responsive>
                     <thead>
@@ -235,7 +261,12 @@ const Admin: React.FC = () => {
                           <td>{formatPrice(order.totalPrice)}</td>
                           <td>
                             <Badge bg={getStatusVariant(order.orderStatus)}>
-                              {order.orderStatus}
+                              {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus}
+                            </Badge>
+                          </td>
+                          <td>
+                            <Badge bg={getStatusVariant(order.orderStatus)}>
+                              {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus}
                             </Badge>
                           </td>
                           <td>
@@ -288,9 +319,11 @@ const Admin: React.FC = () => {
 
             {/* Управление автомобилями */}
             <Tab eventKey="cars" title="Автомобили">
-              <Card>
+              <Card className="shadow-sm border-0">
+                <Card.Header className="bg-light">
+                  <h4 className="mb-0">🚗 Управление автомобилями</h4>
+                </Card.Header>
                 <Card.Body>
-                  <h4>Управление автомобилями</h4>
                   
                   <Table responsive>
                     <thead>
@@ -314,7 +347,7 @@ const Admin: React.FC = () => {
                           <td>{formatPrice(car.basePrice)}</td>
                           <td>
                             <Badge bg={getStatusVariant(car.status)}>
-                              {car.status}
+                              {CAR_STATUS_LABELS[car.status] || car.status}
                             </Badge>
                           </td>
                           <td>
@@ -332,6 +365,7 @@ const Admin: React.FC = () => {
         </Col>
       </Row>
     </Container>
+    </div>
   );
 };
 

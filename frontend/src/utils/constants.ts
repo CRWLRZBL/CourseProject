@@ -1,9 +1,18 @@
 // Базовые настройки приложения
+// Во Vite переменные окружения читаются через import.meta.env,
+// а не через process.env, как в CRA.
+const API_BASE_URL =
+  // Vite: переменная должна начинаться с VITE_
+  (typeof import.meta !== 'undefined' &&
+    import.meta.env &&
+    import.meta.env.VITE_API_URL) ||
+  'https://localhost:7038/api';
+
 export const APP_CONFIG = {
   NAME: 'AutoSalon LADA',
   VERSION: '1.0.0',
   DESCRIPTION: 'Официальный дилер автомобилей LADA',
-  API_BASE_URL: process.env.REACT_APP_API_URL || 'https://localhost:7038/api',
+  API_BASE_URL,
   DEFAULT_LANGUAGE: 'ru-RU',
   CURRENCY: 'RUB',
 } as const;
@@ -57,6 +66,12 @@ export const USER_ROLES = {
   CLIENT: 'Client',
   MANAGER: 'Manager',
   ADMIN: 'Admin',
+} as const;
+
+export const USER_ROLE_LABELS: Record<string, string> = {
+  [USER_ROLES.CLIENT]: 'Клиент',
+  [USER_ROLES.MANAGER]: 'Менеджер',
+  [USER_ROLES.ADMIN]: 'Администратор',
 } as const;
 
 // Типы кузовов

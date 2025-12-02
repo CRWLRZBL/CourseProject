@@ -88,82 +88,136 @@ const Order: React.FC = () => {
   }
 
   return (
-    <Container>
-      <Row className="mb-4">
-        <Col>
-          <h1>Оформление заказа</h1>
-          <p className="text-muted">
-            Заполните конфигурацию автомобиля и выберите дополнительные опции
-          </p>
-        </Col>
-      </Row>
+    <div className="order-page">
+      <Container>
+        {/* Заголовок страницы */}
+        <Row className="mb-4">
+          <Col>
+            <div className="d-flex align-items-center mb-2">
+              <h1 className="mb-0 me-3">Оформление заказа</h1>
+              <span className="badge bg-primary fs-6">Шаг 2 из 3</span>
+            </div>
+            <p className="text-muted mb-0">
+              Настройте параметры автомобиля и выберите дополнительные опции
+            </p>
+          </Col>
+        </Row>
 
-      {error && (
-        <Alert variant="danger" dismissible onClose={() => setError('')}>
-          {error}
-        </Alert>
-      )}
+        {error && (
+          <Alert variant="danger" dismissible onClose={() => setError('')} className="mb-4">
+            <Alert.Heading>Ошибка</Alert.Heading>
+            {error}
+          </Alert>
+        )}
 
-      {success && (
-        <Alert variant="success">
-          {success}
-        </Alert>
-      )}
+        {success && (
+          <Alert variant="success" className="mb-4">
+            <Alert.Heading>Успешно!</Alert.Heading>
+            {success}
+          </Alert>
+        )}
 
-      <Row>
-        <Col lg={8}>
-          {carId ? (
-            <OrderWizard 
-              carId={Number(carId)} 
-              onOrderCreate={handleOrderCreate}
-            />
-          ) : (
-            <Card>
-              <Card.Body className="text-center">
-                <h4>Выберите автомобиль для заказа</h4>
-                <p className="text-muted mb-3">
-                  Перейдите в каталог и выберите автомобиль для оформления заказа
-                </p>
-                <Button 
-                  variant="primary" 
-                  onClick={() => navigate('/catalog')}
-                >
-                  Перейти в каталог
-                </Button>
-              </Card.Body>
-            </Card>
-          )}
-        </Col>
+        <Row>
+          {/* Основной контент - конфигуратор */}
+          <Col lg={8}>
+            {carId ? (
+              <OrderWizard 
+                carId={Number(carId)} 
+                onOrderCreate={handleOrderCreate}
+              />
+            ) : (
+              <Card className="text-center py-5">
+                <Card.Body>
+                  <div className="display-1 mb-3">🚗</div>
+                  <h3 className="mb-3">Выберите автомобиль для заказа</h3>
+                  <p className="text-muted mb-4">
+                    Перейдите в каталог и выберите автомобиль для оформления заказа
+                  </p>
+                  <Button 
+                    variant="primary" 
+                    size="lg"
+                    onClick={() => navigate('/catalog')}
+                  >
+                    Перейти в каталог
+                  </Button>
+                </Card.Body>
+              </Card>
+            )}
+          </Col>
 
-        <Col lg={4}>
-          <Card>
-            <Card.Header>
-              <h5 className="mb-0">Информация о клиенте</h5>
-            </Card.Header>
-            <Card.Body>
-              <p><strong>Имя:</strong> {user.firstName} {user.lastName}</p>
-              <p><strong>Email:</strong> {user.email}</p>
-              <p><strong>Телефон:</strong> {user.phone}</p>
-            </Card.Body>
-          </Card>
+          {/* Боковая панель */}
+          <Col lg={4}>
+            <div className="sticky-sidebar">
+              {/* Информация о клиенте */}
+              <Card className="mb-3 shadow-sm">
+                <Card.Header className="bg-primary text-white">
+                  <h5 className="mb-0 d-flex align-items-center">
+                    <span className="me-2">👤</span>
+                    Информация о клиенте
+                  </h5>
+                </Card.Header>
+                <Card.Body>
+                  <div className="mb-3">
+                    <div className="text-muted small mb-1">Имя</div>
+                    <div className="fw-semibold">{user.firstName} {user.lastName}</div>
+                  </div>
+                  <div className="mb-3">
+                    <div className="text-muted small mb-1">Email</div>
+                    <div className="fw-semibold">{user.email}</div>
+                  </div>
+                  <div>
+                    <div className="text-muted small mb-1">Телефон</div>
+                    <div className="fw-semibold">{user.phone || 'Не указан'}</div>
+                  </div>
+                </Card.Body>
+              </Card>
 
-          <Card className="mt-3">
-            <Card.Header>
-              <h5 className="mb-0">Процесс заказа</h5>
-            </Card.Header>
-            <Card.Body>
-              <ol className="ps-3">
-                <li className="mb-2">Выбор автомобиля</li>
-                <li className="mb-2">Конфигурация и опции</li>
-                <li className="mb-2">Подтверждение заказа</li>
-                <li className="mb-2">Связь с менеджером</li>
-                <li>Получение автомобиля</li>
-              </ol>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+              {/* Процесс заказа */}
+              <Card className="shadow-sm">
+                <Card.Header className="bg-light">
+                  <h5 className="mb-0 d-flex align-items-center">
+                    <span className="me-2">📋</span>
+                    Процесс заказа
+                  </h5>
+                </Card.Header>
+                <Card.Body>
+                  <div className="order-steps">
+                    <div className="order-step completed mb-3">
+                      <div className="step-number">1</div>
+                      <div className="step-content">
+                        <div className="fw-semibold">Выбор автомобиля</div>
+                        <div className="text-muted small">Завершено</div>
+                      </div>
+                    </div>
+                    <div className="order-step active mb-3">
+                      <div className="step-number">2</div>
+                      <div className="step-content">
+                        <div className="fw-semibold">Конфигурация</div>
+                        <div className="text-muted small">В процессе</div>
+                      </div>
+                    </div>
+                    <div className="order-step mb-3">
+                      <div className="step-number">3</div>
+                      <div className="step-content">
+                        <div className="fw-semibold">Подтверждение</div>
+                        <div className="text-muted small">Ожидание</div>
+                      </div>
+                    </div>
+                    <div className="order-step">
+                      <div className="step-number">4</div>
+                      <div className="step-content">
+                        <div className="fw-semibold">Получение</div>
+                        <div className="text-muted small">Ожидание</div>
+                      </div>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </div>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 };
 

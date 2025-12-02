@@ -34,5 +34,34 @@ export const carService = {
   async getBodyTypes(): Promise<string[]> {
     const response = await apiClient.get('/cars/filters/body-types');
     return response.data;
+  },
+
+  // Методы для конфигуратора (если API поддерживает)
+  async getAvailableColors(carId: number): Promise<{ colorId: number; colorName: string; colorCode: string; priceModifier: number }[]> {
+    try {
+      const response = await apiClient.get(`/cars/${carId}/colors`);
+      return response.data;
+    } catch (error) {
+      // Если API не поддерживает, возвращаем пустой массив
+      return [];
+    }
+  },
+
+  async getAvailableEngines(carId: number): Promise<{ engineId: number; engineName: string; engineCapacity: number; power: number; fuelType: string; priceModifier: number }[]> {
+    try {
+      const response = await apiClient.get(`/cars/${carId}/engines`);
+      return response.data;
+    } catch (error) {
+      return [];
+    }
+  },
+
+  async getAvailableTransmissions(carId: number): Promise<{ transmissionId: number; transmissionName: string; transmissionType: string; gears: number; priceModifier: number }[]> {
+    try {
+      const response = await apiClient.get(`/cars/${carId}/transmissions`);
+      return response.data;
+    } catch (error) {
+      return [];
+    }
   }
 };

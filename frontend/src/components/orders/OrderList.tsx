@@ -3,6 +3,7 @@ import { Card, Table, Badge, Button } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
 import { Order } from '../../services/models/order';
 import { orderService } from '../../services/api/orderService';
+import { ORDER_STATUS_LABELS } from '../../utils/constants';
 
 const OrderList: React.FC = () => {
   const { user } = useAuth();
@@ -80,7 +81,7 @@ const OrderList: React.FC = () => {
                   <td>{formatPrice(order.totalPrice)}</td>
                   <td>
                     <Badge bg={getStatusVariant(order.orderStatus)}>
-                      {order.orderStatus}
+                      {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus}
                     </Badge>
                   </td>
                   <td>{new Date(order.orderDate).toLocaleDateString('ru-RU')}</td>

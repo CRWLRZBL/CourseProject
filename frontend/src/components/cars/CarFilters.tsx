@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Row, Col, Accordion } from 'react-bootstrap';
 import { carService } from '../../services/api/carService';
+import { BODY_TYPE_LABELS } from '../../utils/constants';
 
 interface Filters {
   brand: string;
@@ -153,7 +154,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
                   <option value="">Все типы</option>
                   {bodyTypes.map(type => (
                     <option key={type} value={type}>
-                      {type}
+                      {BODY_TYPE_LABELS[type] || type}
                     </option>
                   ))}
                 </Form.Select>
@@ -237,7 +238,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
               )}
               {filters.bodyType && (
                 <span className="badge bg-secondary">
-                  Кузов: {filters.bodyType}
+                  Кузов: {BODY_TYPE_LABELS[filters.bodyType] || filters.bodyType}
                 </span>
               )}
               {filters.minPrice && (
