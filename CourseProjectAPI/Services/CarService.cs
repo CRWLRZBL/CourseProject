@@ -32,6 +32,7 @@ namespace CourseProjectAPI.Services
                 .Select(c => new CarDto
                 {
                     CarId = c.CarId,
+                    ModelId = c.ModelId,
                     BrandName = c.Model.Brand.BrandName,
                     ModelName = c.Model.ModelName,
                     BodyType = c.Model.BodyType,
@@ -46,15 +47,84 @@ namespace CourseProjectAPI.Services
                 .ToListAsync();
         }
 
+        public async Task<List<ModelDto>> GetAvailableModelsAsync(string brand = null, string bodyType = null)
+        {
+            var query = _context.Models
+                .Include(m => m.Brand)
+                .Where(m => m.IsActive);
+
+            if (!string.IsNullOrEmpty(brand))
+                query = query.Where(m => m.Brand.BrandName.Contains(brand));
+
+            if (!string.IsNullOrEmpty(bodyType))
+                query = query.Where(m => m.BodyType == bodyType);
+
+            var models = await query
+                .Select(m => new ModelDto
+                {
+                    ModelId = m.ModelId,
+                    BrandName = m.Brand.BrandName,
+                    ModelName = m.ModelName,
+                    BodyType = m.BodyType,
+                    BasePrice = m.BasePrice,
+                    ModelYear = m.ModelYear,
+                    FuelType = m.FuelType,
+                    EngineCapacity = m.EngineCapacity,
+                    Description = m.Description,
+                    ImageUrl = m.ImageUrl,
+                    IsActive = m.IsActive,
+                    AvailableCount = _context.Cars.Count(c => c.ModelId == m.ModelId && c.Status == "Available")
+                })
+                .ToListAsync();
+
+            // Фильтруем модели: показываем те, у которых есть либо доступные машины, либо комплектации
+            var modelIdsWithConfigs = await _context.Configurations
+                .Select(c => c.ModelId)
+                .Distinct()
+                .ToListAsync();
+
+            return models
+                .Where(m => m.AvailableCount > 0 || modelIdsWithConfigs.Contains(m.ModelId))
+                .OrderBy(m => m.BrandName)
+                .ThenBy(m => m.ModelName)
+                .ToList();
+        }
+
+        public async Task<ModelDto> GetModelByIdAsync(int id)
+        {
+            return await _context.Models
+                .Include(m => m.Brand)
+                .Where(m => m.ModelId == id && m.IsActive)
+                .Select(m => new ModelDto
+                {
+                    ModelId = m.ModelId,
+                    BrandName = m.Brand.BrandName,
+                    ModelName = m.ModelName,
+                    BodyType = m.BodyType,
+                    BasePrice = m.BasePrice,
+                    ModelYear = m.ModelYear,
+                    FuelType = m.FuelType,
+                    EngineCapacity = m.EngineCapacity,
+                    Description = m.Description,
+                    ImageUrl = m.ImageUrl,
+                    IsActive = m.IsActive,
+                    AvailableCount = _context.Cars.Count(c => c.ModelId == m.ModelId && c.Status == "Available")
+                })
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<CarDto> GetCarByIdAsync(int id)
         {
             return await _context.Cars
                 .Include(c => c.Model)
                     .ThenInclude(m => m.Brand)
+                .Include(c => c.Orders)
+                    .ThenInclude(o => o.Configuration)
                 .Where(c => c.CarId == id)
                 .Select(c => new CarDto
                 {
                     CarId = c.CarId,
+                    ModelId = c.ModelId,
                     BrandName = c.Model.Brand.BrandName,
                     ModelName = c.Model.ModelName,
                     BodyType = c.Model.BodyType,
@@ -64,9 +134,37 @@ namespace CourseProjectAPI.Services
                     Vin = c.Vin,
                     ModelYear = c.Model.ModelYear,
                     FuelType = c.Model.FuelType,
-                    EngineCapacity = c.Model.EngineCapacity
+                    EngineCapacity = c.Model.EngineCapacity,
+                    ConfigurationName = c.Orders.OrderByDescending(o => o.OrderDate).Select(o => o.Configuration.ConfigurationName).FirstOrDefault()
                 })
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<CarDto>> GetAllCarsAsync()
+        {
+            return await _context.Cars
+                .Include(c => c.Model)
+                    .ThenInclude(m => m.Brand)
+                .Include(c => c.Orders)
+                    .ThenInclude(o => o.Configuration)
+                .Select(c => new CarDto
+                {
+                    CarId = c.CarId,
+                    ModelId = c.ModelId,
+                    BrandName = c.Model.Brand.BrandName,
+                    ModelName = c.Model.ModelName,
+                    BodyType = c.Model.BodyType,
+                    BasePrice = c.Model.BasePrice,
+                    Color = c.Color,
+                    Status = c.Status,
+                    Vin = c.Vin,
+                    ModelYear = c.Model.ModelYear,
+                    FuelType = c.Model.FuelType,
+                    EngineCapacity = c.Model.EngineCapacity,
+                    ConfigurationName = c.Orders.OrderByDescending(o => o.OrderDate).Select(o => o.Configuration.ConfigurationName).FirstOrDefault()
+                })
+                .OrderByDescending(c => c.CarId)
+                .ToListAsync();
         }
 
         public async Task<List<Configuration>> GetConfigurationsAsync(int carId)
@@ -83,40 +181,86 @@ namespace CourseProjectAPI.Services
                 .ToListAsync();
         }
 
+        public async Task<List<Configuration>> GetConfigurationsByModelIdAsync(int modelId)
+        {
+            return await _context.Configurations
+                .AsNoTracking()
+                .Where(c => c.ModelId == modelId)
+                .OrderBy(c => c.AdditionalPrice)
+                .ThenBy(c => c.ConfigurationName)
+                .ToListAsync();
+        }
+
+        public async Task<CarDto> UpdateCarAsync(int id, UpdateCarDto updateDto)
+        {
+            var car = await _context.Cars.FindAsync(id);
+            if (car == null)
+                return null;
+
+            if (!string.IsNullOrEmpty(updateDto.Color))
+                car.Color = updateDto.Color;
+
+            if (!string.IsNullOrEmpty(updateDto.Status))
+                car.Status = updateDto.Status;
+
+            if (!string.IsNullOrEmpty(updateDto.Vin))
+                car.Vin = updateDto.Vin;
+
+            if (updateDto.Mileage.HasValue)
+                car.Mileage = updateDto.Mileage.Value;
+
+            await _context.SaveChangesAsync();
+
+            return await GetCarByIdAsync(id);
+        }
+
         public async Task<List<ColorDto>> GetAvailableColorsAsync()
         {
-            var colorNames = await _context.Cars
-                .AsNoTracking()
-                .Where(c => c.Status == "Available")
-                .Select(c => c.Color)
-                .Distinct()
-                .OrderBy(c => c)
-                .ToListAsync();
-
-            // Маппинг названий цветов в hex-коды
+            // Маппинг всех доступных цветов LADA в hex-коды
+            // Базовый цвет: Ледниковый (белый)
             var colorMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
+                { "Ледниковый", "#FFFFFF" },      // Базовый белый цвет
+                { "Пантера", "#000000" },         // Черный
+                { "Платина", "#C0C0C0" },        // Серебристый
+                { "Борнео", "#4A5568" },         // Темно-серый
+                { "Капитан", "#3B82F6" },        // Синий
+                { "Кориандр", "#92400E" },       // Коричневый
+                { "Фламенко", "#DC2626" },       // Красный
+                { "Несси", "#065F46" },          // Темно-зеленый
+                { "Несси 2", "#065F46" },        // Темно-зеленый (вариант 2)
+                { "Несси2", "#065F46" },         // Темно-зеленый (вариант 2, без пробела)
+                { "Табаско", "#B91C1C" },        // Темно-красный
+                // Старые названия для обратной совместимости
                 { "Белый", "#FFFFFF" },
                 { "Черный", "#000000" },
                 { "Серебристый", "#C0C0C0" },
                 { "Серый", "#808080" },
-                { "Красный", "#FF0000" },
-                { "Синий", "#0000FF" },
-                { "Зеленый", "#008000" },
-                { "Желтый", "#FFFF00" },
-                { "Оранжевый", "#FFA500" },
-                { "Коричневый", "#A52A2A" },
-                { "Бежевый", "#F5F5DC" },
-                { "Золотой", "#FFD700" },
-                { "Бордовый", "#800020" },
-                { "Фиолетовый", "#800080" },
-                { "Голубой", "#00FFFF" }
+                { "Красный", "#DC2626" },
+                { "Синий", "#3B82F6" },
+                { "Зеленый", "#059669" }
             };
 
-            return colorNames.Select(colorName => new ColorDto
+            // Возвращаем все доступные цвета из маппинга
+            // Порядок: сначала базовый, потом остальные
+            var orderedColors = new List<string>
+            {
+                "Ледниковый",  // Базовый цвет - первый
+                "Пантера",
+                "Платина",
+                "Борнео",
+                "Капитан",
+                "Кориандр",
+                "Фламенко",
+                "Несси",
+                "Несси 2",     // Темно-зеленый (вариант 2)
+                "Табаско"
+            };
+
+            return orderedColors.Select(colorName => new ColorDto
             {
                 Name = colorName,
-                HexCode = colorMap.TryGetValue(colorName, out var hexCode) ? hexCode : "#CCCCCC" // По умолчанию серый
+                HexCode = colorMap.TryGetValue(colorName, out var hexCode) ? hexCode : "#CCCCCC"
             }).ToList();
         }
 

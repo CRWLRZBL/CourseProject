@@ -38,9 +38,26 @@ public partial class AutoSalonContext : DbContext
 
     public virtual DbSet<UserProfiles> UserProfiles { get; set; }
 
+    public virtual DbSet<Color> Colors { get; set; }
+    public virtual DbSet<Engine> Engines { get; set; }
+    public virtual DbSet<Transmission> Transmissions { get; set; }
+    public virtual DbSet<ModelColor> ModelColors { get; set; }
+    public virtual DbSet<ModelEngine> ModelEngines { get; set; }
+    public virtual DbSet<ModelTransmission> ModelTransmissions { get; set; }
+
+    // Удален метод OnConfiguring - используем строку подключения из конфигурации (appsettings.json или переменные окружения)
+    // Это позволяет использовать правильную строку подключения для Docker окружения
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=DESKTOP-H4KVEGT;Database=AutoSalon;Trusted_Connection=true;TrustServerCertificate=true;");
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            // Настройка для правильной работы с Unicode
+            optionsBuilder.UseSqlServer(
+                optionsBuilder.Options.FindExtension<Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal.SqlServerOptionsExtension>()?.ConnectionString,
+                options => options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,9 +66,9 @@ public partial class AutoSalonContext : DbContext
             entity.HasKey(e => e.OptionId).HasName("PK__Addition__92C7A1DF1C48BBCA");
 
             entity.Property(e => e.OptionId).HasColumnName("OptionID");
-            entity.Property(e => e.Category).HasMaxLength(50);
-            entity.Property(e => e.Description).HasMaxLength(500);
-            entity.Property(e => e.OptionName).HasMaxLength(100);
+            entity.Property(e => e.Category).HasMaxLength(50).IsUnicode(true);
+            entity.Property(e => e.Description).HasMaxLength(500).IsUnicode(true);
+            entity.Property(e => e.OptionName).HasMaxLength(100).IsUnicode(true);
             entity.Property(e => e.OptionPrice).HasColumnType("decimal(15, 2)");
         });
 
@@ -62,11 +79,12 @@ public partial class AutoSalonContext : DbContext
             entity.HasIndex(e => e.BrandName, "UQ__Brands__2206CE9BE376F531").IsUnique();
 
             entity.Property(e => e.BrandId).HasColumnName("BrandID");
-            entity.Property(e => e.BrandName).HasMaxLength(100);
-            entity.Property(e => e.Country).HasMaxLength(50);
-            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.BrandName).HasMaxLength(100).IsUnicode(true);
+            entity.Property(e => e.Country).HasMaxLength(50).IsUnicode(true);
+            entity.Property(e => e.Description).HasMaxLength(500).IsUnicode(true);
             entity.Property(e => e.LogoUrl)
                 .HasMaxLength(500)
+                .IsUnicode(true)
                 .HasColumnName("LogoURL");
         });
 
@@ -79,15 +97,17 @@ public partial class AutoSalonContext : DbContext
             entity.HasIndex(e => e.Vin, "UQ__Cars__C5DF234CB587C62F").IsUnique();
 
             entity.Property(e => e.CarId).HasColumnName("CarID");
-            entity.Property(e => e.Color).HasMaxLength(50);
+            entity.Property(e => e.Color).HasMaxLength(50).IsUnicode(true);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Mileage).HasDefaultValue(0);
             entity.Property(e => e.ModelId).HasColumnName("ModelID");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
+                .IsUnicode(true)
                 .HasDefaultValue("Available");
             entity.Property(e => e.Vin)
                 .HasMaxLength(17)
+                .IsUnicode(true)
                 .HasColumnName("VIN");
 
             entity.HasOne(d => d.Model).WithMany(p => p.Cars)
@@ -102,13 +122,13 @@ public partial class AutoSalonContext : DbContext
 
             entity.Property(e => e.ConfigurationId).HasColumnName("ConfigurationID");
             entity.Property(e => e.AdditionalPrice).HasColumnType("decimal(15, 2)");
-            entity.Property(e => e.ConfigurationName).HasMaxLength(100);
-            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.ConfigurationName).HasMaxLength(100).IsUnicode(true);
+            entity.Property(e => e.Description).HasMaxLength(500).IsUnicode(true);
             entity.Property(e => e.ModelId).HasColumnName("ModelID");
             entity.Property(e => e.EnginePower).HasColumnName("EnginePower");
             entity.Property(e => e.EngineCapacity).HasColumnType("decimal(4, 2)").HasColumnName("EngineCapacity");
-            entity.Property(e => e.FuelType).HasMaxLength(20).HasColumnName("FuelType");
-            entity.Property(e => e.TransmissionType).HasMaxLength(20).HasColumnName("TransmissionType");
+            entity.Property(e => e.FuelType).HasMaxLength(20).IsUnicode(true).HasColumnName("FuelType");
+            entity.Property(e => e.TransmissionType).HasMaxLength(20).IsUnicode(true).HasColumnName("TransmissionType");
 
             entity.HasOne(d => d.Model).WithMany(p => p.Configurations)
                 .HasForeignKey(d => d.ModelId)
@@ -124,18 +144,112 @@ public partial class AutoSalonContext : DbContext
 
             entity.Property(e => e.ModelId).HasColumnName("ModelID");
             entity.Property(e => e.BasePrice).HasColumnType("decimal(15, 2)");
-            entity.Property(e => e.BodyType).HasMaxLength(50);
+            entity.Property(e => e.BodyType).HasMaxLength(50).IsUnicode(true);
             entity.Property(e => e.BrandId).HasColumnName("BrandID");
-            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.Description).HasMaxLength(1000).IsUnicode(true);
             entity.Property(e => e.EngineCapacity).HasColumnType("decimal(4, 2)");
-            entity.Property(e => e.FuelType).HasMaxLength(20);
+            entity.Property(e => e.FuelType).HasMaxLength(20).IsUnicode(true);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
-            entity.Property(e => e.ModelName).HasMaxLength(100);
+            entity.Property(e => e.ModelName).HasMaxLength(100).IsUnicode(true);
+            entity.Property(e => e.ImageUrl).HasMaxLength(500).IsUnicode(true);
 
             entity.HasOne(d => d.Brand).WithMany(p => p.Models)
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Models_Brands");
+        });
+
+        modelBuilder.Entity<Color>(entity =>
+        {
+            entity.HasKey(e => e.ColorId).HasName("PK_Colors_ColorID");
+
+            entity.HasIndex(e => e.ColorName, "UQ_Colors_ColorName").IsUnique();
+
+            entity.Property(e => e.ColorId).HasColumnName("ColorID");
+            entity.Property(e => e.ColorName).HasMaxLength(100);
+            entity.Property(e => e.ColorCode).HasMaxLength(20);
+            entity.Property(e => e.PriceModifier).HasColumnType("decimal(15, 2)");
+            entity.Property(e => e.ImageUrl).HasMaxLength(500);
+        });
+
+        modelBuilder.Entity<Engine>(entity =>
+        {
+            entity.HasKey(e => e.EngineId).HasName("PK_Engines_EngineID");
+
+            entity.HasIndex(e => e.EngineName, "UQ_Engines_EngineName").IsUnique();
+
+            entity.Property(e => e.EngineId).HasColumnName("EngineID");
+            entity.Property(e => e.EngineName).HasMaxLength(100);
+            entity.Property(e => e.EngineCapacity).HasColumnType("decimal(4, 2)");
+            entity.Property(e => e.FuelType).HasMaxLength(20);
+            entity.Property(e => e.PriceModifier).HasColumnType("decimal(15, 2)");
+        });
+
+        modelBuilder.Entity<Transmission>(entity =>
+        {
+            entity.HasKey(e => e.TransmissionId).HasName("PK_Transmissions_TransmissionID");
+
+            entity.HasIndex(e => e.TransmissionName, "UQ_Transmissions_TransmissionName").IsUnique();
+
+            entity.Property(e => e.TransmissionId).HasColumnName("TransmissionID");
+            entity.Property(e => e.TransmissionName).HasMaxLength(100);
+            entity.Property(e => e.TransmissionType).HasMaxLength(20);
+            entity.Property(e => e.PriceModifier).HasColumnType("decimal(15, 2)");
+        });
+
+        modelBuilder.Entity<ModelColor>(entity =>
+        {
+            entity.HasKey(e => new { e.ModelId, e.ColorId }).HasName("PK_ModelColors");
+
+            entity.Property(e => e.ModelId).HasColumnName("ModelID");
+            entity.Property(e => e.ColorId).HasColumnName("ColorID");
+            entity.Property(e => e.ImageUrl).HasMaxLength(500);
+
+            entity.HasOne(d => d.Model).WithMany()
+                .HasForeignKey(d => d.ModelId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ModelColors_Models");
+
+            entity.HasOne(d => d.Color).WithMany(p => p.ModelColors)
+                .HasForeignKey(d => d.ColorId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ModelColors_Colors");
+        });
+
+        modelBuilder.Entity<ModelEngine>(entity =>
+        {
+            entity.HasKey(e => new { e.ModelId, e.EngineId }).HasName("PK_ModelEngines");
+
+            entity.Property(e => e.ModelId).HasColumnName("ModelID");
+            entity.Property(e => e.EngineId).HasColumnName("EngineID");
+
+            entity.HasOne(d => d.Model).WithMany()
+                .HasForeignKey(d => d.ModelId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ModelEngines_Models");
+
+            entity.HasOne(d => d.Engine).WithMany(p => p.ModelEngines)
+                .HasForeignKey(d => d.EngineId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ModelEngines_Engines");
+        });
+
+        modelBuilder.Entity<ModelTransmission>(entity =>
+        {
+            entity.HasKey(e => new { e.ModelId, e.TransmissionId }).HasName("PK_ModelTransmissions");
+
+            entity.Property(e => e.ModelId).HasColumnName("ModelID");
+            entity.Property(e => e.TransmissionId).HasColumnName("TransmissionID");
+
+            entity.HasOne(d => d.Model).WithMany()
+                .HasForeignKey(d => d.ModelId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ModelTransmissions_Models");
+
+            entity.HasOne(d => d.Transmission).WithMany(p => p.ModelTransmissions)
+                .HasForeignKey(d => d.TransmissionId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ModelTransmissions_Transmissions");
         });
 
         modelBuilder.Entity<Order>(entity =>

@@ -20,19 +20,56 @@ namespace CourseProjectAPI.Services
 
             try
             {
-                // 1. Проверяем доступность автомобиля
-                var car = await _context.Cars
-                    .FirstOrDefaultAsync(c => c.CarId == orderDto.CarId && c.Status == "Available");
+                Car car;
+                Model model;
+                
+                // 1. Проверяем или создаем автомобиль
+                if (orderDto.CarId.HasValue)
+                {
+                    // Если указан CarId, проверяем доступность
+                    car = await _context.Cars
+                        .Include(c => c.Model)
+                        .FirstOrDefaultAsync(c => c.CarId == orderDto.CarId.Value && c.Status == "Available");
 
-                if (car == null)
-                    throw new Exception("Car is not available");
+                    if (car == null)
+                        throw new Exception("Car is not available");
+
+                    model = car.Model;
+                }
+                else
+                {
+                    // Если CarId не указан, создаем новый автомобиль со статусом "Reserved" (В ожидании)
+                    model = await _context.Models
+                        .FirstOrDefaultAsync(m => m.ModelId == orderDto.ModelId);
+
+                    if (model == null)
+                        throw new Exception("Model not found");
+
+                    // Генерируем VIN
+                    var vinPrefix = model.ModelName.ToUpper().Replace(" ", "").Substring(0, Math.Min(4, model.ModelName.Length));
+                    var vinNumber = DateTime.Now.Ticks.ToString().Substring(10);
+                    var vin = $"{vinPrefix}{vinNumber}";
+
+                    car = new Car
+                    {
+                        ModelId = orderDto.ModelId,
+                        Vin = vin,
+                        Color = orderDto.Color ?? "Ледниковый",
+                        Status = "Reserved", // Статус "В ожидании" (Reserved)
+                        Mileage = 0,
+                        CreatedAt = DateTime.Now
+                    };
+
+                    _context.Cars.Add(car);
+                    await _context.SaveChangesAsync(); // Сохраняем, чтобы получить CarId
+                }
 
                 // 2. Получаем данные для расчета цены
                 var configuration = await _context.Configurations
                     .FirstOrDefaultAsync(c => c.ConfigurationId == orderDto.ConfigurationId);
 
-                var model = await _context.Models
-                    .FirstOrDefaultAsync(m => m.ModelId == car.ModelId);
+                if (configuration == null)
+                    throw new Exception("Configuration not found");
 
                 var options = await _context.AdditionalOptions
                     .Where(o => orderDto.OptionIds.Contains(o.OptionId))
@@ -45,7 +82,7 @@ namespace CourseProjectAPI.Services
                 var order = new Order
                 {
                     UserId = orderDto.UserId,
-                    CarId = orderDto.CarId,
+                    CarId = car.CarId,
                     ConfigurationId = orderDto.ConfigurationId,
                     TotalPrice = totalPrice,
                     OrderStatus = "Pending",
@@ -68,9 +105,12 @@ namespace CourseProjectAPI.Services
                     _context.OrderOptions.Add(orderOption);
                 }
 
-                // 6. Обновляем статус автомобиля
-                car.Status = "Reserved";
-                _context.Cars.Update(car);
+                // 6. Обновляем статус автомобиля (если он был Available, меняем на Reserved)
+                if (car.Status == "Available")
+                {
+                    car.Status = "Reserved";
+                    _context.Cars.Update(car);
+                }
 
                 // 7. Добавляем запись в историю статусов
                 var statusHistory = new OrderStatusHistory
@@ -78,7 +118,9 @@ namespace CourseProjectAPI.Services
                     OrderId = order.OrderId,
                     Status = "Pending",
                     ChangedAt = DateTime.Now,
-                    Notes = "Order created automatically"
+                    Notes = car.Status == "Reserved" && !orderDto.CarId.HasValue 
+                        ? "Order created for car on order (В ожидании)" 
+                        : "Order created automatically"
                 };
                 _context.OrderStatusHistories.Add(statusHistory);
 
@@ -111,7 +153,7 @@ namespace CourseProjectAPI.Services
                 .Select(o => new OrderDto
                 {
                     OrderId = o.OrderId,
-                    CustomerName = o.User.UserProfiles.FirstName + " " + o.User.UserProfiles.LastName,
+                    CustomerName = (o.User.UserProfiles.FirstName ?? "") + " " + (o.User.UserProfiles.LastName ?? ""),
                     CarModel = o.Car.Model.Brand.BrandName + " " + o.Car.Model.ModelName,
                     Configuration = o.Configuration.ConfigurationName,
                     TotalPrice = o.TotalPrice,
@@ -142,7 +184,7 @@ namespace CourseProjectAPI.Services
                 .Select(o => new OrderDto
                 {
                     OrderId = o.OrderId,
-                    CustomerName = o.User.UserProfiles.FirstName + " " + o.User.UserProfiles.LastName,
+                    CustomerName = (o.User.UserProfiles.FirstName ?? "") + " " + (o.User.UserProfiles.LastName ?? ""),
                     CarModel = o.Car.Model.Brand.BrandName + " " + o.Car.Model.ModelName,
                     Configuration = o.Configuration.ConfigurationName,
                     TotalPrice = o.TotalPrice,
@@ -196,7 +238,7 @@ namespace CourseProjectAPI.Services
                 .Select(o => new OrderDto
                 {
                     OrderId = o.OrderId,
-                    CustomerName = o.User.UserProfiles.FirstName + " " + o.User.UserProfiles.LastName,
+                    CustomerName = (o.User.UserProfiles.FirstName ?? "") + " " + (o.User.UserProfiles.LastName ?? ""),
                     CarModel = o.Car.Model.Brand.BrandName + " " + o.Car.Model.ModelName,
                     Configuration = o.Configuration.ConfigurationName,
                     TotalPrice = o.TotalPrice,

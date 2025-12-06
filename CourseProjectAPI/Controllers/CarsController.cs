@@ -5,6 +5,7 @@ using CourseProjectAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace CourseProjectAPI.Controllers
 {
@@ -24,12 +25,52 @@ namespace CourseProjectAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<List<CarDto>>> GetCars(
             [FromQuery] string brand = null,
+            [FromQuery] string bodyType = null,
+            [FromQuery] bool all = false)
+        {
+            try
+            {
+                if (all)
+                {
+                    var allCars = await _carService.GetAllCarsAsync();
+                    return Ok(allCars);
+                }
+                var cars = await _carService.GetAvailableCarsAsync(brand, bodyType);
+                return Ok(cars);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("models")]
+        public async Task<ActionResult<List<ModelDto>>> GetModels(
+            [FromQuery] string brand = null,
             [FromQuery] string bodyType = null)
         {
             try
             {
-                var cars = await _carService.GetAvailableCarsAsync(brand, bodyType);
-                return Ok(cars);
+                var models = await _carService.GetAvailableModelsAsync(brand, bodyType);
+                return Ok(models);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("models/{id}")]
+        public async Task<ActionResult<ModelDto>> GetModel(int id)
+        {
+            try
+            {
+                var model = await _carService.GetModelByIdAsync(id);
+
+                if (model == null)
+                    return NotFound();
+
+                return Ok(model);
             }
             catch (Exception ex)
             {
@@ -61,6 +102,33 @@ namespace CourseProjectAPI.Controllers
             try
             {
                 var configurations = await _carService.GetConfigurationsAsync(carId);
+                var configurationDtos = configurations.Select(c => new ConfigurationDto
+                {
+                    ConfigurationId = c.ConfigurationId,
+                    ModelId = c.ModelId,
+                    ConfigurationName = c.ConfigurationName,
+                    Description = c.Description,
+                    AdditionalPrice = c.AdditionalPrice,
+                    EnginePower = c.EnginePower,
+                    EngineCapacity = c.EngineCapacity,
+                    FuelType = c.FuelType,
+                    TransmissionType = c.TransmissionType
+                }).ToList();
+                
+                return Ok(configurationDtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("models/{modelId}/configurations")]
+        public async Task<ActionResult<List<ConfigurationDto>>> GetConfigurationsByModelId(int modelId)
+        {
+            try
+            {
+                var configurations = await _carService.GetConfigurationsByModelIdAsync(modelId);
                 var configurationDtos = configurations.Select(c => new ConfigurationDto
                 {
                     ConfigurationId = c.ConfigurationId,
@@ -203,6 +271,70 @@ namespace CourseProjectAPI.Controllers
             {
                 var transmissions = await _carService.GetAvailableTransmissionsAsync(modelId);
                 return Ok(transmissions);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpPost("import/excel")]
+        public async Task<IActionResult> ImportCarsFromExcel(IFormFile file, [FromServices] IExcelImportService excelImportService)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    return BadRequest(new { Error = "Файл не загружен" });
+                }
+
+                if (!file.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) &&
+                    !file.FileName.EndsWith(".xls", StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new { Error = "Поддерживаются только файлы Excel (.xlsx, .xls)" });
+                }
+
+                using var stream = file.OpenReadStream();
+                var result = await excelImportService.ImportCarsFromExcelAsync(stream);
+
+                return Ok(new
+                {
+                    SuccessCount = result.SuccessCount,
+                    ErrorCount = result.ErrorCount,
+                    Errors = result.Errors,
+                    Message = $"Импортировано: {result.SuccessCount}, Ошибок: {result.ErrorCount}"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("import/template")]
+        public IActionResult DownloadExcelTemplate([FromServices] IExcelImportService excelImportService)
+        {
+            try
+            {
+                var templateBytes = excelImportService.GenerateExcelTemplate();
+                return File(templateBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "car_import_template.xlsx");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<CarDto>> UpdateCar(int id, [FromBody] UpdateCarDto updateDto)
+        {
+            try
+            {
+                var updatedCar = await _carService.UpdateCarAsync(id, updateDto);
+                if (updatedCar == null)
+                    return NotFound();
+
+                return Ok(updatedCar);
             }
             catch (Exception ex)
             {
