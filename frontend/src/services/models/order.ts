@@ -11,8 +11,10 @@ export interface Order {
 
 export interface CreateOrderRequest {
   userId: number;
-  carId: number;
+  carId?: number; // Опционально - если не указан, создается новый автомобиль
+  modelId?: number; // Обязательно, если carId не указан
   configurationId: number;
+  color?: string; // Цвет для нового автомобиля
   optionIds: number[];
 }
 

@@ -2,28 +2,29 @@ import React from 'react';
 import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Icon from '../components/common/Icon';
 
 const Home: React.FC = () => {
   const { user } = useAuth();
 
   const features = [
     {
-      icon: '🚗',
+      icon: 'directions_car',
       title: 'Широкий выбор',
       description: 'Большой каталог новых автомобилей LADA с различными комплектациями'
     },
     {
-      icon: '⚙️',
+      icon: 'tune',
       title: 'Онлайн-конфигуратор',
       description: 'Соберите автомобиль своей мечты с помощью удобного конфигуратора'
     },
     {
-      icon: '💰',
+      icon: 'attach_money',
       title: 'Лучшие цены',
       description: 'Прямые поставки от производителя гарантируют выгодные условия'
     },
     {
-      icon: '📦',
+      icon: 'inventory_2',
       title: 'Быстрое оформление',
       description: 'Весь процесс заказа от выбора до оформления занимает несколько минут'
     }
@@ -63,67 +64,69 @@ const Home: React.FC = () => {
 
   return (
     <div className="home-page">
-      {/* Hero секция */}
       <section className="hero-section text-white py-5 mb-5">
         <div className="hero-background"></div>
-        <Container className="position-relative">
-          <Row className="align-items-center min-vh-50 py-5">
-            <Col lg={6}>
-              <div className="hero-content">
-                <Badge bg="primary" className="mb-3 px-3 py-2 fs-6">
-                  🏆 Официальный дилер
-                </Badge>
-                <h1 className="display-3 fw-bold mb-4">
-                  Автомобили LADA
-                  <br />
-                  <span className="text-warning">С заботой о вас</span>
-                </h1>
-                <p className="lead mb-4 opacity-90">
-                  Новые автомобили с гарантией от производителя. 
-                  Онлайн-заказ и индивидуальный подбор комплектации.
-                </p>
-                <div className="d-flex gap-3 flex-wrap">
-                  <Button 
-                    as={Link} 
-                    to="/catalog" 
-                    variant="primary" 
-                    size="lg"
-                    className="px-5 shadow-lg"
-                  >
-                    <span className="me-2">🚗</span>
-                    Смотреть каталог
-                  </Button>
-                  {!user && (
+        <Container fluid className="position-relative px-0">
+          <Container className="position-relative">
+            <Row className="align-items-center min-vh-50 py-5">
+              <Col lg={6}>
+                <div className="hero-content">
+                  <Badge bg="primary" className="mb-3 px-3 py-2 fs-6">
+                    <Icon name="emoji_events" className="me-1" style={{ fontSize: '1rem', verticalAlign: 'middle' }} />
+                    Официальный дилер
+                  </Badge>
+                  <h1 className="display-3 fw-bold mb-4">
+                    Автомобили LADA
+                    <br />
+                    <span className="text-warning">С заботой о вас</span>
+                  </h1>
+                  <p className="lead mb-4 opacity-90">
+                    Новые автомобили с гарантией от производителя. 
+                    Онлайн-заказ и индивидуальный подбор комплектации.
+                  </p>
+                  <div className="d-flex gap-3 flex-wrap">
                     <Button 
-                      as={Link} 
-                      to="/profile" 
-                      variant="outline-light" 
+                      as={Link as any}
+                      to="/catalog" 
+                      variant="primary" 
                       size="lg"
-                      className="px-5"
+                      className="px-5 shadow-lg"
                     >
-                      <span className="me-2">👤</span>
-                      Войти в аккаунт
+                      <Icon name="directions_car" className="me-2" style={{ verticalAlign: 'middle' }} />
+                      Смотреть каталог
                     </Button>
-                  )}
+                    {!user && (
+                      <Button 
+                        as={Link as any} 
+                        to="/profile" 
+                        variant="outline-light" 
+                        size="lg"
+                        className="px-5"
+                      >
+                        <Icon name="person" className="me-2" style={{ verticalAlign: 'middle' }} />
+                        Войти в аккаунт
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Col>
-            <Col lg={6} className="text-center">
-              <div className="hero-image mt-4 mt-lg-0">
-                <div className="hero-image-wrapper">
-                  <img 
-                    src="/images/cars/hero-car.png" 
-                    alt="LADA Vesta" 
-                    className="img-fluid"
-                    style={{ maxHeight: '450px', filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.3))' }}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/cars/4.jpg';
-                    }}
-                  />
+              </Col>
+              <Col lg={6} className="text-center">
+                <div className="hero-image mt-4 mt-lg-0">
+                  <div className="hero-image-wrapper">
+                    <img 
+                      src="/images/cars/4.jpg" 
+                      alt="LADA Vesta" 
+                      className="img-fluid"
+                      style={{ maxHeight: '450px', filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.3))' }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/cars/4.jpg';
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-            </Col>
-          </Row>
+              </Col>
+            </Row>
+          </Container>
         </Container>
       </section>
 
@@ -133,10 +136,11 @@ const Home: React.FC = () => {
           <Col>
             <div className="text-center">
               <Badge bg="light" text="dark" className="mb-3 px-3 py-2">
-                🔥 Популярное
+                <Icon name="local_fire_department" className="me-1" style={{ fontSize: '1rem', verticalAlign: 'middle' }} />
+                Популярное
               </Badge>
-              <h2 className="display-5 fw-bold mb-3">Популярные модели</h2>
-              <p className="text-muted lead mb-0">
+              <h2 className="display-5 fw-bold mb-3 text-dark">Популярные модели</h2>
+              <p className="text-dark lead mb-0" style={{ fontSize: '1.125rem' }}>
                 Самые востребованные автомобили в нашем каталоге
               </p>
             </div>
@@ -182,12 +186,12 @@ const Home: React.FC = () => {
                       </span>
                     </div>
                     <Button 
-                      as={Link} 
-                      to={`/order?carId=${car.id}`}
+                      as={Link as any} 
+                      to={`/configurator?modelId=${car.id}`}
                       variant="primary" 
                       className="w-100"
                     >
-                      <span className="me-2">⚙️</span>
+                      <Icon name="tune" className="me-2" style={{ verticalAlign: 'middle' }} />
                       Настроить
                     </Button>
                   </div>
@@ -200,7 +204,7 @@ const Home: React.FC = () => {
         <Row className="mt-4">
           <Col className="text-center">
             <Button 
-              as={Link} 
+              as={Link as any} 
               to="/catalog" 
               variant="outline-secondary" 
               size="lg"
@@ -216,8 +220,8 @@ const Home: React.FC = () => {
         <Container>
           <Row className="mb-5">
             <Col>
-              <h2 className="text-center mb-3">Почему выбирают нас</h2>
-              <p className="text-center text-muted lead">
+              <h2 className="text-center mb-3 text-dark">Почему выбирают нас</h2>
+              <p className="text-center text-dark lead" style={{ fontSize: '1.125rem' }}>
                 Мы делаем процесс покупки автомобиля простым и удобным
               </p>
             </Col>
@@ -230,7 +234,7 @@ const Home: React.FC = () => {
                   <Card.Body className="p-4">
                     <div className="feature-icon-wrapper mb-3">
                       <div className="feature-icon display-1">
-                        {feature.icon}
+                        <Icon name={feature.icon} style={{ fontSize: '4rem' }} />
                       </div>
                     </div>
                     <Card.Title className="h5 mb-3">{feature.title}</Card.Title>
@@ -259,22 +263,24 @@ const Home: React.FC = () => {
                 </p>
                 <div className="d-flex gap-3 justify-content-center flex-wrap">
                   <Button 
-                    as={Link} 
+                    as={Link as any} 
                     to="/catalog" 
                     variant="light" 
                     size="lg"
                     className="px-4"
                   >
-                    📋 Смотреть каталог
+                    <Icon name="description" className="me-2" style={{ verticalAlign: 'middle' }} />
+                    Смотреть каталог
                   </Button>
                   <Button 
-                    as={Link} 
+                    as={Link as any } 
                     to="/order" 
                     variant="outline-light" 
                     size="lg"
                     className="px-4"
                   >
-                    ⚙️ Начать конфигурацию
+                    <Icon name="tune" className="me-2" style={{ verticalAlign: 'middle' }} />
+                    Начать конфигурацию
                   </Button>
                 </div>
               </Card.Body>

@@ -189,7 +189,19 @@ const OrderManagement: React.FC = () => {
                       </small>
                     </td>
                     <td>
-                      <Badge bg={utils.getStatusVariant(order.orderStatus, 'order')}>
+                      <Badge 
+                        bg={utils.getStatusVariant(order.orderStatus, 'order')}
+                        style={{
+                          backgroundColor: order.orderStatus === 'Pending' ? '#ffc107' : 
+                                           order.orderStatus === 'Confirmed' ? '#17a2b8' : 
+                                           order.orderStatus === 'InProduction' ? '#007bff' : 
+                                           order.orderStatus === 'Completed' ? '#28a745' : 
+                                           order.orderStatus === 'Cancelled' ? '#dc3545' : '#6c757d',
+                          color: '#fff',
+                          padding: '6px 12px',
+                          fontSize: '0.875rem'
+                        }}
+                      >
                         {utils.getStatusLabel(order.orderStatus, 'order')}
                       </Badge>
                     </td>

@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Badge } from 'react-bootstrap';
-import CarList from '../components/cars/CarList';
+import ModelList from '../components/cars/ModelList';
 import CarFilters from '../components/cars/CarFilters';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorAlert from '../components/common/ErrorAlert';
 import EmptyState from '../components/common/EmptyState';
-import { Car } from '../services/models/car';
+import { Model } from '../services/models/car';
 import { carService } from '../services/api/carService';
 
 const Catalog: React.FC = () => {
-  const [cars, setCars] = useState<Car[]>([]);
-  const [filteredCars, setFilteredCars] = useState<Car[]>([]);
+  const [models, setModels] = useState<Model[]>([]);
+  const [filteredModels, setFilteredModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [retryCount, setRetryCount] = useState(0);
@@ -24,57 +24,57 @@ const Catalog: React.FC = () => {
   });
 
   useEffect(() => {
-    loadCars();
+    loadModels();
   }, [retryCount]);
 
   useEffect(() => {
     applyFilters();
-  }, [cars, filters]);
+  }, [models, filters]);
 
-  const loadCars = async () => {
+  const loadModels = async () => {
     try {
       setLoading(true);
       setError('');
-      const carsData = await carService.getCars();
-      setCars(carsData);
+      const modelsData = await carService.getModels();
+      setModels(modelsData);
     } catch (err) {
-      setError('Не удалось загрузить каталог автомобилей. Проверьте подключение к интернету.');
-      console.error('Error loading cars:', err);
+      setError('Не удалось загрузить каталог моделей. Проверьте подключение к интернету.');
+      console.error('Error loading models:', err);
     } finally {
       setLoading(false);
     }
   };
 
   const applyFilters = () => {
-    let filtered = [...cars];
+    let filtered = [...models];
 
     if (filters.brand) {
-      filtered = filtered.filter(car => 
-        car.brandName.toLowerCase().includes(filters.brand.toLowerCase())
+      filtered = filtered.filter(model => 
+        model.brandName.toLowerCase().includes(filters.brand.toLowerCase())
       );
     }
 
     if (filters.bodyType) {
-      filtered = filtered.filter(car => car.bodyType === filters.bodyType);
+      filtered = filtered.filter(model => model.bodyType === filters.bodyType);
     }
 
     if (filters.minPrice) {
-      filtered = filtered.filter(car => car.basePrice >= Number(filters.minPrice));
+      filtered = filtered.filter(model => model.basePrice >= Number(filters.minPrice));
     }
 
     if (filters.maxPrice) {
-      filtered = filtered.filter(car => car.basePrice <= Number(filters.maxPrice));
+      filtered = filtered.filter(model => model.basePrice <= Number(filters.maxPrice));
     }
 
     if (filters.searchQuery) {
-      filtered = filtered.filter(car =>
-        `${car.brandName} ${car.modelName} ${car.color}`
+      filtered = filtered.filter(model =>
+        `${model.brandName} ${model.modelName}`
           .toLowerCase()
           .includes(filters.searchQuery.toLowerCase())
       );
     }
 
-    setFilteredCars(filtered);
+    setFilteredModels(filtered);
   };
 
   const handleFilterChange = (newFilters: typeof filters) => {
@@ -117,67 +117,70 @@ const Catalog: React.FC = () => {
 
   return (
     <div className="catalog-page">
+    <Container fluid className="px-0"> 
       <Container>
         {/* Заголовок страницы */}
         <Row className="mb-4">
           <Col>
             <div className="page-header">
-              <h1 className="display-5 fw-bold mb-2">Каталог автомобилей</h1>
-              <p className="text-muted lead mb-0">
-                Выберите автомобиль своей мечты из нашего каталога
-              </p>
-            </div>
+              <h1 className="display-5 fw-bold mb-2 text-dark">Каталог автомобилей</h1>
+                <p className="text-dark lead mb-0" style={{ fontSize: '1.125rem' }}>
+                  Выберите автомобиль своей мечты из нашего каталога
+                </p>
+              </div>
+            </Col>
+          </Row>
+
+          <Row>
+            <Col lg={3}>
+              <CarFilters
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onClearFilters={clearFilters}
+              />
+            </Col>
+            
+            <Col lg={9}>
+              <div className="catalog-header mb-4">
+                <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                  <div>
+                    <h2 className="h4 mb-1">Доступные модели</h2>
+                    <p className="text-muted small mb-0">
+                      Найдено: <strong className="text-primary">{filteredModels.length}</strong> {filteredModels.length === 1 ? 'модель' : 
+                                                                                                filteredModels.length < 5 ? 'модели' : 'моделей'}
+                    </p>
+                  </div>
+                  {filteredModels.length > 0 && (
+                    <Badge bg="primary" className="fs-6 px-3 py-2">
+                      {filteredModels.length} {filteredModels.length === 1 ? 'модель' : 
+                                            filteredModels.length < 5 ? 'модели' : 'моделей'}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+            {filteredModels.length === 0 && models.length > 0 ? (
+              <EmptyState
+                title="Ничего не найдено"
+                message="Попробуйте изменить параметры фильтрации"
+                icon="🔍"
+                action={{
+                  label: 'Сбросить фильтры',
+                  onClick: clearFilters
+                }}
+              />
+            ) : filteredModels.length === 0 ? (
+              <EmptyState
+                title="Каталог пуст"
+                message="В данный момент нет доступных моделей"
+                icon="🚗"
+              />
+            ) : (
+              <ModelList models={filteredModels} />
+            )}
           </Col>
         </Row>
-
-        <Row>
-          <Col lg={3}>
-            <CarFilters
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              onClearFilters={clearFilters}
-            />
-          </Col>
-          
-          <Col lg={9}>
-            <div className="catalog-header mb-4">
-              <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                  <h2 className="h4 mb-1">Доступные модели</h2>
-                  <p className="text-muted small mb-0">
-                    Найдено: <strong className="text-primary">{filteredCars.length}</strong> автомобилей
-                  </p>
-                </div>
-                {filteredCars.length > 0 && (
-                  <Badge bg="primary" className="fs-6 px-3 py-2">
-                    {filteredCars.length} {filteredCars.length === 1 ? 'автомобиль' : 
-                                           filteredCars.length < 5 ? 'автомобиля' : 'автомобилей'}
-                  </Badge>
-                )}
-              </div>
-            </div>
-
-          {filteredCars.length === 0 && cars.length > 0 ? (
-            <EmptyState
-              title="Ничего не найдено"
-              message="Попробуйте изменить параметры фильтрации"
-              icon="🔍"
-              action={{
-                label: 'Сбросить фильтры',
-                onClick: clearFilters
-              }}
-            />
-          ) : filteredCars.length === 0 ? (
-            <EmptyState
-              title="Каталог пуст"
-              message="В данный момент нет доступных автомобилей"
-              icon="🚗"
-            />
-          ) : (
-            <CarList cars={filteredCars} />
-          )}
-        </Col>
-      </Row>
+      </Container>
     </Container>
     </div>
   );

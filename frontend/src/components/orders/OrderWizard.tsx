@@ -3,18 +3,32 @@ import { Card, Button, Row, Col, Alert, Badge } from 'react-bootstrap';
 import { Car, Configuration, AdditionalOption } from '../../services/models/car';
 import { carService } from '../../services/api/carService';
 import CarConfigurator from '../cars/CarConfigurator';
+import Icon from '../common/Icon';
 
 interface OrderWizardProps {
-  carId: number;
+  carId?: number;
+  modelId?: number;
+  configurationId?: number;
+  color?: string;
+  optionIds?: number[];
   onOrderCreate: (orderData: {
-    carId: number;
+    carId?: number;
+    modelId?: number;
     configurationId: number;
+    color?: string;
     optionIds: number[];
     totalPrice: number;
   }) => void;
 }
 
-const OrderWizard: React.FC<OrderWizardProps> = ({ carId, onOrderCreate }) => {
+const OrderWizard: React.FC<OrderWizardProps> = ({ 
+  carId, 
+  modelId,
+  configurationId: initialConfigurationId,
+  color: initialColor,
+  optionIds: initialOptionIds,
+  onOrderCreate 
+}) => {
   const [car, setCar] = useState<Car | null>(null);
   const [configurations, setConfigurations] = useState<Configuration[]>([]);
   const [options, setOptions] = useState<AdditionalOption[]>([]);
@@ -39,8 +53,26 @@ const OrderWizard: React.FC<OrderWizardProps> = ({ carId, onOrderCreate }) => {
   }>({});
 
   useEffect(() => {
-    loadData();
-  }, [carId]);
+    if (carId) {
+      loadData();
+    } else if (modelId) {
+      // Если перешли из конфигуратора, загружаем только опции
+      loadOptions();
+      if (initialConfigurationId) {
+        setCurrentConfig(prev => ({
+          ...prev,
+          configurationId: initialConfigurationId,
+        }));
+      }
+      if (initialOptionIds && initialOptionIds.length > 0) {
+        setCurrentConfig(prev => ({
+          ...prev,
+          optionIds: initialOptionIds,
+        }));
+      }
+      setLoading(false);
+    }
+  }, [carId, modelId, initialConfigurationId, initialOptionIds]);
 
   const loadData = async () => {
     setLoading(true);
@@ -140,8 +172,10 @@ const OrderWizard: React.FC<OrderWizardProps> = ({ carId, onOrderCreate }) => {
     }
 
     onOrderCreate({
-      carId,
+      carId: carId,
+      modelId: modelId,
       configurationId: currentConfig.configurationId,
+      color: initialColor,
       optionIds: currentConfig.optionIds,
       totalPrice: currentConfig.totalPrice
     });
@@ -171,7 +205,7 @@ const OrderWizard: React.FC<OrderWizardProps> = ({ carId, onOrderCreate }) => {
     );
   }
 
-  if (!car) {
+  if (!car && carId) {
     return (
       <Alert variant="warning">
         <Alert.Heading>Автомобиль не найден</Alert.Heading>
@@ -191,7 +225,7 @@ const OrderWizard: React.FC<OrderWizardProps> = ({ carId, onOrderCreate }) => {
           <Row className="align-items-center">
             <Col>
               <h4 className="mb-0 d-flex align-items-center">
-                <span className="me-2">🚗</span>
+                <Icon name="directions_car" className="me-2" style={{ verticalAlign: 'middle' }} />
                 {car.brandName} {car.modelName}
               </h4>
             </Col>
@@ -214,12 +248,6 @@ const OrderWizard: React.FC<OrderWizardProps> = ({ carId, onOrderCreate }) => {
               <div className="d-flex align-items-center">
                 <span className="text-muted me-2">Год выпуска:</span>
                 <span className="fw-semibold">{car.modelYear}</span>
-              </div>
-            </Col>
-            <Col md={4}>
-              <div className="d-flex align-items-center">
-                <span className="text-muted me-2">VIN:</span>
-                <span className="fw-semibold font-monospace small">{car.vin}</span>
               </div>
             </Col>
           </Row>
@@ -281,7 +309,7 @@ const OrderWizard: React.FC<OrderWizardProps> = ({ carId, onOrderCreate }) => {
                   disabled={!currentConfig.configurationId}
                   className="w-100 w-md-auto px-5"
                 >
-                  <span className="me-2">✓</span>
+                  <Icon name="check_circle" className="me-2" style={{ verticalAlign: 'middle' }} />
                   Оформить заказ
                 </Button>
               </Col>

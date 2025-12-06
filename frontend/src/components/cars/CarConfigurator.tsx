@@ -19,13 +19,15 @@ interface CarConfiguratorProps {
 }
 
 // Временные данные для демонстрации (в реальности должны загружаться с API)
+// Используются официальные названия цветов LADA
 const DEFAULT_COLORS: ColorOption[] = [
-  { colorId: 1, colorName: 'Белый', colorCode: '#FFFFFF', priceModifier: 0 },
-  { colorId: 2, colorName: 'Черный', colorCode: '#000000', priceModifier: 15000 },
-  { colorId: 3, colorName: 'Серебристый', colorCode: '#C0C0C0', priceModifier: 20000 },
-  { colorId: 4, colorName: 'Красный', colorCode: '#FF0000', priceModifier: 25000 },
-  { colorId: 5, colorName: 'Синий', colorCode: '#0000FF', priceModifier: 22000 },
-  { colorId: 6, colorName: 'Серый', colorCode: '#808080', priceModifier: 10000 },
+  { colorId: 1, colorName: 'Ледниковый', colorCode: '#FFFFFF', priceModifier: 0 },
+  { colorId: 2, colorName: 'Пантера', colorCode: '#000000', priceModifier: 20000 },
+  { colorId: 3, colorName: 'Платина', colorCode: '#C0C0C0', priceModifier: 20000 },
+  { colorId: 4, colorName: 'Фламенко', colorCode: '#DC2626', priceModifier: 20000 },
+  { colorId: 5, colorName: 'Борнео', colorCode: '#1E3A8A', priceModifier: 20000 },
+  { colorId: 6, colorName: 'Капитан', colorCode: '#3B82F6', priceModifier: 20000 },
+  { colorId: 7, colorName: 'Кориандр', colorCode: '#059669', priceModifier: 20000 },
 ];
 
 const DEFAULT_ENGINES: EngineOption[] = [

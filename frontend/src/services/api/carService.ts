@@ -1,13 +1,28 @@
 import { apiClient } from './apiClient';
-import { Car, Configuration, AdditionalOption } from '../models/car';
+import { Car, Configuration, AdditionalOption, Model } from '../models/car';
 
 export const carService = {
-  async getCars(brand?: string, bodyType?: string): Promise<Car[]> {
+  async getCars(brand?: string, bodyType?: string, all: boolean = false): Promise<Car[]> {
+    const params = new URLSearchParams();
+    if (brand) params.append('brand', brand);
+    if (bodyType) params.append('bodyType', bodyType);
+    if (all) params.append('all', 'true');
+    
+    const response = await apiClient.get<Car[]>(`/cars?${params}`);
+    return response.data;
+  },
+
+  async getModels(brand?: string, bodyType?: string): Promise<Model[]> {
     const params = new URLSearchParams();
     if (brand) params.append('brand', brand);
     if (bodyType) params.append('bodyType', bodyType);
     
-    const response = await apiClient.get<Car[]>(`/cars?${params}`);
+    const response = await apiClient.get<Model[]>(`/cars/models?${params}`);
+    return response.data;
+  },
+
+  async getModelById(id: number): Promise<Model> {
+    const response = await apiClient.get<Model>(`/cars/models/${id}`);
     return response.data;
   },
 
@@ -18,6 +33,11 @@ export const carService = {
 
   async getConfigurations(carId: number): Promise<Configuration[]> {
     const response = await apiClient.get<Configuration[]>(`/cars/${carId}/configurations`);
+    return response.data;
+  },
+
+  async getConfigurationsByModelId(modelId: number): Promise<Configuration[]> {
+    const response = await apiClient.get<Configuration[]>(`/cars/models/${modelId}/configurations`);
     return response.data;
   },
 
@@ -63,5 +83,10 @@ export const carService = {
     } catch (error) {
       return [];
     }
+  },
+
+  async updateCar(carId: number, updates: { color?: string; status?: string; vin?: string; mileage?: number }): Promise<Car> {
+    const response = await apiClient.put<Car>(`/cars/${carId}`, updates);
+    return response.data;
   }
 };

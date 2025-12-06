@@ -1,6 +1,7 @@
 import React from 'react';
 import { Container, Row, Col, Nav } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import Icon from './Icon';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -59,10 +60,11 @@ const Footer: React.FC = () => {
           {/* Информация о компании */}
           <Col lg={4} className="mb-4">
             <div className="footer-brand mb-3">
-              <h4 className="text-primary mb-2">
-                🚗 AutoSalon LADA
+              <h4 className="text-white mb-2"> {/* Изменено с text-primary на text-white */}
+                <Icon name="directions_car" className="me-2" style={{ verticalAlign: 'middle' }} />
+                Автосалон LADA
               </h4>
-              <p className="text-muted">
+              <p className="footer-text-secondary"> {/* Заменен класс */}
                 Официальный дилер автомобилей LADA. 
                 Продажа новых автомобилей с гарантией от производителя.
               </p>
@@ -70,7 +72,7 @@ const Footer: React.FC = () => {
             
             <div className="contact-info">
               <div className="d-flex align-items-center mb-2">
-                <span className="me-2">📞</span>
+                <Icon name="phone" className="me-2" style={{ verticalAlign: 'middle' }} />
                 <a 
                   href={`tel:${contactInfo.phone}`} 
                   className="text-light text-decoration-none"
@@ -79,7 +81,7 @@ const Footer: React.FC = () => {
                 </a>
               </div>
               <div className="d-flex align-items-center mb-2">
-                <span className="me-2">✉️</span>
+                <Icon name="email" className="me-2" style={{ verticalAlign: 'middle' }} />
                 <a 
                   href={`mailto:${contactInfo.email}`} 
                   className="text-light text-decoration-none"
@@ -88,12 +90,12 @@ const Footer: React.FC = () => {
                 </a>
               </div>
               <div className="d-flex align-items-start mb-2">
-                <span className="me-2">📍</span>
-                <span className="text-muted">{contactInfo.address}</span>
+                <Icon name="location_on" className="me-2" style={{ verticalAlign: 'middle' }} />
+                <span className="footer-text-secondary">{contactInfo.address}</span> {/* Заменен класс */}
               </div>
               <div className="d-flex align-items-center">
-                <span className="me-2">🕒</span>
-                <span className="text-muted">{contactInfo.hours}</span>
+                <Icon name="schedule" className="me-2" style={{ verticalAlign: 'middle' }} />
+                <span className="footer-text-secondary">{contactInfo.hours}</span> {/* Заменен класс */}
               </div>
             </div>
           </Col>
@@ -101,14 +103,14 @@ const Footer: React.FC = () => {
           {/* Навигационные ссылки */}
           {footerSections.map((section, index) => (
             <Col key={index} lg={2} md={6} className="mb-4">
-              <h6 className="text-primary mb-3">{section.title}</h6>
+              <h6 className="text-white mb-3">{section.title}</h6> {/* Изменено с text-primary на text-white */}
               <Nav className="flex-column">
                 {section.links.map((link, linkIndex) => (
                   <Nav.Link 
                     key={linkIndex}
                     as={Link} 
                     to={link.path}
-                    className="text-muted px-0 py-1 footer-link"
+                    className="footer-link px-0 py-1" // Убрал text-muted
                   >
                     {link.name}
                   </Nav.Link>
@@ -122,19 +124,19 @@ const Footer: React.FC = () => {
         <Row className="align-items-center pt-3 border-top border-secondary">
           <Col md={6} className="mb-2 mb-md-0">
             <div className="social-links">
-              <span className="text-muted me-3">Мы в соцсетях:</span>
+              <span className="footer-text-secondary me-3">Мы в соцсетях:</span> {/* Заменен класс */}
               {[
-                { name: 'VK', icon: '📘', url: '#' },
-                { name: 'Telegram', icon: '📢', url: '#' },
-                { name: 'YouTube', icon: '📺', url: '#' }
+                { name: 'VK', icon: 'forum', url: '#' },
+                { name: 'Telegram', icon: 'send', url: '#' },
+                { name: 'YouTube', icon: 'play_circle', url: '#' }
               ].map((social, index) => (
                 <a
                   key={index}
                   href={social.url}
-                  className="text-muted me-3 text-decoration-none"
+                  className="footer-social-link me-3 text-decoration-none" // Заменен класс
                   title={social.name}
                 >
-                  {social.icon}
+                  <Icon name={social.icon} style={{ fontSize: '1.5rem', verticalAlign: 'middle' }} />
                 </a>
               ))}
             </div>
@@ -142,10 +144,10 @@ const Footer: React.FC = () => {
           
           <Col md={6} className="text-md-end">
             <div className="payment-methods mb-2">
-              <span className="text-muted me-2">Принимаем к оплате:</span>
-              <span className="me-2">💳</span>
-              <span className="me-2">📱</span>
-              <span>🏦</span>
+              <span className="footer-text-secondary me-2">Принимаем к оплате:</span> {/* Заменен класс */}
+              <Icon name="credit_card" className="footer-social-link me-2" style={{ fontSize: '1.5rem', verticalAlign: 'middle' }} />
+              <Icon name="smartphone" className="footer-social-link me-2" style={{ fontSize: '1.5rem', verticalAlign: 'middle' }} />
+              <Icon name="account_balance" className="footer-social-link" style={{ fontSize: '1.5rem', verticalAlign: 'middle' }} />
             </div>
           </Col>
         </Row>
@@ -153,18 +155,18 @@ const Footer: React.FC = () => {
         {/* Копирайт */}
         <Row className="mt-3">
           <Col>
-            <div className="text-center text-muted">
-              <p className="mb-1">
-                © {currentYear} AutoSalon LADA. Все права защищены.
+            <div className="text-center">
+              <p className="footer-text-secondary mb-1"> {/* Заменен класс */}
+                © {currentYear} Автосалон LADA. Все права защищены.
               </p>
               <div className="d-flex justify-content-center flex-wrap">
-                <Nav.Link as={Link} to="/" className="text-muted small px-2">
+                <Nav.Link as={Link} to="/" className="footer-link small px-2"> {/* Заменен класс */}
                   Политика конфиденциальности
                 </Nav.Link>
-                <Nav.Link as={Link} to="/" className="text-muted small px-2">
+                <Nav.Link as={Link} to="/" className="footer-link small px-2"> {/* Заменен класс */}
                   Пользовательское соглашение
                 </Nav.Link>
-                <Nav.Link as={Link} to="/" className="text-muted small px-2">
+                <Nav.Link as={Link} to="/" className="footer-link small px-2"> {/* Заменен класс */}
                   Карта сайта
                 </Nav.Link>
               </div>

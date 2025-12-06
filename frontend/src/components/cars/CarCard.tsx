@@ -14,7 +14,8 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
   const [imageError, setImageError] = React.useState(false);
 
   const handleSelectCar = () => {
-    navigate(`/order?carId=${car.carId}`);
+    // Переходим в конфигуратор с modelId
+    navigate(`/configurator?modelId=${car.modelId}`);
   };
 
   const handleImageLoad = () => {
@@ -39,10 +40,9 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
         <Card.Img 
           variant="top" 
           src={imageError ? '/images/cars/default.jpg' : `/images/cars/${car.carId}.jpg`}
-          alt={`${car.brandName} ${car.modelName}`}
+          alt={`${car.brandName || ''} ${car.modelName || ''}`}
+          className="car-card-image"
           style={{ 
-            height: '200px', 
-            objectFit: 'cover',
             display: imageLoaded ? 'block' : 'none'
           }}
           onLoad={handleImageLoad}
@@ -60,21 +60,21 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
       <Card.Body className="d-flex flex-column">
         <div className="mb-2">
           <Badge bg="light" text="dark" className="me-2">
-            {BODY_TYPE_LABELS[car.bodyType] || car.bodyType}
+            {car.bodyType ? (BODY_TYPE_LABELS[car.bodyType] || car.bodyType) : 'Не указано'}
           </Badge>
           <Badge bg="light" text="dark">
-            {FUEL_TYPE_LABELS[car.fuelType] || car.fuelType}
+            {car.fuelType ? (FUEL_TYPE_LABELS[car.fuelType] || car.fuelType) : 'Не указано'}
           </Badge>
         </div>
         
         <Card.Title className="h5">
-          {car.brandName} {car.modelName}
+          {car.brandName || 'Не указано'} {car.modelName || 'Не указано'}
         </Card.Title>
         
         <Card.Text className="text-muted small mb-2">
-          <strong>Цвет:</strong> {car.color}<br />
-          <strong>Год:</strong> {car.modelYear}<br />
-          <strong>Двигатель:</strong> {car.engineCapacity}L
+          <strong>Цвет:</strong> {car.color || 'Не указан'}<br />
+          <strong>Год:</strong> {car.modelYear || 'Не указан'}<br />
+          <strong>Двигатель:</strong> {car.engineCapacity ? `${car.engineCapacity}L` : 'Не указан'}
         </Card.Text>
         
         <div className="mt-auto">

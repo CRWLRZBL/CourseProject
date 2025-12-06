@@ -8,6 +8,7 @@ import Catalog from './pages/Catalog';
 import Order from './pages/Order';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
+import Configurator from './pages/Configurator';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
 
@@ -23,6 +24,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/catalog" element={<Catalog />} />
+              <Route path="/configurator" element={<Configurator />} />
               <Route path="/order" element={<Order />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/admin" element={<Admin />} />

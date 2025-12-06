@@ -9,7 +9,7 @@ const API_BASE_URL =
   'https://localhost:7038/api';
 
 export const APP_CONFIG = {
-  NAME: 'AutoSalon LADA',
+  NAME: 'Автосалон LADA',
   VERSION: '1.0.0',
   DESCRIPTION: 'Официальный дилер автомобилей LADA',
   API_BASE_URL,
@@ -204,7 +204,7 @@ export const STORAGE_KEYS = {
 
 // Настройки API
 export const API_CONFIG = {
-  TIMEOUT: 10000,
+  TIMEOUT: 30000, // Увеличено до 30 секунд для медленных подключений
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000,
 } as const;
@@ -222,7 +222,7 @@ export const ROUTES = {
 
 // Мета-данные для SEO
 export const META_DATA = {
-  TITLE: 'AutoSalon LADA - Официальный дилер',
+  TITLE: 'Автосалон LADA - Официальный дилер',
   DESCRIPTION: 'Купить новый автомобиль LADA. Официальный дилер, лучшие цены, гарантия от производителя.',
   KEYWORDS: 'LADA, автомобили, купить авто, новый автомобиль, автосалон, Веста, Гранта, Нива',
 } as const;

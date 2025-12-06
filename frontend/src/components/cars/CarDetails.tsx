@@ -94,7 +94,7 @@ const CarDetails: React.FC<CarDetailsProps> = ({ carId }) => {
               <div className="main-image mb-3 text-center">
                 <img
                   src={mainImage}
-                  alt={`${car.brandName} ${car.modelName}`}
+                  alt={`${car.brandName || ''} ${car.modelName || ''}`}
                   className="img-fluid rounded"
                   style={{ maxHeight: '400px', width: 'auto' }}
                   onError={(e) => {
@@ -148,8 +148,8 @@ const CarDetails: React.FC<CarDetailsProps> = ({ carId }) => {
                   >
                     {utils.getStatusLabel(car.status, 'car')}
                   </Badge>
-                  <h2 className="h3 mb-1">{car.brandName} {car.modelName}</h2>
-                  <p className="text-muted mb-0">Год выпуска: {car.modelYear}</p>
+                  <h2 className="h3 mb-1">{car.brandName || 'Не указано'} {car.modelName || 'Не указано'}</h2>
+                  <p className="text-muted mb-0">Год выпуска: {car.modelYear || 'Не указан'}</p>
                 </div>
                 <div className="text-end">
                   <div className="h3 text-primary mb-0">
@@ -162,23 +162,19 @@ const CarDetails: React.FC<CarDetailsProps> = ({ carId }) => {
               <ListGroup variant="flush" className="mb-4">
                 <ListGroup.Item className="d-flex justify-content-between px-0">
                   <span>Тип кузова:</span>
-                  <strong>{car.bodyType}</strong>
+                  <strong>{car.bodyType || 'Не указано'}</strong>
                 </ListGroup.Item>
                 <ListGroup.Item className="d-flex justify-content-between px-0">
                   <span>Цвет:</span>
-                  <strong>{car.color}</strong>
+                  <strong>{car.color || 'Не указан'}</strong>
                 </ListGroup.Item>
                 <ListGroup.Item className="d-flex justify-content-between px-0">
                   <span>Тип топлива:</span>
-                  <strong>{car.fuelType}</strong>
+                  <strong>{car.fuelType || 'Не указано'}</strong>
                 </ListGroup.Item>
                 <ListGroup.Item className="d-flex justify-content-between px-0">
                   <span>Объем двигателя:</span>
-                  <strong>{car.engineCapacity}L</strong>
-                </ListGroup.Item>
-                <ListGroup.Item className="d-flex justify-content-between px-0">
-                  <span>VIN:</span>
-                  <strong className="font-monospace">{car.vin}</strong>
+                  <strong>{car.engineCapacity ? `${car.engineCapacity}L` : 'Не указан'}</strong>
                 </ListGroup.Item>
               </ListGroup>
 
@@ -249,19 +245,19 @@ const CarDetails: React.FC<CarDetailsProps> = ({ carId }) => {
                   <ListGroup variant="flush">
                     <ListGroup.Item className="d-flex justify-content-between px-0">
                       <span>Марка:</span>
-                      <strong>{car.brandName}</strong>
+                      <strong>{car.brandName || 'Не указано'}</strong>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex justify-content-between px-0">
                       <span>Модель:</span>
-                      <strong>{car.modelName}</strong>
+                      <strong>{car.modelName || 'Не указано'}</strong>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex justify-content-between px-0">
                       <span>Год выпуска:</span>
-                      <strong>{car.modelYear}</strong>
+                      <strong>{car.modelYear || 'Не указан'}</strong>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex justify-content-between px-0">
                       <span>Тип кузова:</span>
-                      <strong>{car.bodyType}</strong>
+                      <strong>{car.bodyType || 'Не указано'}</strong>
                     </ListGroup.Item>
                   </ListGroup>
                 </Col>
@@ -269,19 +265,15 @@ const CarDetails: React.FC<CarDetailsProps> = ({ carId }) => {
                   <ListGroup variant="flush">
                     <ListGroup.Item className="d-flex justify-content-between px-0">
                       <span>Тип топлива:</span>
-                      <strong>{car.fuelType}</strong>
+                      <strong>{car.fuelType || 'Не указано'}</strong>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex justify-content-between px-0">
                       <span>Объем двигателя:</span>
-                      <strong>{car.engineCapacity} л</strong>
+                      <strong>{car.engineCapacity ? `${car.engineCapacity} л` : 'Не указан'}</strong>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex justify-content-between px-0">
                       <span>Цвет:</span>
-                      <strong>{car.color}</strong>
-                    </ListGroup.Item>
-                    <ListGroup.Item className="d-flex justify-content-between px-0">
-                      <span>VIN код:</span>
-                      <strong className="font-monospace">{car.vin}</strong>
+                      <strong>{car.color || 'Не указан'}</strong>
                     </ListGroup.Item>
                   </ListGroup>
                 </Col>
