@@ -49,9 +49,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAll");
 
-app.UseHttpsRedirection();
+// UseHttpsRedirection отключен для Docker окружения (только HTTP)
+// app.UseHttpsRedirection();
 
-app.UseAuthorization();
+// UseAuthorization отключен - аутентификация не настроена
+// При необходимости настроить JWT или Cookie authentication, раскомментировать:
+// app.UseAuthentication();
+// app.UseAuthorization();
 
 app.MapControllers();
 

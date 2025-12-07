@@ -24,25 +24,34 @@ namespace CourseProjectAPI.Controllers
 
         [HttpGet]
         public async Task<ActionResult<List<CarDto>>> GetCars(
-            [FromQuery] string brand = null,
-            [FromQuery] string bodyType = null,
-            [FromQuery] bool all = false)
+    [FromQuery] string brand = null,    // Параметр фильтрации по марке автомобиля
+    [FromQuery] string bodyType = null, // Параметр фильтрации по типу кузова
+    [FromQuery] bool all = false)       // Флаг для получения всех записей (включая недоступные)
+{
+    try
+    {
+        // Проверка флага 'all' - если true, возвращаем все автомобили без фильтрации
+        if (all)
         {
-            try
-            {
-                if (all)
-                {
-                    var allCars = await _carService.GetAllCarsAsync();
-                    return Ok(allCars);
-                }
-                var cars = await _carService.GetAvailableCarsAsync(brand, bodyType);
-                return Ok(cars);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Error = ex.Message });
-            }
+            // Вызов сервисного метода для получения всех автомобилей из БД
+            var allCars = await _carService.GetAllCarsAsync();
+            // Возврат успешного HTTP-ответа (200 OK) со списком автомобилей
+            return Ok(allCars);
         }
+        
+        // Если флаг 'all' не установлен, выполняем фильтрацию
+        // Вызов сервисного метода для получения доступных автомобилей с учетом фильтров
+        var cars = await _carService.GetAvailableCarsAsync(brand, bodyType);
+        // Возврат успешного HTTP-ответа (200 OK) с отфильтрованным списком
+        return Ok(cars);
+    }
+    catch (Exception ex) // Обработка исключений, возникших в процессе выполнения
+    {
+        // Возврат HTTP-ответа 500 Internal Server Error
+        // В тело ответа включается объект с информацией об ошибке
+        return StatusCode(500, new { Error = ex.Message });
+    }
+}
 
         [HttpGet("models")]
         public async Task<ActionResult<List<ModelDto>>> GetModels(
@@ -278,35 +287,59 @@ namespace CourseProjectAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Эндпоинт для импорта автомобилей из файла Excel.
+        /// Позволяет загрузить файл Excel с данными об автомобилях и автоматически добавить их в базу данных.
+        /// </summary>
+        /// <param name="file">Загружаемый файл Excel с данными об автомобилях (.xlsx или .xls)</param>
+        /// <param name="excelImportService">Сервис для обработки импорта данных из Excel (внедряется через dependency injection)</param>
+        /// <returns>
+        /// 200 OK - успешный импорт, возвращает результат с количеством успешно импортированных автомобилей и списком ошибок.
+        /// 400 BadRequest - файл не загружен или имеет недопустимый формат (не Excel).
+        /// 500 InternalServerError - внутренняя ошибка сервера при обработке файла.
+        /// </returns>
         [HttpPost("import/excel")]
         public async Task<IActionResult> ImportCarsFromExcel(IFormFile file, [FromServices] IExcelImportService excelImportService)
         {
             try
             {
+                // Проверка наличия файла и его размера
+                // Если файл не загружен или пуст, возвращаем ошибку 400
                 if (file == null || file.Length == 0)
                 {
                     return BadRequest(new { Error = "Файл не загружен" });
                 }
 
+                // Валидация формата файла: проверяем расширение файла
+                // Поддерживаются только файлы Excel с расширениями .xlsx и .xls
                 if (!file.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) &&
                     !file.FileName.EndsWith(".xls", StringComparison.OrdinalIgnoreCase))
                 {
                     return BadRequest(new { Error = "Поддерживаются только файлы Excel (.xlsx, .xls)" });
                 }
 
+                // Открываем поток для чтения файла
+                // using гарантирует автоматическое освобождение ресурсов после использования
                 using var stream = file.OpenReadStream();
+                
+                // Вызываем сервис импорта для обработки файла Excel
+                // Сервис читает данные из потока, валидирует их и сохраняет в базу данных
                 var result = await excelImportService.ImportCarsFromExcelAsync(stream);
 
+                // Возвращаем результат импорта с информацией об успешно импортированных автомобилях
+                // и списком ошибок (если они были)
                 return Ok(new
                 {
-                    SuccessCount = result.SuccessCount,
-                    ErrorCount = result.ErrorCount,
-                    Errors = result.Errors,
-                    Message = $"Импортировано: {result.SuccessCount}, Ошибок: {result.ErrorCount}"
+                    SuccessCount = result.SuccessCount,    // Количество успешно импортированных автомобилей
+                    ErrorCount = result.ErrorCount,        // Количество ошибок при импорте
+                    Errors = result.Errors,                // Список описаний ошибок
+                    Message = $"Импортировано: {result.SuccessCount}, Ошибок: {result.ErrorCount}"  // Итоговое сообщение
                 });
             }
             catch (Exception ex)
             {
+                // Обработка неожиданных ошибок при импорте
+                // Возвращаем HTTP 500 с сообщением об ошибке для диагностики
                 return StatusCode(500, new { Error = ex.Message });
             }
         }

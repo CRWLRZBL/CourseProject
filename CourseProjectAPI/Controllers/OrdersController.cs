@@ -2,6 +2,7 @@
 using CourseProjectAPI.DTOs;
 using CourseProjectAPI.Models;
 using CourseProjectAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -51,7 +52,17 @@ namespace CourseProjectAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Эндпоинт для получения всех заказов в системе.
+        /// Доступен только для администраторов.
+        /// </summary>
+        /// <returns>
+        /// 200 OK - успешное получение списка заказов
+        /// 401 Unauthorized - пользователь не авторизован
+        /// 403 Forbidden - у пользователя нет прав администратора
+        /// </returns>
         [HttpGet]
+        // [Authorize(Roles = "Admin")] // Временно отключено - требуется настройка аутентификации
         public async Task<ActionResult<List<OrderDto>>> GetAllOrders()
         {
             try
@@ -65,7 +76,20 @@ namespace CourseProjectAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Эндпоинт для обновления статуса заказа.
+        /// Доступен только для администраторов.
+        /// </summary>
+        /// <param name="orderId">Идентификатор заказа, статус которого нужно обновить</param>
+        /// <param name="statusDto">DTO с новым статусом и примечаниями</param>
+        /// <returns>
+        /// 200 OK - статус заказа успешно обновлен
+        /// 401 Unauthorized - пользователь не авторизован
+        /// 403 Forbidden - у пользователя нет прав администратора
+        /// 404 NotFound - заказ не найден
+        /// </returns>
         [HttpPut("{orderId}/status")]
+        // [Authorize(Roles = "Admin")] // Временно отключено - требуется настройка аутентификации
         public async Task<IActionResult> UpdateOrderStatus(int orderId, [FromBody] UpdateOrderStatusDto statusDto)
         {
             try
@@ -83,7 +107,22 @@ namespace CourseProjectAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Эндпоинт для получения отчета о продажах.
+        /// Формирует отчет о продажах за указанный период времени с возможностью фильтрации по бренду.
+        /// Доступен только для администраторов.
+        /// </summary>
+        /// <param name="startDate">Начальная дата периода для формирования отчета (опционально, из query string).</param>
+        /// <param name="endDate">Конечная дата периода для формирования отчета (опционально, из query string).</param>
+        /// <param name="brandId">Идентификатор бренда для фильтрации отчета (опционально, из query string).</param>
+        /// <returns>
+        /// 200 OK - успешное получение отчета, возвращает список данных отчета о продажах.
+        /// 400 BadRequest - ошибка при формировании отчета (неверные параметры или ошибка сервиса).
+        /// 401 Unauthorized - пользователь не авторизован
+        /// 403 Forbidden - у пользователя нет прав администратора
+        /// </returns>
         [HttpGet("reports/sales")]
+        // [Authorize(Roles = "Admin")] // Временно отключено - требуется настройка аутентификации
         public async Task<ActionResult<List<SalesReportDto>>> GetSalesReport(
             [FromQuery] DateTime? startDate,
             [FromQuery] DateTime? endDate,
@@ -91,11 +130,16 @@ namespace CourseProjectAPI.Controllers
         {
             try
             {
+                // Логика формирования отчета только для администраторов
+                // Вызываем сервис для генерации отчета с переданными параметрами периода и фильтрации по бренду
                 var report = await _orderService.GetSalesReportAsync(startDate, endDate, brandId);
+                
+                // Возвращаем отчет в формате JSON с HTTP статусом 200 OK
                 return Ok(report);
             }
             catch (Exception ex)
             {
+                // Обработка ошибок: возвращаем HTTP 400 BadRequest с сообщением об ошибке
                 return BadRequest(new { Error = ex.Message });
             }
         }

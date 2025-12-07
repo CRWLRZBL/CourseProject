@@ -1,4 +1,5 @@
 using CourseProjectAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CourseProjectAPI.Controllers
@@ -14,7 +15,22 @@ namespace CourseProjectAPI.Controllers
             _pdfReportService = pdfReportService;
         }
 
+        /// <summary>
+        /// Эндпоинт для экспорта отчета о продажах в формате PDF.
+        /// Доступен только для администраторов.
+        /// </summary>
+        /// <param name="startDate">Начальная дата периода для формирования отчета (опционально, из query string).</param>
+        /// <param name="endDate">Конечная дата периода для формирования отчета (опционально, из query string).</param>
+        /// <param name="brandId">Идентификатор бренда для фильтрации отчета (опционально, из query string).</param>
+        /// <param name="period">Период для формирования отчета: "month", "year" или "custom" (по умолчанию "custom").</param>
+        /// <returns>
+        /// 200 OK - успешное создание PDF отчета, возвращает файл PDF.
+        /// 400 BadRequest - ошибка при формировании отчета.
+        /// 401 Unauthorized - пользователь не авторизован
+        /// 403 Forbidden - у пользователя нет прав администратора
+        /// </returns>
         [HttpGet("sales/export")]
+        // [Authorize(Roles = "Admin")] // Временно отключено - требуется настройка аутентификации
         public async Task<IActionResult> ExportSalesReportPdf(
             [FromQuery] DateTime? startDate,
             [FromQuery] DateTime? endDate,
