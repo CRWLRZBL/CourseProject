@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, LoginRequest } from '../services/models/user';
+import { User, LoginRequest, RegisterRequest } from '../services/models/user';
 import { authService } from '../services/api/authService';
 
 interface AuthContextType {
   user: User | null;
   login: (credentials: LoginRequest) => Promise<void>;
+  register: (userData: RegisterRequest) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -31,13 +32,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const register = async (userData: RegisterRequest) => {
+    try {
+      // Регистрируем пользователя
+      await authService.register(userData);
+      // После регистрации автоматически логиним пользователя
+      await login({ email: userData.email, password: userData.password });
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const logout = () => {
     authService.logout();
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

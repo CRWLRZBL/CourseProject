@@ -69,12 +69,6 @@ const LoginForm: React.FC = () => {
             </Button>
           </div>
         </Form>
-
-        <div className="text-center mt-3">
-          <small className="text-muted">
-            Тестовые учетные данные: client@example.com / hashed_password_456
-          </small>
-        </div>
       </Card.Body>
     </Card>
   );

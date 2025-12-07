@@ -1,2 +1,0 @@
-# CourseProject
-Course project repository

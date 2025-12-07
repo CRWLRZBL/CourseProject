@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert, Card, Row, Col } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -16,8 +16,10 @@ const RegisterForm: React.FC = () => {
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const { login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -85,14 +87,16 @@ const RegisterForm: React.FC = () => {
     setLoading(true);
 
     try {
-      // Временная заглушка - используем тестовые данные для логина
-      // В реальном приложении здесь был бы вызов API регистрации
-      await login({ 
-        email: 'client@example.com', 
-        password: 'hashed_password_456' 
+      await register({
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone || ''
       });
       
-      navigate('/');
+      // Перенаправляем на нужную страницу после успешной регистрации
+      navigate(redirect || '/');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Ошибка при регистрации');
     } finally {
@@ -218,22 +222,7 @@ const RegisterForm: React.FC = () => {
             </Button>
           </div>
 
-          <div className="text-center">
-            <small className="text-muted">
-              Уже есть аккаунт?{' '}
-              <Link to="/profile" className="text-decoration-none">
-                Войдите здесь
-              </Link>
-            </small>
-          </div>
 
-          <div className="mt-3 p-3 bg-light rounded">
-            <small className="text-muted">
-              <strong>Тестовые данные для входа:</strong><br />
-              Email: client@example.com<br />
-              Пароль: hashed_password_456
-            </small>
-          </div>
         </Form>
       </Card.Body>
     </Card>

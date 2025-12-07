@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Tabs, Tab, Card, Badge } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import { USER_ROLE_LABELS } from '../utils/constants';
 import LoginForm from '../components/auth/LoginForm';
+import RegisterForm from '../components/auth/RegisterForm';
 import OrderList from '../components/orders/OrderList';
+import { useSearchParams } from 'react-router-dom';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('login');
+  const [searchParams] = useSearchParams();
+
+  // Определяем, какую вкладку показать по умолчанию (для неавторизованных пользователей)
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'register' && !user) {
+      setActiveTab('register');
+    }
+  }, [searchParams, user]);
 
   if (user) {
     return (
@@ -99,10 +110,29 @@ const Profile: React.FC = () => {
         <Row className="justify-content-center">
           <Col md={8} lg={6}>
             <div className="text-center mb-4">
-              <h1 className="display-5 fw-bold mb-2">Вход в систему</h1>
-              <p className="text-muted">Войдите в свой аккаунт для доступа к заказам</p>
+              <h1 className="display-5 fw-bold mb-2">
+                {activeTab === 'register' ? 'Регистрация' : 'Вход в систему'}
+              </h1>
+              <p className="text-muted">
+                {activeTab === 'register' 
+                  ? 'Создайте аккаунт для доступа к заказам' 
+                  : 'Войдите в свой аккаунт для доступа к заказам'}
+              </p>
             </div>
-            <LoginForm />
+            
+            <Tabs 
+              activeKey={activeTab} 
+              onSelect={(k) => setActiveTab(k || 'login')} 
+              className="mb-4"
+              fill
+            >
+              <Tab eventKey="login" title="Вход">
+                <LoginForm />
+              </Tab>
+              <Tab eventKey="register" title="Регистрация">
+                <RegisterForm />
+              </Tab>
+            </Tabs>
           </Col>
         </Row>
       </Container>
