@@ -85,6 +85,16 @@ export const carService = {
     }
   },
 
+  async getColors(): Promise<{ name: string; hexCode: string }[]> {
+    try {
+      const response = await apiClient.get<{ name: string; hexCode: string }[]>('/cars/colors');
+      return response.data;
+    } catch (error) {
+      console.error('Error loading colors:', error);
+      return [];
+    }
+  },
+
   async updateCar(carId: number, updates: { color?: string; status?: string; vin?: string; mileage?: number }): Promise<Car> {
     const response = await apiClient.put<Car>(`/cars/${carId}`, updates);
     return response.data;

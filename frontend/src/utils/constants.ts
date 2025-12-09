@@ -1,12 +1,15 @@
 // Базовые настройки приложения
 // Во Vite переменные окружения читаются через import.meta.env,
 // а не через process.env, как в CRA.
+// Определяем базовый URL API
+// В Docker окружении используем относительный путь /api (проксируется через nginx)
+// В development используем переменную окружения или fallback
 const API_BASE_URL =
   // Vite: переменная должна начинаться с VITE_
   (typeof import.meta !== 'undefined' &&
     import.meta.env &&
     import.meta.env.VITE_API_URL) ||
-  'https://localhost:7038/api';
+  'http://localhost:5171/api';
 
 export const APP_CONFIG = {
   NAME: 'Автосалон LADA',

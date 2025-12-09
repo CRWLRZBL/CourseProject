@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, Button, Spinner } from 'react-bootstrap';
 import { carService } from '../../../services/api/carService';
-import { getModelFolderName, getConfigurationPrefix } from '../../../utils/imageUtils';
+import { getModelImagePath } from '../../../utils/imageUtils';
 import './Step5Color.css';
 
 interface Color {
@@ -29,30 +29,67 @@ const Step5Color: React.FC<Step5ColorProps> = ({
   const [colors, setColors] = useState<Color[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const hasAutoSelectedRef = useRef(false);
 
   useEffect(() => {
     loadColors();
   }, [modelId, modelName, configurationName]);
 
-  // Функция для проверки существования изображения
+  // Автоматически выбираем первый доступный цвет при загрузке, если цвет не выбран
+  useEffect(() => {
+    if (colors.length > 0 && selectedColorId === null && !hasAutoSelectedRef.current) {
+      // Всегда выбираем первый цвет из списка доступных цветов
+      const colorId = 1;
+      hasAutoSelectedRef.current = true;
+      onColorSelect(colorId, colors[0].name);
+      
+      // Отладочное логирование
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[Auto Select] Auto-selected first color: ${colors[0].name} (ID: ${colorId}) for model: ${modelName}`);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [colors.length, selectedColorId]); // Используем colors.length вместо colors, чтобы избежать лишних вызовов
+
+  // Сбрасываем флаг при изменении модели или комплектации
+  useEffect(() => {
+    hasAutoSelectedRef.current = false;
+  }, [modelId, modelName, configurationName]);
+
+  // Функция для проверки существования изображения без ошибок в консоли
   const checkImageExists = async (imagePath: string): Promise<boolean> => {
     return new Promise((resolve) => {
+      // Используем Image объект для проверки (более надежно, чем fetch)
       const img = new Image();
       let resolved = false;
       
       const resolveOnce = (value: boolean) => {
         if (!resolved) {
           resolved = true;
+          // Очищаем обработчики, чтобы избежать утечек памяти
+          img.onerror = null;
+          img.onload = null;
           resolve(value);
         }
       };
       
-      img.onload = () => resolveOnce(true);
-      img.onerror = () => resolveOnce(false);
-      img.src = imagePath;
+      // Увеличиваем таймаут до 3 секунд для более надежной проверки
+      const timeout = setTimeout(() => {
+        resolveOnce(false);
+      }, 3000);
       
-      // Таймаут на случай, если изображение загружается очень долго
-      setTimeout(() => resolveOnce(false), 2000);
+      img.onload = () => {
+        clearTimeout(timeout);
+        resolveOnce(true);
+      };
+      
+      img.onerror = () => {
+        clearTimeout(timeout);
+        resolveOnce(false);
+      };
+      
+      // Устанавливаем src после настройки всех обработчиков
+      img.src = imagePath;
     });
   };
 
@@ -65,82 +102,48 @@ const Step5Color: React.FC<Step5ColorProps> = ({
     try {
       setLoading(true);
       setError('');
-      const response = await fetch('http://localhost:5171/api/cars/colors');
-      if (response.ok) {
-        const colorsData = await response.json();
-        // Преобразуем формат данных
-        const allColors = Array.isArray(colorsData) 
-          ? colorsData.map((color: any) => ({
-              name: color.name || color.colorName || 'Цвет',
-              hexCode: color.hexCode || color.colorCode || '#CCCCCC',
-            }))
-          : [];
+      const colorsData = await carService.getColors();
+      // Преобразуем формат данных
+      const allColors = Array.isArray(colorsData) 
+        ? colorsData.map((color: any) => ({
+            name: color.name || color.colorName || 'Цвет',
+            hexCode: color.hexCode || color.colorCode || '#CCCCCC',
+          }))
+        : [];
 
-        // Фильтруем цвета по наличию изображений
-        const modelFolder = getModelFolderName(modelName);
-        const bodyType = configurationName || 'Sedan';
-        const configPrefix = getConfigurationPrefix(bodyType, modelName, configurationName);
+      // Фильтруем цвета по наличию изображений для данной модели и комплектации
+      // Используем configurationName как bodyType, если оно есть, иначе используем 'Sedan'
+      const bodyType = configurationName || 'Sedan';
+      
+      // Проверяем все цвета последовательно с задержкой, чтобы не перегружать браузер
+      const filteredColors: Color[] = [];
+      
+      for (const color of allColors) {
+        // Формируем путь к изображению для данного цвета
+        const imagePath = getModelImagePath(modelName, bodyType, undefined, configurationName, color.name);
         
-        // Проверяем все изображения последовательно для более точной проверки
-        const imageChecks = [];
-        for (const color of allColors) {
-          // Нормализуем название цвета для поиска файла (убираем пробелы)
-          const normalizedColorName = color.name.replace(/\s+/g, '');
-          // Пробуем оба варианта: с пробелом и без
-          const imagePath1 = `/images/cars/${modelFolder}/${configPrefix}-${color.name}.png`;
-          const imagePath2 = `/images/cars/${modelFolder}/${configPrefix}-${normalizedColorName}.png`;
-          
-          // Также пробуем вариант с "Несси2" вместо "Несси 2"
-          let imagePath3 = '';
-          if (color.name === 'Несси 2' || color.name === 'Несси2') {
-            imagePath3 = `/images/cars/${modelFolder}/${configPrefix}-Несси2.png`;
-          }
-          
-          // Для Niva Travel также пробуем вариант с Travel вместо Travel-NEW
-          let imagePath4 = '';
-          if (configPrefix === 'Travel-NEW') {
-            imagePath4 = `/images/cars/${modelFolder}/Travel-${color.name}.png`;
-          }
-          
-          const exists1 = await checkImageExists(imagePath1);
-          if (exists1) {
-            imageChecks.push({ color, exists: true });
-            continue;
-          }
-          
-          const exists2 = await checkImageExists(imagePath2);
-          if (exists2) {
-            imageChecks.push({ color: { ...color, name: normalizedColorName }, exists: true });
-            continue;
-          }
-          
-          if (imagePath3) {
-            const exists3 = await checkImageExists(imagePath3);
-            if (exists3) {
-              imageChecks.push({ color: { ...color, name: 'Несси2' }, exists: true });
-              continue;
-            }
-          }
-          
-          if (imagePath4) {
-            const exists4 = await checkImageExists(imagePath4);
-            if (exists4) {
-              imageChecks.push({ color, exists: true });
-              continue;
-            }
-          }
-          
-          // Если ни один вариант не найден, не добавляем цвет
-          imageChecks.push({ color, exists: false });
+        // Проверяем существование изображения
+        const exists = await checkImageExists(imagePath);
+        
+        // Отладочное логирование (можно убрать в production)
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[Color Check] Model: ${modelName}, Config: ${configurationName}, BodyType: ${bodyType}, Color: ${color.name}, Path: ${imagePath}, Exists: ${exists}`);
         }
         
-        // Фильтруем только те цвета, для которых есть изображения
-        const availableColors = imageChecks
-          .filter(check => check.exists)
-          .map(check => check.color);
+        if (exists) {
+          filteredColors.push(color);
+        }
         
-        setColors(availableColors);
+        // Небольшая задержка между проверками, чтобы не перегружать браузер
+        await new Promise(resolve => setTimeout(resolve, 30));
       }
+      
+      // Если не найдено ни одного цвета, логируем предупреждение
+      if (filteredColors.length === 0 && allColors.length > 0) {
+        console.warn(`[Color Check] No available colors found for model: ${modelName}, configuration: ${configurationName}`);
+      }
+      
+      setColors(filteredColors);
     } catch (err) {
       setError('Ошибка при загрузке цветов');
       console.error('Error loading colors:', err);
@@ -164,20 +167,13 @@ const Step5Color: React.FC<Step5ColorProps> = ({
       return '/images/cars/default.jpg';
     }
 
-    // Формируем путь к изображению на основе модели, комплектации и цвета
-    // Путь: /images/cars/{ModelFolder}/{ConfigurationPrefix}-{ColorName}.png
-    const modelFolder = getModelFolderName(modelName);
-    // Для определения префикса используем modelName и configurationName
-    // Если нет configurationName, используем 'Sedan' как fallback
+    // Используем функцию getModelImagePath из imageUtils для правильного формирования пути
     const bodyType = configurationName || 'Sedan';
-    const configPrefix = getConfigurationPrefix(bodyType, modelName, configurationName);
-    
-    // Если цвет выбран, используем его, иначе используем базовый цвет Ледниковый
-    const colorName = selectedColorId && colors.length >= selectedColorId
+    const colorName = selectedColorId && colors.length > 0 && selectedColorId <= colors.length
       ? colors[selectedColorId - 1].name
-      : 'Ледниковый';
+      : null;
     
-    return `/images/cars/${modelFolder}/${configPrefix}-${colorName}.png`;
+    return getModelImagePath(modelName, bodyType, undefined, configurationName, colorName);
   };
 
   if (loading) {
