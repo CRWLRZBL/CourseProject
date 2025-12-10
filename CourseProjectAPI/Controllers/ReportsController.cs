@@ -55,6 +55,14 @@ namespace CourseProjectAPI.Controllers
                     default:
                         start = startDate ?? DateTime.Now.AddMonths(-1);
                         end = endDate ?? DateTime.Now;
+                        
+                        // Проверяем и исправляем порядок дат, если они в обратном порядке
+                        if (start > end)
+                        {
+                            var temp = start;
+                            start = end;
+                            end = temp;
+                        }
                         break;
                 }
 

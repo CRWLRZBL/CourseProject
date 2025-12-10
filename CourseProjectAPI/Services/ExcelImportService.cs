@@ -127,6 +127,14 @@ namespace CourseProjectAPI.Services
                             mileage = parsedMileage;
                         }
 
+                        // Валидация данных
+                        if (mileage < 0)
+                        {
+                            result.Errors.Add($"Строка {row}: Пробег не может быть отрицательным");
+                            result.ErrorCount++;
+                            continue;
+                        }
+
                         // Проверяем уникальность VIN
                         if (!string.IsNullOrEmpty(vin))
                         {
@@ -142,6 +150,14 @@ namespace CourseProjectAPI.Services
                         {
                             // Генерируем уникальный VIN, если не указан
                             vin = GenerateUniqueVin();
+                        }
+
+                        // Валидация статуса
+                        if (status != "Available" && status != "Reserved" && status != "Sold")
+                        {
+                            result.Errors.Add($"Строка {row}: Недопустимый статус '{statusRu}'. Доступные: В наличии, Забронирован, Продан");
+                            result.ErrorCount++;
+                            continue;
                         }
 
                         // Создаем автомобиль

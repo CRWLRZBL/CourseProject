@@ -143,5 +143,26 @@ namespace CourseProjectAPI.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Эндпоинт для удаления заказа.
+        /// Доступен только для администраторов.
+        /// </summary>
+        [HttpDelete("{orderId}")]
+        public async Task<IActionResult> DeleteOrder(int orderId)
+        {
+            try
+            {
+                var success = await _orderService.DeleteOrderAsync(orderId);
+                if (!success)
+                    return NotFound();
+
+                return Ok(new { Message = "Order deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
     }
 }

@@ -254,6 +254,17 @@ namespace CourseProjectAPI.Services
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<bool> DeleteOrderAsync(int orderId)
+        {
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order == null)
+                return false;
+
+            _context.Orders.Remove(order);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<List<SalesReportDto>> GetSalesReportAsync(DateTime? startDate = null, DateTime? endDate = null, int? brandId = null)
         {
             if (startDate == null) startDate = DateTime.Now.AddMonths(-1);
