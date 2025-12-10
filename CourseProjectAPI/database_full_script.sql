@@ -799,12 +799,21 @@ GO
 -- Вставка тестовых автомобилей
 DECLARE @GrantaSedanModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Granta Седан');
 DECLARE @GrantaHatchbackModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Granta Хэтчбек');
+DECLARE @GrantaCrossModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Cross');
+DECLARE @GrantaSportModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Sport');
+DECLARE @GrantaSportlineModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Sportline');
 DECLARE @VestaSedanModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Vesta Седан');
 DECLARE @VestaSWModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Vesta SW');
+DECLARE @VestaSWCrossModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Vesta SW Cross');
+DECLARE @VestaSportlineModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Vesta Sportline');
 DECLARE @LargusUniversalModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Largus Универсал');
+DECLARE @LargusCrossModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Largus Cross');
+DECLARE @LargusFurgonModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Largus Фургон');
 DECLARE @NivaTravelModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Niva Travel');
 DECLARE @NivaLegendModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Niva Legend');
 DECLARE @IskraSedanModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Iskra Седан');
+DECLARE @IskraSWModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Iskra SW');
+DECLARE @IskraSWCrossModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Iskra SW Cross');
 DECLARE @AuraModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Aura');
 
 INSERT INTO [dbo].[Cars] ([ModelID], [VIN], [Color], [Status], [Mileage]) VALUES
@@ -816,6 +825,18 @@ INSERT INTO [dbo].[Cars] ([ModelID], [VIN], [Color], [Status], [Mileage]) VALUES
     -- Granta Хэтчбек
     (@GrantaHatchbackModelID, 'X9FMXXEEBDM123460', 'Ледниковый', 'Available', 0),
     (@GrantaHatchbackModelID, 'X9FMXXEEBDM123461', 'Пантера', 'Available', 0),
+    -- Granta Cross
+    (@GrantaCrossModelID, 'X9FMXXEEBDM123500', 'Ледниковый', 'Available', 0),
+    (@GrantaCrossModelID, 'X9FMXXEEBDM123501', 'Капитан', 'Available', 0),
+    (@GrantaCrossModelID, 'X9FMXXEEBDM123502', 'Борнео', 'Available', 0),
+    -- Granta Sport
+    (@GrantaSportModelID, 'X9FMXXEEBDM123510', 'Ледниковый', 'Available', 0),
+    (@GrantaSportModelID, 'X9FMXXEEBDM123511', 'Пантера', 'Available', 0),
+    (@GrantaSportModelID, 'X9FMXXEEBDM123512', 'Платина', 'Available', 0),
+    -- Granta Sportline
+    (@GrantaSportlineModelID, 'X9FMXXEEBDM123520', 'Ледниковый', 'Available', 0),
+    (@GrantaSportlineModelID, 'X9FMXXEEBDM123521', 'Пантера', 'Available', 0),
+    (@GrantaSportlineModelID, 'X9FMXXEEBDM123522', 'Капитан', 'Available', 0),
     -- Vesta Седан
     (@VestaSedanModelID, 'X9FMXXEEBDM123462', 'Ледниковый', 'Available', 0),
     (@VestaSedanModelID, 'X9FMXXEEBDM123463', 'Пантера', 'Available', 0),
@@ -824,21 +845,46 @@ INSERT INTO [dbo].[Cars] ([ModelID], [VIN], [Color], [Status], [Mileage]) VALUES
     -- Vesta SW
     (@VestaSWModelID, 'X9FMXXEEBDM123466', 'Ледниковый', 'Available', 0),
     (@VestaSWModelID, 'X9FMXXEEBDM123467', 'Пантера', 'Available', 0),
+    -- Vesta SW Cross
+    (@VestaSWCrossModelID, 'X9FMXXEEBDM123530', 'Ледниковый', 'Available', 0),
+    (@VestaSWCrossModelID, 'X9FMXXEEBDM123531', 'Борнео', 'Available', 0),
+    (@VestaSWCrossModelID, 'X9FMXXEEBDM123532', 'Платина', 'Available', 0),
+    -- Vesta Sportline
+    (@VestaSportlineModelID, 'X9FMXXEEBDM123540', 'Ледниковый', 'Available', 0),
+    (@VestaSportlineModelID, 'X9FMXXEEBDM123541', 'Пантера', 'Available', 0),
     -- Largus Универсал
     (@LargusUniversalModelID, 'X9FMXXEEBDM123468', 'Ледниковый', 'Available', 0),
     (@LargusUniversalModelID, 'X9FMXXEEBDM123469', 'Пантера', 'Available', 0),
+    (@LargusUniversalModelID, 'X9FMXXEEBDM123550', 'Капитан', 'Available', 0),
+    -- Largus Cross
+    (@LargusCrossModelID, 'X9FMXXEEBDM123560', 'Ледниковый', 'Available', 0),
+    (@LargusCrossModelID, 'X9FMXXEEBDM123561', 'Пантера', 'Available', 0),
+    -- Largus Фургон
+    (@LargusFurgonModelID, 'X9FMXXEEBDM123570', 'Ледниковый', 'Available', 0),
+    (@LargusFurgonModelID, 'X9FMXXEEBDM123571', 'Капитан', 'Available', 0),
     -- Niva Travel
     (@NivaTravelModelID, 'X9FMXXEEBDM123470', 'Ледниковый', 'Available', 0),
     (@NivaTravelModelID, 'X9FMXXEEBDM123471', 'Капитан', 'Available', 0),
+    (@NivaTravelModelID, 'X9FMXXEEBDM123580', 'Кориандр', 'Available', 0),
     -- Niva Legend
     (@NivaLegendModelID, 'X9FMXXEEBDM123472', 'Ледниковый', 'Available', 0),
     (@NivaLegendModelID, 'X9FMXXEEBDM123473', 'Пантера', 'Available', 0),
+    (@NivaLegendModelID, 'X9FMXXEEBDM123590', 'Капитан', 'Available', 0),
     -- Iskra Седан
     (@IskraSedanModelID, 'X9FMXXEEBDM123474', 'Ледниковый', 'Available', 0),
     (@IskraSedanModelID, 'X9FMXXEEBDM123475', 'Пантера', 'Available', 0),
+    (@IskraSedanModelID, 'X9FMXXEEBDM123600', 'Борнео', 'Available', 0),
+    -- Iskra SW
+    (@IskraSWModelID, 'X9FMXXEEBDM123610', 'Ледниковый', 'Available', 0),
+    (@IskraSWModelID, 'X9FMXXEEBDM123611', 'Платина', 'Available', 0),
+    -- Iskra SW Cross
+    (@IskraSWCrossModelID, 'X9FMXXEEBDM123620', 'Ледниковый', 'Available', 0),
+    (@IskraSWCrossModelID, 'X9FMXXEEBDM123621', 'Борнео', 'Available', 0),
+    (@IskraSWCrossModelID, 'X9FMXXEEBDM123622', 'Капитан', 'Available', 0),
     -- Aura
     (@AuraModelID, 'X9FMXXEEBDM123476', 'Платина', 'Available', 0),
-    (@AuraModelID, 'X9FMXXEEBDM123477', 'Пантера', 'Available', 0);
+    (@AuraModelID, 'X9FMXXEEBDM123477', 'Пантера', 'Available', 0),
+    (@AuraModelID, 'X9FMXXEEBDM123630', 'Кориандр', 'Available', 0);
 GO
 
 PRINT '========================================';
