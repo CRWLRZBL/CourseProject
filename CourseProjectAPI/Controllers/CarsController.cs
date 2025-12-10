@@ -141,14 +141,28 @@ namespace CourseProjectAPI.Controllers
             try
             {
                 _logger?.LogInformation($"Getting configurations for modelId: {modelId}");
+                
+                // Прямой запрос к БД для диагностики
+                var directQuery = await _context.Configurations
+                    .AsNoTracking()
+                    .Where(c => c.ModelId == modelId)
+                    .ToListAsync();
+                
+                _logger?.LogInformation($"Direct query returned {directQuery.Count} configurations for modelId: {modelId}");
+                
                 var configurations = await _carService.GetConfigurationsByModelIdAsync(modelId);
-                _logger?.LogInformation($"Found {configurations.Count} configurations for modelId: {modelId}");
+                _logger?.LogInformation($"Service returned {configurations.Count} configurations for modelId: {modelId}");
+                
+                if (configurations.Count == 0 && directQuery.Count > 0)
+                {
+                    _logger?.LogWarning($"Service returned 0 but direct query returned {directQuery.Count} - possible service issue");
+                }
                 
                 var configurationDtos = configurations.Select(c => new ConfigurationDto
                 {
                     ConfigurationId = c.ConfigurationId,
                     ModelId = c.ModelId,
-                    ConfigurationName = c.ConfigurationName,
+                    ConfigurationName = c.ConfigurationName ?? string.Empty,
                     Description = c.Description,
                     AdditionalPrice = c.AdditionalPrice,
                     EnginePower = c.EnginePower,
@@ -157,12 +171,14 @@ namespace CourseProjectAPI.Controllers
                     TransmissionType = c.TransmissionType
                 }).ToList();
                 
+                _logger?.LogInformation($"Returning {configurationDtos.Count} DTOs for modelId: {modelId}");
+                
                 return Ok(configurationDtos);
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, $"Error getting configurations for modelId: {modelId}");
-                return StatusCode(500, new { Error = ex.Message });
+                return StatusCode(500, new { Error = ex.Message, StackTrace = ex.StackTrace });
             }
         }
 

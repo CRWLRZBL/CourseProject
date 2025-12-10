@@ -183,12 +183,32 @@ namespace CourseProjectAPI.Services
 
         public async Task<List<Configuration>> GetConfigurationsByModelIdAsync(int modelId)
         {
-            return await _context.Configurations
+            var configurations = await _context.Configurations
                 .AsNoTracking()
                 .Where(c => c.ModelId == modelId)
                 .OrderBy(c => c.AdditionalPrice)
                 .ThenBy(c => c.ConfigurationName)
                 .ToListAsync();
+            
+            // Диагностическое логирование
+            System.Diagnostics.Debug.WriteLine($"[CarService] GetConfigurationsByModelIdAsync: modelId={modelId}, found={configurations.Count} configurations");
+            if (configurations.Count > 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CarService] First config: ID={configurations[0].ConfigurationId}, Name={configurations[0].ConfigurationName}, ModelId={configurations[0].ModelId}");
+            }
+            else
+            {
+                // Проверяем есть ли вообще конфигурации в БД
+                var totalCount = await _context.Configurations.CountAsync();
+                var modelsWithConfigs = await _context.Configurations
+                    .Select(c => c.ModelId)
+                    .Distinct()
+                    .ToListAsync();
+                System.Diagnostics.Debug.WriteLine($"[CarService] Total configurations in DB: {totalCount}");
+                System.Diagnostics.Debug.WriteLine($"[CarService] Models with configurations: {string.Join(", ", modelsWithConfigs)}");
+            }
+            
+            return configurations;
         }
 
         public async Task<CarDto> UpdateCarAsync(int id, UpdateCarDto updateDto)
