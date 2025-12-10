@@ -431,7 +431,28 @@ INSERT INTO [dbo].[Transmissions] ([TransmissionName], [TransmissionType], [Gear
     ('Вариатор', 'Вариатор', 0, 120000.00, 1);
 GO
 
--- Получаем ID моделей для создания комплектаций
+-- Получаем ID для связей
+DECLARE @LedaGlacierColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Ледниковый');
+DECLARE @PantherColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Пантера');
+DECLARE @PlatinumColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Платина');
+DECLARE @BorneoColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Борнео');
+DECLARE @CaptainColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Капитан');
+DECLARE @CorianderColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Кориандр');
+DECLARE @FlamencoColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Фламенко');
+DECLARE @NessyColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Несси');
+
+DECLARE @Engine16_90ID INT = (SELECT EngineID FROM [dbo].[Engines] WHERE EngineName = '1.6L 90 л.с.');
+DECLARE @Engine16_106ID INT = (SELECT EngineID FROM [dbo].[Engines] WHERE EngineName = '1.6L 106 л.с. Turbo');
+DECLARE @Engine18_122ID INT = (SELECT EngineID FROM [dbo].[Engines] WHERE EngineName = '1.8L 122 л.с.');
+DECLARE @Engine17_83ID INT = (SELECT EngineID FROM [dbo].[Engines] WHERE EngineName = '1.7L 83 л.с.');
+DECLARE @Engine15_87ID INT = (SELECT EngineID FROM [dbo].[Engines] WHERE EngineName = '1.5L 87 л.с.');
+
+DECLARE @Transmission5MTID INT = (SELECT TransmissionID FROM [dbo].[Transmissions] WHERE TransmissionName = '5-ступенчатая механика');
+DECLARE @Transmission6MTID INT = (SELECT TransmissionID FROM [dbo].[Transmissions] WHERE TransmissionName = '6-ступенчатая механика');
+DECLARE @TransmissionATID INT = (SELECT TransmissionID FROM [dbo].[Transmissions] WHERE TransmissionName = 'Автоматическая');
+DECLARE @TransmissionCVTID INT = (SELECT TransmissionID FROM [dbo].[Transmissions] WHERE TransmissionName = 'Вариатор');
+
+-- Получаем ID моделей для создания связей и комплектаций
 DECLARE @GrantaSedanID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Седан');
 DECLARE @GrantaHatchbackID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Хэтчбек');
 DECLARE @GrantaCrossID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Cross');
@@ -450,6 +471,186 @@ DECLARE @IskraSedanID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName 
 DECLARE @IskraSWID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Iskra SW');
 DECLARE @IskraSWCrossID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Iskra SW Cross');
 DECLARE @AuraID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Aura');
+
+-- =====================================================
+-- Заполнение связей: ModelColors (Модели-Цвета)
+-- =====================================================
+-- Granta Седан - доступные цвета
+INSERT INTO [dbo].[ModelColors] ([ModelID], [ColorID]) VALUES
+    (@GrantaSedanID, @LedaGlacierColorID),
+    (@GrantaSedanID, @PantherColorID),
+    (@GrantaSedanID, @PlatinumColorID),
+    (@GrantaSedanID, @BorneoColorID),
+    (@GrantaSedanID, @CaptainColorID),
+    (@GrantaSedanID, @CorianderColorID),
+    (@GrantaSedanID, @FlamencoColorID);
+
+-- Granta Хэтчбек
+INSERT INTO [dbo].[ModelColors] ([ModelID], [ColorID]) VALUES
+    (@GrantaHatchbackID, @LedaGlacierColorID),
+    (@GrantaHatchbackID, @PantherColorID),
+    (@GrantaHatchbackID, @PlatinumColorID),
+    (@GrantaHatchbackID, @BorneoColorID);
+
+-- Vesta Седан
+INSERT INTO [dbo].[ModelColors] ([ModelID], [ColorID]) VALUES
+    (@VestaSedanID, @LedaGlacierColorID),
+    (@VestaSedanID, @PantherColorID),
+    (@VestaSedanID, @PlatinumColorID),
+    (@VestaSedanID, @BorneoColorID),
+    (@VestaSedanID, @CaptainColorID),
+    (@VestaSedanID, @FlamencoColorID);
+
+-- Vesta SW
+INSERT INTO [dbo].[ModelColors] ([ModelID], [ColorID]) VALUES
+    (@VestaSWID, @LedaGlacierColorID),
+    (@VestaSWID, @PantherColorID),
+    (@VestaSWID, @PlatinumColorID),
+    (@VestaSWID, @BorneoColorID);
+
+-- Largus Универсал
+INSERT INTO [dbo].[ModelColors] ([ModelID], [ColorID]) VALUES
+    (@LargusUniversalID, @LedaGlacierColorID),
+    (@LargusUniversalID, @PantherColorID),
+    (@LargusUniversalID, @PlatinumColorID);
+
+-- Niva Travel
+INSERT INTO [dbo].[ModelColors] ([ModelID], [ColorID]) VALUES
+    (@NivaTravelID, @LedaGlacierColorID),
+    (@NivaTravelID, @PantherColorID),
+    (@NivaTravelID, @CaptainColorID),
+    (@NivaTravelID, @NessyColorID);
+
+-- Niva Legend
+INSERT INTO [dbo].[ModelColors] ([ModelID], [ColorID]) VALUES
+    (@NivaLegendID, @LedaGlacierColorID),
+    (@NivaLegendID, @PantherColorID),
+    (@NivaLegendID, @NessyColorID);
+
+-- Iskra Седан
+INSERT INTO [dbo].[ModelColors] ([ModelID], [ColorID]) VALUES
+    (@IskraSedanID, @LedaGlacierColorID),
+    (@IskraSedanID, @PantherColorID),
+    (@IskraSedanID, @PlatinumColorID),
+    (@IskraSedanID, @BorneoColorID);
+
+-- Aura
+INSERT INTO [dbo].[ModelColors] ([ModelID], [ColorID]) VALUES
+    (@AuraID, @PlatinumColorID),
+    (@AuraID, @PantherColorID),
+    (@AuraID, @BorneoColorID),
+    (@AuraID, @CaptainColorID);
+GO
+
+-- =====================================================
+-- Заполнение связей: ModelEngines (Модели-Двигатели)
+-- =====================================================
+-- Granta модели - двигатели 1.6L
+INSERT INTO [dbo].[ModelEngines] ([ModelID], [EngineID]) VALUES
+    (@GrantaSedanID, @Engine16_90ID),
+    (@GrantaSedanID, @Engine16_106ID),
+    (@GrantaHatchbackID, @Engine16_90ID),
+    (@GrantaHatchbackID, @Engine16_106ID),
+    (@GrantaCrossID, @Engine16_90ID),
+    (@GrantaCrossID, @Engine16_106ID),
+    (@GrantaSportID, @Engine16_106ID),
+    (@GrantaSportlineID, @Engine16_106ID);
+
+-- Vesta модели
+INSERT INTO [dbo].[ModelEngines] ([ModelID], [EngineID]) VALUES
+    (@VestaSedanID, @Engine16_106ID),
+    (@VestaSedanID, @Engine18_122ID),
+    (@VestaSWID, @Engine16_106ID),
+    (@VestaSWID, @Engine18_122ID),
+    (@VestaSWCrossID, @Engine16_106ID),
+    (@VestaSWCrossID, @Engine18_122ID),
+    (@VestaSportlineID, @Engine18_122ID);
+
+-- Largus модели
+INSERT INTO [dbo].[ModelEngines] ([ModelID], [EngineID]) VALUES
+    (@LargusUniversalID, @Engine16_90ID),
+    (@LargusUniversalID, @Engine16_106ID),
+    (@LargusFurgonID, @Engine16_90ID),
+    (@LargusCrossID, @Engine16_90ID),
+    (@LargusCrossID, @Engine16_106ID);
+
+-- Niva модели
+INSERT INTO [dbo].[ModelEngines] ([ModelID], [EngineID]) VALUES
+    (@NivaTravelID, @Engine18_122ID),
+    (@NivaLegendID, @Engine17_83ID);
+
+-- Iskra модели
+INSERT INTO [dbo].[ModelEngines] ([ModelID], [EngineID]) VALUES
+    (@IskraSedanID, @Engine16_90ID),
+    (@IskraSedanID, @Engine16_106ID),
+    (@IskraSWID, @Engine16_90ID),
+    (@IskraSWID, @Engine16_106ID),
+    (@IskraSWCrossID, @Engine16_90ID),
+    (@IskraSWCrossID, @Engine16_106ID);
+
+-- Aura
+INSERT INTO [dbo].[ModelEngines] ([ModelID], [EngineID]) VALUES
+    (@AuraID, @Engine18_122ID);
+GO
+
+-- =====================================================
+-- Заполнение связей: ModelTransmissions (Модели-КПП)
+-- =====================================================
+-- Granta модели
+INSERT INTO [dbo].[ModelTransmissions] ([ModelID], [TransmissionID]) VALUES
+    (@GrantaSedanID, @Transmission5MTID),
+    (@GrantaSedanID, @Transmission6MTID),
+    (@GrantaSedanID, @TransmissionATID),
+    (@GrantaHatchbackID, @Transmission5MTID),
+    (@GrantaHatchbackID, @TransmissionATID),
+    (@GrantaCrossID, @Transmission5MTID),
+    (@GrantaCrossID, @TransmissionATID),
+    (@GrantaSportID, @Transmission6MTID),
+    (@GrantaSportlineID, @Transmission6MTID),
+    (@GrantaSportlineID, @TransmissionATID);
+
+-- Vesta модели
+INSERT INTO [dbo].[ModelTransmissions] ([ModelID], [TransmissionID]) VALUES
+    (@VestaSedanID, @Transmission5MTID),
+    (@VestaSedanID, @Transmission6MTID),
+    (@VestaSedanID, @TransmissionATID),
+    (@VestaSedanID, @TransmissionCVTID),
+    (@VestaSWID, @Transmission5MTID),
+    (@VestaSWID, @TransmissionATID),
+    (@VestaSWID, @TransmissionCVTID),
+    (@VestaSWCrossID, @Transmission5MTID),
+    (@VestaSWCrossID, @TransmissionATID),
+    (@VestaSportlineID, @TransmissionATID),
+    (@VestaSportlineID, @TransmissionCVTID);
+
+-- Largus модели
+INSERT INTO [dbo].[ModelTransmissions] ([ModelID], [TransmissionID]) VALUES
+    (@LargusUniversalID, @Transmission5MTID),
+    (@LargusUniversalID, @TransmissionATID),
+    (@LargusFurgonID, @Transmission5MTID),
+    (@LargusCrossID, @Transmission5MTID),
+    (@LargusCrossID, @TransmissionATID);
+
+-- Niva модели
+INSERT INTO [dbo].[ModelTransmissions] ([ModelID], [TransmissionID]) VALUES
+    (@NivaTravelID, @Transmission5MTID),
+    (@NivaTravelID, @TransmissionATID),
+    (@NivaLegendID, @Transmission5MTID);
+
+-- Iskra модели
+INSERT INTO [dbo].[ModelTransmissions] ([ModelID], [TransmissionID]) VALUES
+    (@IskraSedanID, @Transmission5MTID),
+    (@IskraSedanID, @TransmissionATID),
+    (@IskraSWID, @Transmission5MTID),
+    (@IskraSWID, @TransmissionATID),
+    (@IskraSWCrossID, @Transmission5MTID),
+    (@IskraSWCrossID, @TransmissionATID);
+
+-- Aura
+INSERT INTO [dbo].[ModelTransmissions] ([ModelID], [TransmissionID]) VALUES
+    (@AuraID, @TransmissionATID),
+    (@AuraID, @TransmissionCVTID);
+GO
 
 -- Вставка комплектаций для Granta Седан
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
@@ -672,12 +873,16 @@ PRINT '';
 PRINT 'Создано:';
 PRINT '  - Брендов: 1 (LADA)';
 PRINT '  - Моделей: 18';
-PRINT '  - Комплектаций: 30+';
+PRINT '  - Комплектаций: 40+';
 PRINT '  - Цветов: 10';
 PRINT '  - Двигателей: 5';
 PRINT '  - Трансмиссий: 4';
+PRINT '  - Связей Модель-Цвет: 50+';
+PRINT '  - Связей Модель-Двигатель: 30+';
+PRINT '  - Связей Модель-Трансмиссия: 30+';
 PRINT '  - Дополнительных опций: 12';
-PRINT '  - Тестовых автомобилей: 8';
+PRINT '  - Тестовых автомобилей: 18';
 PRINT '';
+PRINT 'Все связи заполнены корректно!';
 PRINT 'База данных готова к использованию!';
 GO

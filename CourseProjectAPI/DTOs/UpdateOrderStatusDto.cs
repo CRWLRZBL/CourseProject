@@ -1,8 +1,12 @@
-﻿namespace CourseProjectAPI.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CourseProjectAPI.DTOs
 {
     public class UpdateOrderStatusDto
     {
-        public string Status { get; set; }
-        public string Notes { get; set; }
+        [Required(ErrorMessage = "Status is required")]
+        public string Status { get; set; } = string.Empty;
+        
+        public string? Notes { get; set; }
     }
 }
