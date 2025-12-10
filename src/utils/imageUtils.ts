@@ -40,6 +40,27 @@ export const getConfigurationPrefix = (
   
   const modelNameLower = modelName.toLowerCase();
   
+  // ВАЖНО: Проверяем Sport и Sportline модели ДО других проверок
+  // Granta Sport -> Sport (отдельная модель, не комплектация)
+  if (modelNameLower.includes('granta sportline')) {
+    // Для Sportline моделей используем Sportline префикс
+    if (bodyType?.toLowerCase().includes('хэтчбек') || bodyType?.toLowerCase().includes('hatchback') || bodyType?.toLowerCase().includes('liftback')) {
+      return 'Sportline-LiftBack';
+    }
+    return 'Sportline';
+  }
+  if (modelNameLower.includes('granta sport') && !modelNameLower.includes('sportline')) {
+    // Для Sport моделей используем Sport префикс
+    if (bodyType?.toLowerCase().includes('хэтчбек') || bodyType?.toLowerCase().includes('hatchback') || bodyType?.toLowerCase().includes('liftback')) {
+      return 'Sport-LiftBack';
+    }
+    return 'Sport';
+  }
+  if (modelNameLower.includes('vesta sportline')) {
+    // Vesta Sportline - это отдельная модель, не комплектация
+    return 'Sportline'; // Vesta Sportline использует обычные изображения Sportline
+  }
+  
   // Специальная обработка для Aura - используем название модели
   if (modelNameLower.includes('aura')) {
     return 'Aura';

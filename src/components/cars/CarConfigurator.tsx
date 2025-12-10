@@ -30,7 +30,7 @@ const DEFAULT_COLORS: ColorOption[] = [
   { colorId: 4, colorName: 'Фламенко', colorCode: '#DC2626', priceModifier: 20000 },
   { colorId: 5, colorName: 'Борнео', colorCode: '#1E3A8A', priceModifier: 20000 },
   { colorId: 6, colorName: 'Капитан', colorCode: '#3B82F6', priceModifier: 20000 },
-  { colorId: 7, colorName: 'Кориандр', colorCode: '#059669', priceModifier: 20000 },
+  { colorId: 7, colorName: 'Кориандр', colorCode: '#92400E', priceModifier: 20000 },
 ];
 
 const DEFAULT_ENGINES: EngineOption[] = [

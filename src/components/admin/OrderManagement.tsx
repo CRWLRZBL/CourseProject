@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, Table, Badge, Button, Form, InputGroup, Dropdown, Row, Col } from 'react-bootstrap';
 import { Order } from '../../services/models/order';
 import { orderService } from '../../services/api/orderService';
 import { utils, ORDER_STATUS, ORDER_STATUS_LABELS } from '../../utils/constants';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorAlert from '../common/ErrorAlert';
+import Pagination from '../common/Pagination';
+
+type SortField = 'orderId' | 'customerName' | 'carModel' | 'totalPrice' | 'orderStatus' | 'orderDate';
+type SortDirection = 'asc' | 'desc';
 
 /**
  * Компонент управления заказами
@@ -28,6 +32,14 @@ const OrderManagement: React.FC = () => {
   
   // Фильтр по статусу заказа ('all' - показать все, иначе - конкретный статус)
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  
+  // Сортировка
+  const [sortField, setSortField] = useState<SortField>('orderId');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  
+  // Пагинация
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Эффект: загружаем заказы при монтировании компонента
   useEffect(() => {
@@ -37,7 +49,7 @@ const OrderManagement: React.FC = () => {
   // Эффект: применяем фильтры при изменении списка заказов, поискового запроса или фильтра статуса
   useEffect(() => {
     applyFilters();
-  }, [orders, searchTerm, statusFilter]);
+  }, [orders, searchTerm, statusFilter, sortField, sortDirection]);
 
   /**
    * Асинхронная функция для загрузки списка всех заказов из API
@@ -66,7 +78,7 @@ const OrderManagement: React.FC = () => {
 
   /**
    * Применяет фильтры к списку заказов
-   * Фильтрует заказы по поисковому запросу и статусу, затем обновляет отфильтрованный список
+   * Фильтрует заказы по поисковому запросу и статусу, сортирует, затем обновляет отфильтрованный список
    */
   const applyFilters = () => {
     // Создаем копию массива заказов для фильтрации
@@ -78,6 +90,7 @@ const OrderManagement: React.FC = () => {
       filtered = filtered.filter(order =>
         order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.carModel.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.configuration?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.orderId.toString().includes(searchTerm)
       );
     }
@@ -88,8 +101,44 @@ const OrderManagement: React.FC = () => {
       filtered = filtered.filter(order => order.orderStatus === statusFilter);
     }
 
+    // Сортировка
+    filtered.sort((a, b) => {
+      let aValue: any = a[sortField];
+      let bValue: any = b[sortField];
+
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
     // Обновляем состояние отфильтрованных заказов для отображения в таблице
     setFilteredOrders(filtered);
+    setCurrentPage(1); // Сбрасываем на первую страницу при изменении фильтров
+  };
+
+  // Пагинация
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredOrders.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredOrders, currentPage, itemsPerPage]);
+
+  const handleSort = (field: SortField) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const SortIcon: React.FC<{ field: SortField }> = ({ field }) => {
+    if (field !== sortField) return <span className="text-muted ms-1">↕️</span>;
+    return sortDirection === 'asc' ? <span className="ms-1">↑</span> : <span className="ms-1">↓</span>;
   };
 
   /**
@@ -240,19 +289,56 @@ const OrderManagement: React.FC = () => {
             {/* Заголовки таблицы */}
             <thead className="bg-light">
               <tr>
-                <th>№ Заказа</th>
-                <th>Клиент</th>
-                <th>Автомобиль</th>
+                <th 
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('orderId')}
+                >
+                  № Заказа <SortIcon field="orderId" />
+                </th>
+                <th 
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('customerName')}
+                >
+                  Клиент <SortIcon field="customerName" />
+                </th>
+                <th 
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('carModel')}
+                >
+                  Автомобиль <SortIcon field="carModel" />
+                </th>
                 <th>Комплектация</th>
-                <th>Стоимость</th>
-                <th>Дата</th>
-                <th>Статус</th>
+                <th 
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('totalPrice')}
+                >
+                  Стоимость <SortIcon field="totalPrice" />
+                </th>
+                <th 
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('orderDate')}
+                >
+                  Дата <SortIcon field="orderDate" />
+                </th>
+                <th 
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('orderStatus')}
+                >
+                  Статус <SortIcon field="orderStatus" />
+                </th>
                 <th>Действия</th>
               </tr>
             </thead>
             <tbody>
               {/* Рендерим строки таблицы для каждого отфильтрованного заказа */}
-              {filteredOrders.map(order => {
+              {paginatedOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="text-center py-5 text-muted">
+                    Заказы не найдены
+                  </td>
+                </tr>
+              ) : (
+                paginatedOrders.map(order => {
                 // Получаем список доступных действий для заказа с текущим статусом
                 const statusActions = getStatusActions(order.orderStatus);
                 
@@ -335,15 +421,21 @@ const OrderManagement: React.FC = () => {
                     </td>
                   </tr>
                 );
-              })}
+              })
+              )}
             </tbody>
           </Table>
 
-          {/* Сообщение, если заказы не найдены после фильтрации */}
-          {filteredOrders.length === 0 && (
-            <div className="text-center py-5 text-muted">
-              <div className="h4">📋</div>
-              <p>Заказы не найдены</p>
+          {/* Пагинация */}
+          {filteredOrders.length > 0 && (
+            <div className="p-3">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(filteredOrders.length / itemsPerPage)}
+                onPageChange={setCurrentPage}
+                itemsPerPage={itemsPerPage}
+                totalItems={filteredOrders.length}
+              />
             </div>
           )}
         </Card.Body>

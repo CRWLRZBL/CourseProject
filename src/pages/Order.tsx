@@ -134,10 +134,15 @@ const Order: React.FC = () => {
             <Col>
               <div className="d-flex align-items-center mb-2">
                 <h1 className="mb-0 me-3 text-dark">Оформление заказа</h1>
-                <span className="badge bg-primary fs-6">Шаг 2 из 3</span>
+                <span className="badge bg-primary fs-6">
+                  {modelId && configurationId ? 'Подтверждение заказа' : 'Шаг 2 из 3'}
+                </span>
               </div>
               <p className="text-dark mb-0" style={{ fontSize: '1.125rem', lineHeight: '1.6' }}>
-                Настройте параметры автомобиля и выберите дополнительные опции
+                {modelId && configurationId 
+                  ? 'Проверьте параметры автомобиля и подтвердите заказ'
+                  : 'Настройте параметры автомобиля и выберите дополнительные опции'
+                }
               </p>
             </Col>
           </Row>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Nav, Tab, Tabs, Table, Badge, Button, Modal, Form } from 'react-bootstrap';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Container, Row, Col, Card, Nav, Tab, Tabs, Table, Badge, Button, Modal, Form, InputGroup } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Order } from '../services/models/order';
@@ -12,6 +12,11 @@ import Icon from '../components/common/Icon';
 import ErrorAlert from '../components/common/ErrorAlert';
 import SalesReportExport from '../components/admin/SalesReportExport';
 import CarImport from '../components/admin/CarImport';
+import Pagination from '../components/common/Pagination';
+
+type SortField = 'orderId' | 'customerName' | 'carModel' | 'totalPrice' | 'orderStatus';
+type CarSortField = 'carId' | 'brandName' | 'modelName' | 'color' | 'basePrice' | 'status';
+type SortDirection = 'asc' | 'desc';
 
 const Admin: React.FC = () => {
   const { user } = useAuth();
@@ -23,6 +28,21 @@ const Admin: React.FC = () => {
   const [editingCar, setEditingCar] = useState<Car | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({ color: '', status: '', vin: '', mileage: 0 });
+  
+  // Состояния для поиска и фильтрации заказов
+  const [orderSearch, setOrderSearch] = useState('');
+  const [orderSortField, setOrderSortField] = useState<SortField>('orderId');
+  const [orderSortDirection, setOrderSortDirection] = useState<SortDirection>('desc');
+  const [orderPage, setOrderPage] = useState(1);
+  const orderItemsPerPage = 10;
+  
+  // Состояния для поиска и фильтрации автомобилей
+  const [carSearch, setCarSearch] = useState('');
+  const [carStatusFilter, setCarStatusFilter] = useState<string>('all');
+  const [carSortField, setCarSortField] = useState<CarSortField>('carId');
+  const [carSortDirection, setCarSortDirection] = useState<SortDirection>('desc');
+  const [carPage, setCarPage] = useState(1);
+  const carItemsPerPage = 10;
 
   useEffect(() => {
     if (user?.roleName === 'Admin') {
@@ -123,6 +143,113 @@ const Admin: React.FC = () => {
 
   const pendingOrders = orders.filter(order => order.orderStatus === 'Pending');
   const availableCars = cars.filter(car => car.status === 'Available' || car.status === 'В наличии');
+
+  // Фильтрация и сортировка заказов
+  const filteredAndSortedOrders = useMemo(() => {
+    let filtered = [...orders];
+
+    // Поиск
+    if (orderSearch) {
+      const searchLower = orderSearch.toLowerCase();
+      filtered = filtered.filter(order =>
+        order.customerName.toLowerCase().includes(searchLower) ||
+        order.carModel.toLowerCase().includes(searchLower) ||
+        order.configuration?.toLowerCase().includes(searchLower) ||
+        order.orderId.toString().includes(searchLower)
+      );
+    }
+
+    // Сортировка
+    filtered.sort((a, b) => {
+      let aValue: any = a[orderSortField];
+      let bValue: any = b[orderSortField];
+
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (aValue < bValue) return orderSortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return orderSortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  }, [orders, orderSearch, orderSortField, orderSortDirection]);
+
+  // Пагинация заказов
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (orderPage - 1) * orderItemsPerPage;
+    return filteredAndSortedOrders.slice(startIndex, startIndex + orderItemsPerPage);
+  }, [filteredAndSortedOrders, orderPage, orderItemsPerPage]);
+
+  // Фильтрация и сортировка автомобилей
+  const filteredAndSortedCars = useMemo(() => {
+    let filtered = [...cars];
+
+    // Поиск
+    if (carSearch) {
+      const searchLower = carSearch.toLowerCase();
+      filtered = filtered.filter(car =>
+        car.brandName.toLowerCase().includes(searchLower) ||
+        car.modelName.toLowerCase().includes(searchLower) ||
+        car.color.toLowerCase().includes(searchLower) ||
+        car.vin.toLowerCase().includes(searchLower) ||
+        car.carId.toString().includes(searchLower)
+      );
+    }
+
+    // Фильтр по статусу
+    if (carStatusFilter !== 'all') {
+      filtered = filtered.filter(car => car.status === carStatusFilter);
+    }
+
+    // Сортировка
+    filtered.sort((a, b) => {
+      let aValue: any = a[carSortField];
+      let bValue: any = b[carSortField];
+
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (aValue < bValue) return carSortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return carSortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  }, [cars, carSearch, carStatusFilter, carSortField, carSortDirection]);
+
+  // Пагинация автомобилей
+  const paginatedCars = useMemo(() => {
+    const startIndex = (carPage - 1) * carItemsPerPage;
+    return filteredAndSortedCars.slice(startIndex, startIndex + carItemsPerPage);
+  }, [filteredAndSortedCars, carPage, carItemsPerPage]);
+
+  const handleSort = (field: SortField, currentField: SortField, currentDirection: SortDirection, setField: (f: SortField) => void, setDirection: (d: SortDirection) => void) => {
+    if (field === currentField) {
+      setDirection(currentDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setField(field);
+      setDirection('asc');
+    }
+  };
+
+  const handleCarSort = (field: CarSortField) => {
+    if (field === carSortField) {
+      setCarSortDirection(carSortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setCarSortField(field);
+      setCarSortDirection('asc');
+    }
+  };
+
+  const SortIcon = ({ field, sortField, sortDirection }: { field: string; sortField: string; sortDirection: SortDirection }) => {
+    if (field !== sortField) return <span className="text-muted ms-1">↕️</span>;
+    return sortDirection === 'asc' ? <span className="ms-1">↑</span> : <span className="ms-1">↓</span>;
+  };
 
   return (
     <div className="admin-page">
@@ -309,21 +436,74 @@ const Admin: React.FC = () => {
                     </h4>
                   </Card.Header>
                   <Card.Body>
-                    
+                    {/* Поиск и фильтры */}
+                    <Row className="mb-3">
+                      <Col md={6}>
+                        <InputGroup>
+                          <InputGroup.Text>🔍</InputGroup.Text>
+                          <Form.Control
+                            placeholder="Поиск по клиенту, автомобилю, комплектации или № заказа..."
+                            value={orderSearch}
+                            onChange={(e) => {
+                              setOrderSearch(e.target.value);
+                              setOrderPage(1);
+                            }}
+                          />
+                        </InputGroup>
+                      </Col>
+                      <Col md={6} className="text-end">
+                        <small className="text-muted">
+                          Найдено: {filteredAndSortedOrders.length} заказов
+                        </small>
+                      </Col>
+                    </Row>
+
                     <Table responsive>
                       <thead>
                         <tr>
-                          <th>№</th>
-                          <th>Клиент</th>
-                          <th>Автомобиль</th>
+                          <th 
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            onClick={() => handleSort('orderId', orderSortField, orderSortDirection, setOrderSortField, setOrderSortDirection)}
+                          >
+                            № <SortIcon field="orderId" sortField={orderSortField} sortDirection={orderSortDirection} />
+                          </th>
+                          <th 
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            onClick={() => handleSort('customerName', orderSortField, orderSortDirection, setOrderSortField, setOrderSortDirection)}
+                          >
+                            Клиент <SortIcon field="customerName" sortField={orderSortField} sortDirection={orderSortDirection} />
+                          </th>
+                          <th 
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            onClick={() => handleSort('carModel', orderSortField, orderSortDirection, setOrderSortField, setOrderSortDirection)}
+                          >
+                            Автомобиль <SortIcon field="carModel" sortField={orderSortField} sortDirection={orderSortDirection} />
+                          </th>
                           <th>Комплектация</th>
-                          <th>Стоимость</th>
-                          <th>Статус</th>
+                          <th 
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            onClick={() => handleSort('totalPrice', orderSortField, orderSortDirection, setOrderSortField, setOrderSortDirection)}
+                          >
+                            Стоимость <SortIcon field="totalPrice" sortField={orderSortField} sortDirection={orderSortDirection} />
+                          </th>
+                          <th 
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            onClick={() => handleSort('orderStatus', orderSortField, orderSortDirection, setOrderSortField, setOrderSortDirection)}
+                          >
+                            Статус <SortIcon field="orderStatus" sortField={orderSortField} sortDirection={orderSortDirection} />
+                          </th>
                           <th>Действия</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {orders.map(order => (
+                        {paginatedOrders.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="text-center py-5 text-muted">
+                              Заказы не найдены
+                            </td>
+                          </tr>
+                        ) : (
+                          paginatedOrders.map(order => (
                           <tr key={order.orderId}>
                             <td>#{order.orderId}</td>
                             <td>{order.customerName}</td>
@@ -391,6 +571,19 @@ const Admin: React.FC = () => {
                         ))}
                       </tbody>
                     </Table>
+                    
+                    {/* Пагинация заказов */}
+                    {filteredAndSortedOrders.length > 0 && (
+                      <div className="mt-3">
+                        <Pagination
+                          currentPage={orderPage}
+                          totalPages={Math.ceil(filteredAndSortedOrders.length / orderItemsPerPage)}
+                          onPageChange={setOrderPage}
+                          itemsPerPage={orderItemsPerPage}
+                          totalItems={filteredAndSortedOrders.length}
+                        />
+                      </div>
+                    )}
                   </Card.Body>
                 </Card>
               </Tab>
@@ -415,23 +608,95 @@ const Admin: React.FC = () => {
                     </div>
                   </Card.Header>
                   <Card.Body>
-                    
+                    {/* Поиск и фильтры */}
+                    <Row className="mb-3">
+                      <Col md={4}>
+                        <InputGroup>
+                          <InputGroup.Text>🔍</InputGroup.Text>
+                          <Form.Control
+                            placeholder="Поиск по марке, модели, цвету, VIN или ID..."
+                            value={carSearch}
+                            onChange={(e) => {
+                              setCarSearch(e.target.value);
+                              setCarPage(1);
+                            }}
+                          />
+                        </InputGroup>
+                      </Col>
+                      <Col md={3}>
+                        <Form.Select
+                          value={carStatusFilter}
+                          onChange={(e) => {
+                            setCarStatusFilter(e.target.value);
+                            setCarPage(1);
+                          }}
+                        >
+                          <option value="all">Все статусы</option>
+                          {Object.entries(CAR_STATUS_LABELS).map(([value, label]) => (
+                            <option key={value} value={value}>{label}</option>
+                          ))}
+                        </Form.Select>
+                      </Col>
+                      <Col md={5} className="text-end">
+                        <small className="text-muted">
+                          Найдено: {filteredAndSortedCars.length} автомобилей
+                        </small>
+                      </Col>
+                    </Row>
+
                     <Table responsive>
                       <thead>
                         <tr>
-                          <th>ID</th>
-                          <th>Марка</th>
-                          <th>Модель</th>
+                          <th 
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            onClick={() => handleCarSort('carId')}
+                          >
+                            ID <SortIcon field="carId" sortField={carSortField} sortDirection={carSortDirection} />
+                          </th>
+                          <th 
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            onClick={() => handleCarSort('brandName')}
+                          >
+                            Марка <SortIcon field="brandName" sortField={carSortField} sortDirection={carSortDirection} />
+                          </th>
+                          <th 
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            onClick={() => handleCarSort('modelName')}
+                          >
+                            Модель <SortIcon field="modelName" sortField={carSortField} sortDirection={carSortDirection} />
+                          </th>
                           <th>Комплектация</th>
-                          <th>Цвет</th>
-                          <th>Цена</th>
-                          <th>Статус</th>
+                          <th 
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            onClick={() => handleCarSort('color')}
+                          >
+                            Цвет <SortIcon field="color" sortField={carSortField} sortDirection={carSortDirection} />
+                          </th>
+                          <th 
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            onClick={() => handleCarSort('basePrice')}
+                          >
+                            Цена <SortIcon field="basePrice" sortField={carSortField} sortDirection={carSortDirection} />
+                          </th>
+                          <th 
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            onClick={() => handleCarSort('status')}
+                          >
+                            Статус <SortIcon field="status" sortField={carSortField} sortDirection={carSortDirection} />
+                          </th>
                           <th>VIN</th>
                           <th>Действия</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {cars.map(car => (
+                        {paginatedCars.length === 0 ? (
+                          <tr>
+                            <td colSpan={9} className="text-center py-5 text-muted">
+                              Автомобили не найдены
+                            </td>
+                          </tr>
+                        ) : (
+                          paginatedCars.map(car => (
                           <tr key={car.carId}>
                             <td>{car.carId}</td>
                             <td>{car.brandName}</td>
@@ -479,9 +744,23 @@ const Admin: React.FC = () => {
                               </Button>
                             </td>
                           </tr>
-                        ))}
+                        ))
+                        )}
                       </tbody>
                     </Table>
+                    
+                    {/* Пагинация автомобилей */}
+                    {filteredAndSortedCars.length > 0 && (
+                      <div className="mt-3">
+                        <Pagination
+                          currentPage={carPage}
+                          totalPages={Math.ceil(filteredAndSortedCars.length / carItemsPerPage)}
+                          onPageChange={setCarPage}
+                          itemsPerPage={carItemsPerPage}
+                          totalItems={filteredAndSortedCars.length}
+                        />
+                      </div>
+                    )}
                   </Card.Body>
                 </Card>
               </Tab>

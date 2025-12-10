@@ -3,6 +3,7 @@ import { Card, Button, Row, Col, Alert, Badge } from 'react-bootstrap';
 import { Car, Configuration, AdditionalOption, Model } from '../../services/models/car';
 import { carService } from '../../services/api/carService';
 import CarConfigurator from '../cars/CarConfigurator';
+import OrderSummary from './OrderSummary';
 import Icon from '../common/Icon';
 
 interface OrderWizardProps {
@@ -226,21 +227,79 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
     setLoading(false);
   }, [modelId, initialConfigurationId, initialOptionIds, loadOptions]);
 
-  // Инициализируем начальные значения из пропсов
+  // Инициализируем начальные значения из пропсов и рассчитываем цену
   useEffect(() => {
-    if (initialConfigurationId) {
+    const updateConfig = async () => {
+      if (!modelId && !car?.modelId) return;
+
+      const targetModelId = modelId || car?.modelId || 0;
+      const basePrice = model?.basePrice || car?.basePrice || 0;
+      let calculatedPrice = basePrice;
+
+      if (initialConfigurationId) {
+        setCurrentConfig(prev => ({
+          ...prev,
+          configurationId: initialConfigurationId,
+        }));
+
+        // Добавляем цену комплектации
+        try {
+          const configs = await carService.getConfigurationsByModelId(targetModelId);
+          const config = configs.find(c => c.configurationId === initialConfigurationId);
+          if (config) {
+            calculatedPrice += config.additionalPrice || 0;
+          }
+        } catch (err) {
+          console.error('Error loading configuration price:', err);
+        }
+      }
+
+      if (initialOptionIds && initialOptionIds.length > 0) {
+        setCurrentConfig(prev => ({
+          ...prev,
+          optionIds: initialOptionIds,
+        }));
+
+        // Добавляем цену опций
+        try {
+          const opts = await carService.getAdditionalOptions();
+          const selectedOptions = opts.filter(opt => initialOptionIds.includes(opt.optionId));
+          const optionsPrice = selectedOptions.reduce((sum, opt) => sum + opt.optionPrice, 0);
+          calculatedPrice += optionsPrice;
+        } catch (err) {
+          console.error('Error loading options price:', err);
+        }
+      }
+
+      // Добавляем цену цвета (если не Ледниковый)
+      if (initialColor && initialColor !== 'Ледниковый') {
+        calculatedPrice += 20000; // Стандартная доплата за цвет
+      }
+
       setCurrentConfig(prev => ({
         ...prev,
-        configurationId: initialConfigurationId,
+        totalPrice: calculatedPrice > basePrice ? calculatedPrice : prev.totalPrice || basePrice,
       }));
+    };
+
+    if ((modelId || car?.modelId) && (initialConfigurationId || initialOptionIds)) {
+      updateConfig();
+    } else {
+      // Просто устанавливаем значения без расчета цены
+      if (initialConfigurationId) {
+        setCurrentConfig(prev => ({
+          ...prev,
+          configurationId: initialConfigurationId,
+        }));
+      }
+      if (initialOptionIds && initialOptionIds.length > 0) {
+        setCurrentConfig(prev => ({
+          ...prev,
+          optionIds: initialOptionIds,
+        }));
+      }
     }
-    if (initialOptionIds && initialOptionIds.length > 0) {
-      setCurrentConfig(prev => ({
-        ...prev,
-        optionIds: initialOptionIds,
-      }));
-    }
-  }, [initialConfigurationId, initialOptionIds]);
+  }, [initialConfigurationId, initialOptionIds, initialColor, modelId, model, car]);
 
   useEffect(() => {
     if (carId) {
@@ -351,6 +410,9 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
     );
   }
 
+  // Если пришли из конфигуратора (есть configurationId и modelId), показываем только сводку
+  const showSummaryOnly = modelId && initialConfigurationId && !carId;
+
   return (
     <div className="order-wizard">
       {/* Информация об автомобиле */}
@@ -388,35 +450,96 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
         </Card.Body>
       </Card>
 
-      {/* Конфигуратор */}
-      {errors.configurations && (
-        <Alert variant="warning" className="mb-3">
-          <Alert.Heading>Внимание</Alert.Heading>
-          <p className="mb-2">{errors.configurations}</p>
-          <Button variant="outline-warning" size="sm" onClick={loadData}>
-            Повторить загрузку
-          </Button>
-        </Alert>
-      )}
+      {/* Если пришли из конфигуратора - показываем только сводку */}
+      {showSummaryOnly && initialConfigurationId && modelId ? (
+        <>
+          {errors.configurations && (
+            <Alert variant="warning" className="mb-3">
+              <Alert.Heading>Внимание</Alert.Heading>
+              <p className="mb-2">{errors.configurations}</p>
+            </Alert>
+          )}
 
-      {errors.options && (
-        <Alert variant="warning" className="mb-3">
-          <p className="mb-2">{errors.options}</p>
-          <Button variant="outline-warning" size="sm" onClick={carId ? loadData : loadModelData}>
-            Повторить загрузку
-          </Button>
-        </Alert>
-      )}
+          <OrderSummary
+            car={displayCar}
+            modelId={modelId}
+            configurationId={initialConfigurationId}
+            color={initialColor}
+            optionIds={initialOptionIds && initialOptionIds.length > 0 ? initialOptionIds : currentConfig.optionIds}
+            totalPrice={currentConfig.totalPrice || displayCar.basePrice}
+            basePrice={displayCar.basePrice}
+          />
+          
+          {/* Кнопка оформления заказа для сводки */}
+          <div className="order-action-bar mt-4">
+            <Card className="shadow-lg border-0">
+              <Card.Body className="p-4">
+                <Row className="align-items-center">
+                  <Col md={6} className="mb-3 mb-md-0">
+                    {error && (
+                      <Alert variant="danger" className="mb-0 py-2">
+                        <small>{error}</small>
+                      </Alert>
+                    )}
+                    {!error && (
+                      <div>
+                        <div className="text-muted small mb-1">Итоговая стоимость</div>
+                        <div className="h3 mb-0 text-primary fw-bold">
+                          {formatPrice(currentConfig.totalPrice || displayCar.basePrice)}
+                        </div>
+                      </div>
+                    )}
+                  </Col>
+                  <Col md={6} className="text-md-end">
+                    <Button 
+                      variant="primary" 
+                      size="lg"
+                      onClick={handleCreateOrder}
+                      disabled={!initialConfigurationId}
+                      className="w-100 w-md-auto px-5"
+                    >
+                      <Icon name="check_circle" className="me-2" style={{ verticalAlign: 'middle' }} />
+                      Оформить заказ
+                    </Button>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Конфигуратор - показываем только если не пришли из конфигуратора */}
+          {errors.configurations && (
+            <Alert variant="warning" className="mb-3">
+              <Alert.Heading>Внимание</Alert.Heading>
+              <p className="mb-2">{errors.configurations}</p>
+              <Button variant="outline-warning" size="sm" onClick={loadData}>
+                Повторить загрузку
+              </Button>
+            </Alert>
+          )}
 
-      <CarConfigurator
-        car={displayCar}
-        configurations={configurations}
-        options={options}
-        initialConfigurationId={initialConfigurationId || currentConfig.configurationId || undefined}
-        initialColor={initialColor}
-        initialOptionIds={initialOptionIds && initialOptionIds.length > 0 ? initialOptionIds : currentConfig.optionIds.length > 0 ? currentConfig.optionIds : undefined}
-        onConfigurationChange={handleConfigurationChange}
-      />
+          {errors.options && (
+            <Alert variant="warning" className="mb-3">
+              <p className="mb-2">{errors.options}</p>
+              <Button variant="outline-warning" size="sm" onClick={carId ? loadData : loadModelData}>
+                Повторить загрузку
+              </Button>
+            </Alert>
+          )}
+
+          <CarConfigurator
+            car={displayCar}
+            configurations={configurations}
+            options={options}
+            initialConfigurationId={initialConfigurationId || currentConfig.configurationId || undefined}
+            initialColor={initialColor}
+            initialOptionIds={initialOptionIds && initialOptionIds.length > 0 ? initialOptionIds : currentConfig.optionIds.length > 0 ? currentConfig.optionIds : undefined}
+            onConfigurationChange={handleConfigurationChange}
+          />
+        </>
+      )}
 
       {/* Кнопка оформления заказа - sticky внизу */}
       <div className="order-action-bar">
