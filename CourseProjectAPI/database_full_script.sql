@@ -380,24 +380,24 @@ DECLARE @LadaBrandID INT = (SELECT BrandID FROM [dbo].[Brands] WHERE BrandName =
 
 -- Вставка моделей автомобилей
 INSERT INTO [dbo].[Models] ([BrandID], [ModelName], [ModelYear], [BodyType], [BasePrice], [Description], [EngineCapacity], [FuelType], [IsActive]) VALUES
-    (@LadaBrandID, 'Granta Седан', 2024, 'Sedan', 749900.00, 'Компактный седан LADA Granta', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Granta Хэтчбек', 2024, 'Hatchback', 789900.00, 'Хэтчбек LADA Granta', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Granta Cross', 2024, 'SUV', 899900.00, 'Кроссовер LADA Granta Cross', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Granta Sport', 2024, 'Sedan', 949900.00, 'Спортивная версия LADA Granta', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Granta Sportline', 2024, 'Sedan', 999900.00, 'Спортивная версия LADA Granta Sportline', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Vesta Седан', 2024, 'Sedan', 1239900.00, 'Седан LADA Vesta', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Vesta SW', 2024, 'StationWagon', 1299900.00, 'Универсал LADA Vesta SW', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Vesta SW Cross', 2024, 'SUV', 1399900.00, 'Кросс-универсал LADA Vesta SW Cross', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Vesta Sportline', 2024, 'Sedan', 1449900.00, 'Спортивная версия LADA Vesta Sportline', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Largus Универсал', 2024, 'StationWagon', 1099900.00, 'Универсал LADA Largus', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Largus Фургон', 2024, 'StationWagon', 999900.00, 'Фургон LADA Largus', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Largus Cross', 2024, 'SUV', 1199900.00, 'Кроссовер LADA Largus Cross', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Niva Travel', 2024, 'SUV', 1314000.00, 'Внедорожник LADA Niva Travel', 1.8, 'Petrol', 1),
-    (@LadaBrandID, 'Niva Legend', 2024, 'SUV', 1249900.00, 'Внедорожник LADA Niva Legend', 1.7, 'Petrol', 1),
-    (@LadaBrandID, 'Iskra Седан', 2024, 'Sedan', 899900.00, 'Седан LADA Iskra', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Iskra SW', 2024, 'StationWagon', 949900.00, 'Универсал LADA Iskra SW', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Iskra SW Cross', 2024, 'SUV', 1049900.00, 'Кросс-универсал LADA Iskra SW Cross', 1.6, 'Petrol', 1),
-    (@LadaBrandID, 'Aura', 2024, 'Sedan', 1599900.00, 'Премиум седан LADA Aura', 1.8, 'Petrol', 1);
+    (@LadaBrandID, N'Granta Седан', 2024, 'Sedan', 749900.00, N'Компактный седан LADA Granta', 1.6, 'Petrol', 1),
+    (@LadaBrandID, N'Granta Хэтчбек', 2024, 'Hatchback', 789900.00, N'Хэтчбек LADA Granta', 1.6, 'Petrol', 1),
+    (@LadaBrandID, 'Granta Cross', 2024, 'SUV', 899900.00, N'Кроссовер LADA Granta Cross', 1.6, 'Petrol', 1),
+    (@LadaBrandID, 'Granta Sport', 2024, 'Sedan', 949900.00, N'Спортивная версия LADA Granta', 1.6, 'Petrol', 1),
+    (@LadaBrandID, 'Granta Sportline', 2024, 'Sedan', 999900.00, N'Спортивная версия LADA Granta Sportline', 1.6, 'Petrol', 1),
+    (@LadaBrandID, N'Vesta Седан', 2024, 'Sedan', 1239900.00, N'Седан LADA Vesta', 1.6, 'Petrol', 1),
+    (@LadaBrandID, 'Vesta SW', 2024, 'StationWagon', 1299900.00, N'Универсал LADA Vesta SW', 1.6, 'Petrol', 1),
+    (@LadaBrandID, 'Vesta SW Cross', 2024, 'SUV', 1399900.00, N'Кросс-универсал LADA Vesta SW Cross', 1.6, 'Petrol', 1),
+    (@LadaBrandID, 'Vesta Sportline', 2024, 'Sedan', 1449900.00, N'Спортивная версия LADA Vesta Sportline', 1.6, 'Petrol', 1),
+    (@LadaBrandID, N'Largus Универсал', 2024, 'StationWagon', 1099900.00, N'Универсал LADA Largus', 1.6, 'Petrol', 1),
+    (@LadaBrandID, N'Largus Фургон', 2024, 'StationWagon', 999900.00, N'Фургон LADA Largus', 1.6, 'Petrol', 1),
+    (@LadaBrandID, 'Largus Cross', 2024, 'SUV', 1199900.00, N'Кроссовер LADA Largus Cross', 1.6, 'Petrol', 1),
+    (@LadaBrandID, 'Niva Travel', 2024, 'SUV', 1314000.00, N'Внедорожник LADA Niva Travel', 1.8, 'Petrol', 1),
+    (@LadaBrandID, 'Niva Legend', 2024, 'SUV', 1249900.00, N'Внедорожник LADA Niva Legend', 1.7, 'Petrol', 1),
+    (@LadaBrandID, N'Iskra Седан', 2024, 'Sedan', 899900.00, N'Седан LADA Iskra', 1.6, 'Petrol', 1),
+    (@LadaBrandID, 'Iskra SW', 2024, 'StationWagon', 949900.00, N'Универсал LADA Iskra SW', 1.6, 'Petrol', 1),
+    (@LadaBrandID, 'Iskra SW Cross', 2024, 'SUV', 1049900.00, N'Кросс-универсал LADA Iskra SW Cross', 1.6, 'Petrol', 1),
+    (@LadaBrandID, 'Aura', 2024, 'Sedan', 1599900.00, N'Премиум седан LADA Aura', 1.8, 'Petrol', 1);
 GO
 
 -- Вставка цветов (с проверкой на существование)
@@ -467,16 +467,16 @@ DECLARE @GrantaHatchbackID INT = (SELECT ModelID FROM [dbo].[Models] WHERE Model
 DECLARE @GrantaCrossID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Cross');
 DECLARE @GrantaSportID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Sport');
 DECLARE @GrantaSportlineID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Sportline');
-DECLARE @VestaSedanID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Vesta Седан');
+DECLARE @VestaSedanID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Vesta Седан');
 DECLARE @VestaSWID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Vesta SW');
 DECLARE @VestaSWCrossID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Vesta SW Cross');
 DECLARE @VestaSportlineID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Vesta Sportline');
-DECLARE @LargusUniversalID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Largus Универсал');
-DECLARE @LargusFurgonID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Largus Фургон');
+DECLARE @LargusUniversalID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Largus Универсал');
+DECLARE @LargusFurgonID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Largus Фургон');
 DECLARE @LargusCrossID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Largus Cross');
 DECLARE @NivaTravelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Niva Travel');
 DECLARE @NivaLegendID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Niva Legend');
-DECLARE @IskraSedanID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Iskra Седан');
+DECLARE @IskraSedanID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Iskra Седан');
 DECLARE @IskraSWID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Iskra SW');
 DECLARE @IskraSWCrossID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Iskra SW Cross');
 DECLARE @AuraID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Aura');
@@ -661,127 +661,150 @@ INSERT INTO [dbo].[ModelTransmissions] ([ModelID], [TransmissionID]) VALUES
     (@AuraID, @TransmissionCVTID);
 GO
 
+-- =====================================================
+-- Заполнение комплектаций (Configurations)
+-- =====================================================
+-- Переобъявляем переменные (после GO они теряются)
+DECLARE @GrantaSedanID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Granta Седан');
+DECLARE @GrantaHatchbackID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Granta Хэтчбек');
+DECLARE @GrantaCrossID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Cross');
+DECLARE @GrantaSportID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Sport');
+DECLARE @GrantaSportlineID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Sportline');
+DECLARE @VestaSedanID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Vesta Седан');
+DECLARE @VestaSWID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Vesta SW');
+DECLARE @VestaSWCrossID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Vesta SW Cross');
+DECLARE @VestaSportlineID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Vesta Sportline');
+DECLARE @LargusUniversalID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Largus Универсал');
+DECLARE @LargusFurgonID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Largus Фургон');
+DECLARE @LargusCrossID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Largus Cross');
+DECLARE @NivaTravelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Niva Travel');
+DECLARE @NivaLegendID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Niva Legend');
+DECLARE @IskraSedanID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Iskra Седан');
+DECLARE @IskraSWID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Iskra SW');
+DECLARE @IskraSWCrossID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Iskra SW Cross');
+DECLARE @AuraID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Aura');
+
 -- Вставка комплектаций для Granta Седан
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@GrantaSedanID, 'Standard', 'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@GrantaSedanID, 'Standard Plus', 'Комплектация Standard Plus', 50000.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@GrantaSedanID, 'Comfort', 'Комплектация Comfort', 100000.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@GrantaSedanID, 'Luxury', 'Комплектация Luxury', 150000.00, 106, 1.6, 'Petrol', 'Автомат');
+    (@GrantaSedanID, 'Standard', N'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@GrantaSedanID, 'Standard Plus', N'Комплектация Standard Plus', 50000.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@GrantaSedanID, 'Comfort', N'Комплектация Comfort', 100000.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@GrantaSedanID, 'Luxury', N'Комплектация Luxury', 150000.00, 106, 1.6, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Vesta Седан
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@VestaSedanID, 'Classic', 'Базовая комплектация', 0.00, 106, 1.6, 'Petrol', 'Механика'),
-    (@VestaSedanID, 'Comfort', 'Комплектация Comfort', 80000.00, 106, 1.6, 'Petrol', 'Механика'),
-    (@VestaSedanID, 'Luxury', 'Комплектация Luxury', 150000.00, 122, 1.8, 'Petrol', 'Автомат'),
-    (@VestaSedanID, 'Sportline', 'Спортивная комплектация', 200000.00, 122, 1.8, 'Petrol', 'Автомат');
+    (@VestaSedanID, 'Classic', N'Базовая комплектация', 0.00, 106, 1.6, 'Petrol', N'Механика'),
+    (@VestaSedanID, 'Comfort', N'Комплектация Comfort', 80000.00, 106, 1.6, 'Petrol', N'Механика'),
+    (@VestaSedanID, 'Luxury', N'Комплектация Luxury', 150000.00, 122, 1.8, 'Petrol', N'Автомат'),
+    (@VestaSedanID, 'Sportline', N'Спортивная комплектация', 200000.00, 122, 1.8, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Vesta SW
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@VestaSWID, 'Classic', 'Базовая комплектация', 0.00, 106, 1.6, 'Petrol', 'Механика'),
-    (@VestaSWID, 'Comfort', 'Комплектация Comfort', 80000.00, 106, 1.6, 'Petrol', 'Механика'),
-    (@VestaSWID, 'Luxury', 'Комплектация Luxury', 150000.00, 122, 1.8, 'Petrol', 'Автомат');
+    (@VestaSWID, 'Classic', N'Базовая комплектация', 0.00, 106, 1.6, 'Petrol', N'Механика'),
+    (@VestaSWID, 'Comfort', N'Комплектация Comfort', 80000.00, 106, 1.6, 'Petrol', N'Механика'),
+    (@VestaSWID, 'Luxury', N'Комплектация Luxury', 150000.00, 122, 1.8, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Vesta SW Cross
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@VestaSWCrossID, 'Classic', 'Базовая комплектация', 0.00, 106, 1.6, 'Petrol', 'Механика'),
-    (@VestaSWCrossID, 'Comfort', 'Комплектация Comfort', 80000.00, 106, 1.6, 'Petrol', 'Механика'),
-    (@VestaSWCrossID, 'Luxury', 'Комплектация Luxury', 150000.00, 122, 1.8, 'Petrol', 'Автомат');
+    (@VestaSWCrossID, 'Classic', N'Базовая комплектация', 0.00, 106, 1.6, 'Petrol', N'Механика'),
+    (@VestaSWCrossID, 'Comfort', N'Комплектация Comfort', 80000.00, 106, 1.6, 'Petrol', N'Механика'),
+    (@VestaSWCrossID, 'Luxury', N'Комплектация Luxury', 150000.00, 122, 1.8, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Largus Универсал
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@LargusUniversalID, 'Standard', 'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@LargusUniversalID, 'Comfort', 'Комплектация Comfort', 70000.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@LargusUniversalID, 'Luxury', 'Комплектация Luxury', 120000.00, 106, 1.6, 'Petrol', 'Автомат');
+    (@LargusUniversalID, 'Standard', N'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@LargusUniversalID, 'Comfort', N'Комплектация Comfort', 70000.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@LargusUniversalID, 'Luxury', N'Комплектация Luxury', 120000.00, 106, 1.6, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Niva Travel
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@NivaTravelID, 'Standard', 'Базовая комплектация', 0.00, 90, 1.8, 'Petrol', 'Механика'),
-    (@NivaTravelID, 'Comfort', 'Комплектация Comfort', 100000.00, 90, 1.8, 'Petrol', 'Механика'),
-    (@NivaTravelID, 'Luxury', 'Комплектация Luxury', 180000.00, 90, 1.8, 'Petrol', 'Автомат');
+    (@NivaTravelID, 'Standard', N'Базовая комплектация', 0.00, 90, 1.8, 'Petrol', N'Механика'),
+    (@NivaTravelID, 'Comfort', N'Комплектация Comfort', 100000.00, 90, 1.8, 'Petrol', N'Механика'),
+    (@NivaTravelID, 'Luxury', N'Комплектация Luxury', 180000.00, 90, 1.8, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Niva Legend
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@NivaLegendID, 'Standard', 'Базовая комплектация', 0.00, 83, 1.7, 'Petrol', 'Механика'),
-    (@NivaLegendID, 'Comfort', 'Комплектация Comfort', 90000.00, 83, 1.7, 'Petrol', 'Механика'),
-    (@NivaLegendID, 'Luxury', 'Комплектация Luxury', 150000.00, 83, 1.7, 'Petrol', 'Механика');
+    (@NivaLegendID, 'Standard', N'Базовая комплектация', 0.00, 83, 1.7, 'Petrol', N'Механика'),
+    (@NivaLegendID, 'Comfort', N'Комплектация Comfort', 90000.00, 83, 1.7, 'Petrol', N'Механика'),
+    (@NivaLegendID, 'Luxury', N'Комплектация Luxury', 150000.00, 83, 1.7, 'Petrol', N'Механика');
 GO
 
 -- Вставка комплектаций для Iskra Седан
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@IskraSedanID, 'Standard', 'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@IskraSedanID, 'Comfort', 'Комплектация Comfort', 60000.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@IskraSedanID, 'Luxury', 'Комплектация Luxury', 120000.00, 106, 1.6, 'Petrol', 'Автомат');
+    (@IskraSedanID, 'Standard', N'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@IskraSedanID, 'Comfort', N'Комплектация Comfort', 60000.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@IskraSedanID, 'Luxury', N'Комплектация Luxury', 120000.00, 106, 1.6, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Iskra SW
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@IskraSWID, 'Standard', 'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@IskraSWID, 'Comfort', 'Комплектация Comfort', 60000.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@IskraSWID, 'Luxury', 'Комплектация Luxury', 120000.00, 106, 1.6, 'Petrol', 'Автомат');
+    (@IskraSWID, 'Standard', N'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@IskraSWID, 'Comfort', N'Комплектация Comfort', 60000.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@IskraSWID, 'Luxury', N'Комплектация Luxury', 120000.00, 106, 1.6, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Iskra SW Cross
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@IskraSWCrossID, 'Standard', 'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@IskraSWCrossID, 'Comfort', 'Комплектация Comfort', 70000.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@IskraSWCrossID, 'Luxury', 'Комплектация Luxury', 130000.00, 106, 1.6, 'Petrol', 'Автомат');
+    (@IskraSWCrossID, 'Standard', N'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@IskraSWCrossID, 'Comfort', N'Комплектация Comfort', 70000.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@IskraSWCrossID, 'Luxury', N'Комплектация Luxury', 130000.00, 106, 1.6, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Granta Хэтчбек
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@GrantaHatchbackID, 'Standard', 'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@GrantaHatchbackID, 'Comfort', 'Комплектация Comfort', 50000.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@GrantaHatchbackID, 'Luxury', 'Комплектация Luxury', 100000.00, 106, 1.6, 'Petrol', 'Автомат');
+    (@GrantaHatchbackID, 'Standard', N'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@GrantaHatchbackID, 'Comfort', N'Комплектация Comfort', 50000.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@GrantaHatchbackID, 'Luxury', N'Комплектация Luxury', 100000.00, 106, 1.6, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Granta Cross
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@GrantaCrossID, 'Standard', 'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@GrantaCrossID, 'Comfort', 'Комплектация Comfort', 60000.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@GrantaCrossID, 'Luxury', 'Комплектация Luxury', 120000.00, 106, 1.6, 'Petrol', 'Автомат');
+    (@GrantaCrossID, 'Standard', N'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@GrantaCrossID, 'Comfort', N'Комплектация Comfort', 60000.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@GrantaCrossID, 'Luxury', N'Комплектация Luxury', 120000.00, 106, 1.6, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Granta Sport
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@GrantaSportID, 'Sport', 'Спортивная комплектация', 0.00, 106, 1.6, 'Petrol', 'Механика'),
-    (@GrantaSportID, 'Sport Plus', 'Спортивная комплектация Plus', 80000.00, 106, 1.6, 'Petrol', 'Механика');
+    (@GrantaSportID, 'Sport', N'Спортивная комплектация', 0.00, 106, 1.6, 'Petrol', N'Механика'),
+    (@GrantaSportID, 'Sport Plus', N'Спортивная комплектация Plus', 80000.00, 106, 1.6, 'Petrol', N'Механика');
 GO
 
 -- Вставка комплектаций для Granta Sportline
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@GrantaSportlineID, 'Sportline', 'Спортивная комплектация Sportline', 0.00, 106, 1.6, 'Petrol', 'Механика'),
-    (@GrantaSportlineID, 'Sportline Plus', 'Спортивная комплектация Sportline Plus', 100000.00, 106, 1.6, 'Petrol', 'Автомат');
+    (@GrantaSportlineID, 'Sportline', N'Спортивная комплектация Sportline', 0.00, 106, 1.6, 'Petrol', N'Механика'),
+    (@GrantaSportlineID, 'Sportline Plus', N'Спортивная комплектация Sportline Plus', 100000.00, 106, 1.6, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Vesta Sportline
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@VestaSportlineID, 'Sportline', 'Спортивная комплектация Sportline', 0.00, 122, 1.8, 'Petrol', 'Автомат'),
-    (@VestaSportlineID, 'Sportline Plus', 'Спортивная комплектация Sportline Plus', 150000.00, 122, 1.8, 'Petrol', 'Автомат');
+    (@VestaSportlineID, 'Sportline', N'Спортивная комплектация Sportline', 0.00, 122, 1.8, 'Petrol', N'Автомат'),
+    (@VestaSportlineID, 'Sportline Plus', N'Спортивная комплектация Sportline Plus', 150000.00, 122, 1.8, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Largus Фургон
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@LargusFurgonID, 'Standard', 'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@LargusFurgonID, 'Comfort', 'Комплектация Comfort', 50000.00, 90, 1.6, 'Petrol', 'Механика');
+    (@LargusFurgonID, 'Standard', N'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@LargusFurgonID, 'Comfort', N'Комплектация Comfort', 50000.00, 90, 1.6, 'Petrol', N'Механика');
 GO
 
 -- Вставка комплектаций для Largus Cross
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@LargusCrossID, 'Standard', 'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@LargusCrossID, 'Comfort', 'Комплектация Comfort', 70000.00, 90, 1.6, 'Petrol', 'Механика'),
-    (@LargusCrossID, 'Luxury', 'Комплектация Luxury', 130000.00, 106, 1.6, 'Petrol', 'Автомат');
+    (@LargusCrossID, 'Standard', N'Базовая комплектация', 0.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@LargusCrossID, 'Comfort', N'Комплектация Comfort', 70000.00, 90, 1.6, 'Petrol', N'Механика'),
+    (@LargusCrossID, 'Luxury', N'Комплектация Luxury', 130000.00, 106, 1.6, 'Petrol', N'Автомат');
 GO
 
 -- Вставка комплектаций для Aura
 INSERT INTO [dbo].[Configurations] ([ModelID], [ConfigurationName], [Description], [AdditionalPrice], [EnginePower], [EngineCapacity], [FuelType], [TransmissionType]) VALUES
-    (@AuraID, 'Premium', 'Премиум комплектация', 0.00, 122, 1.8, 'Petrol', 'Автомат'),
-    (@AuraID, 'Premium Plus', 'Премиум комплектация Plus', 200000.00, 122, 1.8, 'Petrol', 'Автомат');
+    (@AuraID, 'Premium', N'Премиум комплектация', 0.00, 122, 1.8, 'Petrol', N'Автомат'),
+    (@AuraID, 'Premium Plus', N'Премиум комплектация Plus', 200000.00, 122, 1.8, 'Petrol', N'Автомат');
 GO
 
 -- Вставка дополнительных опций
@@ -824,14 +847,14 @@ INSERT INTO [dbo].[UserProfiles] ([UserID], [FirstName], [LastName], [Phone], [A
 GO
 
 -- Вставка тестовых автомобилей
-DECLARE @GrantaSedanModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Седан');
-DECLARE @GrantaHatchbackModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Хэтчбек');
-DECLARE @VestaSedanModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Vesta Седан');
+DECLARE @GrantaSedanModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Granta Седан');
+DECLARE @GrantaHatchbackModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Granta Хэтчбек');
+DECLARE @VestaSedanModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Vesta Седан');
 DECLARE @VestaSWModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Vesta SW');
-DECLARE @LargusUniversalModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Largus Универсал');
+DECLARE @LargusUniversalModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Largus Универсал');
 DECLARE @NivaTravelModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Niva Travel');
 DECLARE @NivaLegendModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Niva Legend');
-DECLARE @IskraSedanModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Iskra Седан');
+DECLARE @IskraSedanModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Iskra Седан');
 DECLARE @AuraModelID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Aura');
 
 INSERT INTO [dbo].[Cars] ([ModelID], [VIN], [Color], [Status], [Mileage]) VALUES
