@@ -143,15 +143,20 @@ const Step5Color: React.FC<Step5ColorProps> = ({
         await new Promise(resolve => setTimeout(resolve, 30));
       }
       
-      // Если не найдено ни одного цвета, логируем предупреждение
+      // Если не найдено ни одного цвета, используем все цвета (без фильтрации по изображениям)
+      // Это гарантирует что пользователь сможет выбрать цвет даже если изображения отсутствуют
       if (filteredColors.length === 0 && allColors.length > 0) {
-        console.warn(`[Color Check] No available colors found for model: ${modelName}, configuration: ${configurationName}`);
+        console.warn(`[Color Check] No available colors found for model: ${modelName}, configuration: ${configurationName}. Using all colors.`);
+        setColors(allColors); // Используем все цвета если нет доступных изображений
+      } else {
+        setColors(filteredColors);
       }
-      
-      setColors(filteredColors);
     } catch (err) {
-      setError('Ошибка при загрузке цветов');
       console.error('Error loading colors:', err);
+      // Если произошла ошибка, все равно пытаемся показать страницу с пустым списком цветов
+      // чтобы пользователь мог продолжить (цвет можно будет выбрать позже)
+      setError('');
+      setColors([]); // Устанавливаем пустой массив вместо ошибки
     } finally {
       setLoading(false);
     }
@@ -190,13 +195,14 @@ const Step5Color: React.FC<Step5ColorProps> = ({
     );
   }
 
-  if (error) {
-    return (
-      <div className="alert alert-danger" role="alert">
-        {error}
-      </div>
-    );
-  }
+  // Не показываем ошибку как блокирующую - просто продолжаем работу
+  // if (error) {
+  //   return (
+  //     <div className="alert alert-danger" role="alert">
+  //       {error}
+  //     </div>
+  //   );
+  // }
 
   const selectedColor = selectedColorId ? colors[selectedColorId - 1] : null;
 
@@ -228,6 +234,16 @@ const Step5Color: React.FC<Step5ColorProps> = ({
         {/* Палитра цветов */}
         <Card className="color-palette-card">
           <Card.Body>
+            {error && (
+              <div className="alert alert-warning mb-3" role="alert">
+                {error}
+              </div>
+            )}
+            {colors.length === 0 && !loading && (
+              <div className="alert alert-info mb-3" role="alert">
+                Цвета для данной модели загружаются. Пожалуйста, выберите цвет из базы данных или продолжите с цветом по умолчанию.
+              </div>
+            )}
             <div className="color-swatches">
               {colors.map((color, index) => {
                 const colorId = index + 1;
@@ -268,16 +284,28 @@ const Step5Color: React.FC<Step5ColorProps> = ({
               </div>
             )}
             
-            {/* Кнопка продолжения */}
-            {onContinue && selectedColorId && (
+            {/* Кнопка продолжения - показываем всегда если есть onContinue */}
+            {onContinue && (
               <div className="mt-4 text-center">
                 <Button
                   variant="primary"
                   size="lg"
-                  onClick={onContinue}
+                  onClick={() => {
+                    // Если цвет не выбран, выбираем первый доступный или первый из списка
+                    if (!selectedColorId && colors.length > 0) {
+                      onColorSelect(1, colors[0].name);
+                      // Даем немного времени на обновление состояния
+                      setTimeout(() => {
+                        onContinue();
+                      }, 100);
+                    } else {
+                      onContinue();
+                    }
+                  }}
                   className="px-5"
+                  disabled={loading}
                 >
-                  Продолжить →
+                  {loading ? 'Загрузка...' : 'Продолжить →'}
                 </Button>
               </div>
             )}
