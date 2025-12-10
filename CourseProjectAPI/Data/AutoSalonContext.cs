@@ -201,12 +201,14 @@ public partial class AutoSalonContext : DbContext
         {
             entity.HasKey(e => new { e.ModelId, e.ColorId }).HasName("PK_ModelColors");
 
-            entity.Property(e => e.ModelId).HasColumnName("ModelID");
-            entity.Property(e => e.ColorId).HasColumnName("ColorID");
+            entity.Property(e => e.ModelId).HasColumnName("ModelID").IsRequired();
+            entity.Property(e => e.ColorId).HasColumnName("ColorID").IsRequired();
             entity.Property(e => e.ImageUrl).HasMaxLength(500);
 
-            entity.HasOne(d => d.Model).WithMany(m => m.ModelColors)
+            entity.HasOne(d => d.Model)
+                .WithMany(m => m.ModelColors)
                 .HasForeignKey(d => d.ModelId)
+                .HasPrincipalKey(m => m.ModelId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_ModelColors_Models");
 
@@ -220,11 +222,13 @@ public partial class AutoSalonContext : DbContext
         {
             entity.HasKey(e => new { e.ModelId, e.EngineId }).HasName("PK_ModelEngines");
 
-            entity.Property(e => e.ModelId).HasColumnName("ModelID");
-            entity.Property(e => e.EngineId).HasColumnName("EngineID");
+            entity.Property(e => e.ModelId).HasColumnName("ModelID").IsRequired();
+            entity.Property(e => e.EngineId).HasColumnName("EngineID").IsRequired();
 
-            entity.HasOne(d => d.Model).WithMany(m => m.ModelEngines)
+            entity.HasOne(d => d.Model)
+                .WithMany(m => m.ModelEngines)
                 .HasForeignKey(d => d.ModelId)
+                .HasPrincipalKey(m => m.ModelId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_ModelEngines_Models");
 
@@ -238,11 +242,13 @@ public partial class AutoSalonContext : DbContext
         {
             entity.HasKey(e => new { e.ModelId, e.TransmissionId }).HasName("PK_ModelTransmissions");
 
-            entity.Property(e => e.ModelId).HasColumnName("ModelID");
-            entity.Property(e => e.TransmissionId).HasColumnName("TransmissionID");
+            entity.Property(e => e.ModelId).HasColumnName("ModelID").IsRequired();
+            entity.Property(e => e.TransmissionId).HasColumnName("TransmissionID").IsRequired();
 
-            entity.HasOne(d => d.Model).WithMany(m => m.ModelTransmissions)
+            entity.HasOne(d => d.Model)
+                .WithMany(m => m.ModelTransmissions)
                 .HasForeignKey(d => d.ModelId)
+                .HasPrincipalKey(m => m.ModelId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_ModelTransmissions_Models");
 
