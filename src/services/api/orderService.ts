@@ -24,5 +24,10 @@ export const orderService = {
     }
     const response = await apiClient.put(`/orders/${orderId}/status`, requestBody);
     return response.data;
+  },
+
+  async deleteOrder(orderId: number): Promise<void> {
+    const response = await apiClient.delete(`/orders/${orderId}`);
+    return response.data;
   }
 };

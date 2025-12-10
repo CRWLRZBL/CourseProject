@@ -42,7 +42,7 @@ const Header: React.FC = () => {
 
           <Nav>
             {user ? (
-              <NavDropdown title={`${user.firstName} ${user.lastName}`} id="user-dropdown">
+              <NavDropdown title={user.roleName === 'Admin' ? `${user.firstName} ${user.lastName} (Администратор)` : `${user.firstName} ${user.lastName}`} id="user-dropdown">
                 <NavDropdown.Item as={Link} to="/profile">
                   <Icon name="person" className="me-2" style={{ verticalAlign: 'middle' }} />
                   Мой профиль

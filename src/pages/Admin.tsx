@@ -8,7 +8,6 @@ import { orderService } from '../services/api/orderService';
 import { carService } from '../services/api/carService';
 import { ORDER_STATUS_LABELS, CAR_STATUS_LABELS, CAR_STATUS } from '../utils/constants';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import Icon from '../components/common/Icon';
 import ErrorAlert from '../components/common/ErrorAlert';
 import SalesReportExport from '../components/admin/SalesReportExport';
 import CarImport from '../components/admin/CarImport';
@@ -20,7 +19,7 @@ type SortDirection = 'asc' | 'desc';
 
 const Admin: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('orders');
   const [orders, setOrders] = useState<Order[]>([]);
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,6 +81,51 @@ const Admin: React.FC = () => {
         || 'Ошибка при обновлении статуса';
       setError(errorMessage);
     }
+  };
+
+  const handleDeleteOrder = async (orderId: number) => {
+    if (!window.confirm('Вы уверены, что хотите удалить этот заказ?')) {
+      return;
+    }
+    
+    try {
+      setError('');
+      await orderService.deleteOrder(orderId);
+      await loadData(); // Перезагружаем данные
+    } catch (err: any) {
+      console.error('Error deleting order:', err);
+      const errorMessage = err.response?.data?.error 
+        || err.response?.data?.message 
+        || err.message 
+        || 'Ошибка при удалении заказа';
+      setError(errorMessage);
+    }
+  };
+
+  const getAvailableActions = (orderStatus: string) => {
+    const actions: { label: string; status: string; variant: string }[] = [];
+    
+    switch (orderStatus) {
+      case 'Pending':
+        actions.push(
+          { label: 'Подтвердить', status: 'Confirmed', variant: 'success' },
+          { label: 'Отменить', status: 'Cancelled', variant: 'danger' }
+        );
+        break;
+      case 'Confirmed':
+        actions.push(
+          { label: 'В производство', status: 'InProduction', variant: 'primary' },
+          { label: 'Отменить', status: 'Cancelled', variant: 'danger' }
+        );
+        break;
+      case 'InProduction':
+        actions.push(
+          { label: 'Завершить', status: 'Completed', variant: 'success' }
+        );
+        break;
+    }
+    
+    return actions;
   };
 
   const handleEditCar = (car: Car) => {
@@ -236,8 +280,8 @@ const Admin: React.FC = () => {
   };
 
   const SortIcon = ({ field, sortField, sortDirection }: { field: string; sortField: string; sortDirection: SortDirection }) => {
-    if (field !== sortField) return <span className="text-muted ms-1">↕️</span>;
-    return sortDirection === 'asc' ? <span className="ms-1">↑</span> : <span className="ms-1">↓</span>;
+    if (field !== sortField) return <i className="bi bi-sort-alpha-down text-muted ms-1"></i>;
+    return sortDirection === 'asc' ? <i className="bi bi-sort-alpha-down ms-1"></i> : <i className="bi bi-sort-alpha-down-alt ms-1"></i>;
   };
 
   // Условные return после всех хуков
@@ -259,14 +303,9 @@ const Admin: React.FC = () => {
           {/* Заголовок страницы */}
           <Row className="mb-4">
             <Col>
-              <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                <div>
-                  <h1 className="display-5 fw-bold mb-2 text-dark">Админ-панель</h1>
-                  <p className="text-dark mb-0" style={{ fontSize: '1.125rem' }}>Управление заказами, автомобилями и отчеты</p>
-                </div>
-                <Badge bg="danger" className="fs-6 px-3 py-2">
-                  🔐 Администратор
-                </Badge>
+              <div>
+                <h1 className="display-5 fw-bold mb-2 text-dark">Админ-панель</h1>
+                <p className="text-dark mb-0" style={{ fontSize: '1.125rem' }}>Управление заказами, автомобилями и отчеты</p>
               </div>
             </Col>
           </Row>
@@ -288,27 +327,19 @@ const Admin: React.FC = () => {
               <Card.Body className="p-0">
                 <Nav variant="pills" className="flex-column">
                   <Nav.Link 
-                    active={activeTab === 'dashboard'} 
-                    onClick={() => setActiveTab('dashboard')}
-                    className="px-4 py-3"
-                  >
-                    <Icon name="dashboard" className="me-2" style={{ verticalAlign: 'middle' }} />
-                    Дашборд
-                  </Nav.Link>
-                  <Nav.Link 
                     active={activeTab === 'orders'} 
                     onClick={() => setActiveTab('orders')}
                     className="px-4 py-3"
                   >
-                    <Icon name="inventory_2" className="me-2" style={{ verticalAlign: 'middle' }} />
-                    Управление заказами
+                    <i className="bi bi-speedometer2 me-2"></i>
+                    Панель управления
                   </Nav.Link>
                   <Nav.Link 
                     active={activeTab === 'cars'} 
                     onClick={() => setActiveTab('cars')}
                     className="px-4 py-3"
                   >
-                    <Icon name="directions_car" className="me-2" style={{ verticalAlign: 'middle' }} />
+                    <i className="bi bi-car-front me-2"></i>
                     Управление автомобилями
                   </Nav.Link>
                   <Nav.Link 
@@ -316,7 +347,7 @@ const Admin: React.FC = () => {
                     onClick={() => setActiveTab('reports')}
                     className="px-4 py-3"
                   >
-                    <Icon name="trending_up" className="me-2" style={{ verticalAlign: 'middle' }} />
+                    <i className="bi bi-graph-up me-2"></i>
                     Отчеты по продажам
                   </Nav.Link>
                 </Nav>
@@ -325,20 +356,20 @@ const Admin: React.FC = () => {
           </Col>
 
           <Col lg={9}>
-            <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'dashboard')}>
+            <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'orders')}>
               
-              {/* Дашборд */}
-              <Tab eventKey="dashboard" title="Панель управления">
-                <Card className="shadow-sm border-0">
+              {/* Управление заказами с дашбордом */}
+              <Tab eventKey="orders" title="Панель управления">
+                {/* Статистика */}
+                <Card className="shadow-sm border-0 mb-4">
                   <Card.Header className="bg-light">
                     <h4 className="mb-0">
-                      <Icon name="dashboard" className="me-2" style={{ verticalAlign: 'middle' }} />
+                      <i className="bi bi-speedometer2 me-2"></i>
                       Общая статистика
                     </h4>
                   </Card.Header>
                   <Card.Body>
-                    
-                    <Row className="mt-4">
+                    <Row>
                       <Col md={3}>
                         <Card className="bg-primary text-white text-center">
                           <Card.Body>
@@ -369,7 +400,6 @@ const Admin: React.FC = () => {
                             <h3>{formatPrice(
                               orders
                                 .filter(order => {
-                                  // Выручка считается только по проданным автомобилям
                                   const car = cars.find(c => c.carId === order.carId);
                                   return car?.status === 'Sold' || order.orderStatus === 'Completed';
                                 })
@@ -380,64 +410,66 @@ const Admin: React.FC = () => {
                         </Card>
                       </Col>
                     </Row>
-
-                    {/* Последние заказы */}
-                    <div className="mt-4">
-                      <h5>Последние заказы</h5>
-                      <Table responsive>
-                        <thead>
-                          <tr>
-                            <th>№</th>
-                            <th>Клиент</th>
-                            <th>Автомобиль</th>
-                            <th>Стоимость</th>
-                            <th>Статус</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {orders.slice(0, 5).map(order => (
-                            <tr key={order.orderId}>
-                              <td>#{order.orderId}</td>
-                              <td>{order.customerName}</td>
-                              <td>{order.carModel}</td>
-                              <td>{formatPrice(order.totalPrice)}</td>
-                              <td>
-                                <Badge 
-                                  bg={getStatusVariant(order.orderStatus, 'order')}
-                                  style={{
-                                    backgroundColor: order.orderStatus === 'Pending' ? '#ffc107' : 
-                                                     order.orderStatus === 'Confirmed' ? '#17a2b8' : 
-                                                     order.orderStatus === 'InProduction' ? '#007bff' : 
-                                                     order.orderStatus === 'Completed' ? '#28a745' : 
-                                                     order.orderStatus === 'Cancelled' ? '#dc3545' : '#495057',
-                                    color: order.orderStatus === 'Pending' ? '#000' : '#fff',
-                                    padding: '6px 12px',
-                                    fontSize: '0.875rem',
-                                    fontWeight: '500'
-                                  }}
-                                >
-                                  {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus}
-                                </Badge>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
-                    </div>
                   </Card.Body>
                 </Card>
-              </Tab>
 
-              {/* Управление заказами */}
-              <Tab eventKey="orders" title="Заказы">
                 <Card className="shadow-sm border-0">
                   <Card.Header className="bg-light">
                     <h4 className="mb-0">
-                      <Icon name="inventory_2" className="me-2" style={{ verticalAlign: 'middle' }} />
+                      <i className="bi bi-cart-check me-2"></i>
                       Управление заказами
                     </h4>
                   </Card.Header>
                   <Card.Body>
+                    {/* Последние 5 заказов */}
+                    {orders.length > 0 && (
+                      <div className="mb-4">
+                        <h5>Последние заказы</h5>
+                        <Table responsive striped>
+                          <thead>
+                            <tr>
+                              <th>№</th>
+                              <th>Клиент</th>
+                              <th>Автомобиль</th>
+                              <th>Стоимость</th>
+                              <th>Статус</th>
+                              <th>Дата</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {orders.slice(0, 5).map(order => (
+                              <tr key={order.orderId}>
+                                <td>#{order.orderId}</td>
+                                <td>{order.customerName}</td>
+                                <td>{order.carModel}</td>
+                                <td>{formatPrice(order.totalPrice)}</td>
+                                <td>
+                                  <Badge 
+                                    bg={getStatusVariant(order.orderStatus, 'order')}
+                                    style={{
+                                      backgroundColor: order.orderStatus === 'Pending' ? '#ffc107' : 
+                                                       order.orderStatus === 'Confirmed' ? '#17a2b8' : 
+                                                       order.orderStatus === 'InProduction' ? '#007bff' : 
+                                                       order.orderStatus === 'Completed' ? '#28a745' : 
+                                                       order.orderStatus === 'Cancelled' ? '#dc3545' : '#495057',
+                                      color: order.orderStatus === 'Pending' ? '#000' : '#fff',
+                                      padding: '6px 12px',
+                                      fontSize: '0.875rem',
+                                      fontWeight: '500'
+                                    }}
+                                  >
+                                    {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus}
+                                  </Badge>
+                                </td>
+                                <td><small>{formatDate(order.orderDate)}</small></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </Table>
+                        <hr className="my-4" />
+                      </div>
+                    )}
+
                     {/* Поиск и фильтры */}
                     <Row className="mb-3">
                       <Col md={6}>
@@ -532,41 +564,26 @@ const Admin: React.FC = () => {
                               </td>
                             <td>
                               <div className="btn-group btn-group-sm">
-                                {order.orderStatus === 'Pending' && (
-                                  <>
-                                    <Button 
-                                      variant="success" 
-                                      size="sm"
-                                      onClick={() => handleStatusUpdate(order.orderId, 'Confirmed')}
-                                    >
-                                      Подтвердить
-                                    </Button>
-                                    <Button 
-                                      variant="danger" 
-                                      size="sm"
-                                      onClick={() => handleStatusUpdate(order.orderId, 'Cancelled')}
-                                    >
-                                      Отменить
-                                    </Button>
-                                  </>
-                                )}
-                                {order.orderStatus === 'Confirmed' && (
+                                {order.orderStatus === 'Cancelled' ? (
                                   <Button 
-                                    variant="primary" 
+                                    variant="outline-danger" 
                                     size="sm"
-                                    onClick={() => handleStatusUpdate(order.orderId, 'InProduction')}
+                                    onClick={() => handleDeleteOrder(order.orderId)}
                                   >
-                                    В производство
+                                    <i className="bi bi-trash me-1"></i>
+                                    Удалить
                                   </Button>
-                                )}
-                                {order.orderStatus === 'InProduction' && (
-                                  <Button 
-                                    variant="success" 
-                                    size="sm"
-                                    onClick={() => handleStatusUpdate(order.orderId, 'Completed')}
-                                  >
-                                    Завершить
-                                  </Button>
+                                ) : (
+                                  getAvailableActions(order.orderStatus).map((action, idx) => (
+                                    <Button
+                                      key={idx}
+                                      variant={action.variant as any}
+                                      size="sm"
+                                      onClick={() => handleStatusUpdate(order.orderId, action.status)}
+                                    >
+                                      {action.label}
+                                    </Button>
+                                  ))
                                 )}
                               </div>
                             </td>
@@ -604,7 +621,7 @@ const Admin: React.FC = () => {
                   <Card.Header className="bg-light">
                     <div className="d-flex justify-content-between align-items-center">
                       <h4 className="mb-0">
-                        <Icon name="directions_car" className="me-2" style={{ verticalAlign: 'middle' }} />
+                        <i className="bi bi-car-front me-2"></i>
                         Управление автомобилями
                       </h4>
                       <Button variant="outline-primary" size="sm" onClick={loadData}>

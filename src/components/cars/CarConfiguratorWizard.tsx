@@ -42,11 +42,45 @@ const STEPS = [
   { id: 6, title: 'Итог', key: 'summary' },
 ];
 
+const CONFIGURATOR_STORAGE_KEY = 'carConfiguratorState';
+
 const CarConfiguratorWizard: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [state, setState] = useState<ConfiguratorState>({
+  
+  // Загружаем сохраненное состояние из localStorage
+  const loadSavedState = (): { state: ConfiguratorState; step: number } | null => {
+    try {
+      const saved = localStorage.getItem(CONFIGURATOR_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Проверяем, что сохраненное состояние не старше 24 часов
+        if (parsed.timestamp && Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+          return { state: parsed.state, step: parsed.step || 1 };
+        }
+      }
+    } catch (e) {
+      console.error('Error loading saved configurator state:', e);
+    }
+    return null;
+  };
+
+  // Сохраняем состояние в localStorage
+  const saveState = (state: ConfiguratorState, step: number) => {
+    try {
+      localStorage.setItem(CONFIGURATOR_STORAGE_KEY, JSON.stringify({
+        state,
+        step,
+        timestamp: Date.now()
+      }));
+    } catch (e) {
+      console.error('Error saving configurator state:', e);
+    }
+  };
+
+  const savedData = loadSavedState();
+  const [currentStep, setCurrentStep] = useState(savedData?.step || 1);
+  const [state, setState] = useState<ConfiguratorState>(savedData?.state || {
     selectedModel: null,
     selectedConfigurationId: null,
     selectedEngineId: null,
@@ -65,6 +99,11 @@ const CarConfiguratorWizard: React.FC = () => {
   useEffect(() => {
     loadModels();
   }, []);
+
+  // Сохраняем состояние при каждом изменении
+  useEffect(() => {
+    saveState(state, currentStep);
+  }, [state, currentStep]);
 
   // Загружаем предвыбранную модель из URL параметров
   useEffect(() => {

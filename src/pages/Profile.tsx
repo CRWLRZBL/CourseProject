@@ -28,14 +28,9 @@ const Profile: React.FC = () => {
             {/* Заголовок страницы */}
             <Row className="mb-4">
               <Col>
-                <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                  <div>
-                    <h1 className="display-5 fw-bold mb-2 text-dark">Мой профиль</h1>
-                    <p className="text-dark mb-0" style={{ fontSize: '1.125rem' }}>Управление аккаунтом и заказами</p>
-                  </div>
-                  <Badge bg="primary" className="fs-6 px-3 py-2">
-                    {USER_ROLE_LABELS[user.roleName] || user.roleName}
-                  </Badge>
+                <div>
+                  <h1 className="display-5 fw-bold mb-2 text-dark">Мой профиль</h1>
+                  <p className="text-dark mb-0" style={{ fontSize: '1.125rem' }}>Управление аккаунтом и заказами</p>
                 </div>
               </Col>
             </Row>
@@ -66,12 +61,6 @@ const Profile: React.FC = () => {
                       <div className="info-item mb-3">
                         <div className="text-muted small mb-1">Телефон</div>
                         <div className="fw-semibold">{user.phone || 'Не указан'}</div>
-                      </div>
-                      <div className="info-item">
-                        <div className="text-muted small mb-1">Роль</div>
-                        <Badge bg="primary" className="px-3 py-2">
-                          {USER_ROLE_LABELS[user.roleName] || user.roleName}
-                        </Badge>
                       </div>
                     </div>
                   </Card.Body>

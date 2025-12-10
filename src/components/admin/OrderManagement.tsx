@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Card, Table, Badge, Button, Form, InputGroup, Dropdown, Row, Col } from 'react-bootstrap';
+import { Card, Table, Badge, Button, Form, InputGroup, Row, Col } from 'react-bootstrap';
 import { Order } from '../../services/models/order';
 import { orderService } from '../../services/api/orderService';
 import { utils, ORDER_STATUS, ORDER_STATUS_LABELS } from '../../utils/constants';
@@ -137,8 +137,8 @@ const OrderManagement: React.FC = () => {
   };
 
   const SortIcon: React.FC<{ field: SortField }> = ({ field }) => {
-    if (field !== sortField) return <span className="text-muted ms-1">↕️</span>;
-    return sortDirection === 'asc' ? <span className="ms-1">↑</span> : <span className="ms-1">↓</span>;
+    if (field !== sortField) return <i className="bi bi-sort-alpha-down text-muted ms-1"></i>;
+    return sortDirection === 'asc' ? <i className="bi bi-sort-alpha-down ms-1"></i> : <i className="bi bi-sort-alpha-down-alt ms-1"></i>;
   };
 
   /**
@@ -174,6 +174,25 @@ const OrderManagement: React.FC = () => {
     }
   };
 
+  const handleDeleteOrder = async (orderId: number) => {
+    if (!window.confirm('Вы уверены, что хотите удалить этот заказ?')) {
+      return;
+    }
+    
+    try {
+      setError('');
+      await orderService.deleteOrder(orderId);
+      await loadOrders();
+    } catch (err: any) {
+      console.error('Error deleting order:', err);
+      const errorMessage = err.response?.data?.error 
+        || err.response?.data?.message 
+        || err.message 
+        || 'Ошибка при удалении заказа';
+      setError(errorMessage);
+    }
+  };
+
   /**
    * Определяет доступные действия для заказа в зависимости от его текущего статуса
    * Возвращает массив действий (кнопок), которые можно выполнить с заказом
@@ -201,6 +220,11 @@ const OrderManagement: React.FC = () => {
           { status: ORDER_STATUS.IN_PRODUCTION, label: 'В производство', variant: 'primary' },
           { status: ORDER_STATUS.CANCELLED, label: 'Отменить', variant: 'danger' }
         );
+        break;
+      
+      // Для отмененных заказов - только удаление
+      case ORDER_STATUS.CANCELLED:
+        // Возвращаем пустой массив, удаление обрабатывается отдельно
         break;
       
       // Для заказов со статусом "В производстве"
@@ -395,27 +419,29 @@ const OrderManagement: React.FC = () => {
                     
                     {/* Действия с заказом (выпадающее меню с кнопками изменения статуса) */}
                     <td>
-                      {/* Если есть доступные действия, показываем выпадающее меню */}
-                      {statusActions.length > 0 ? (
-                        <Dropdown>
-                          <Dropdown.Toggle variant="outline-primary" size="sm" id="dropdown-basic">
-                            Действия
-                          </Dropdown.Toggle>
-                          <Dropdown.Menu>
-                            {/* Генерируем пункты меню для каждого доступного действия */}
-                            {statusActions.map(action => (
-                              <Dropdown.Item
-                                key={action.status}
-                                onClick={() => handleStatusUpdate(order.orderId, action.status)}
-                                className={`text-${action.variant}`}
-                              >
-                                {action.label}
-                              </Dropdown.Item>
-                            ))}
-                          </Dropdown.Menu>
-                        </Dropdown>
+                      {order.orderStatus === ORDER_STATUS.CANCELLED ? (
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => handleDeleteOrder(order.orderId)}
+                        >
+                          <i className="bi bi-trash me-1"></i>
+                          Удалить
+                        </Button>
+                      ) : statusActions.length > 0 ? (
+                        <div className="btn-group btn-group-sm">
+                          {statusActions.map(action => (
+                            <Button
+                              key={action.status}
+                              variant={action.variant as any}
+                              size="sm"
+                              onClick={() => handleStatusUpdate(order.orderId, action.status)}
+                            >
+                              {action.label}
+                            </Button>
+                          ))}
+                        </div>
                       ) : (
-                        // Если нет доступных действий, показываем информационное сообщение
                         <small className="text-muted">Нет действий</small>
                       )}
                     </td>

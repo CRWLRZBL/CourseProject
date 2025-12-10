@@ -66,8 +66,22 @@ const CarImport: React.FC = () => {
         }
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Ошибка при импорте файла');
       console.error('Import error:', err);
+      let errorMessage = 'Ошибка при импорте файла';
+      
+      if (err.response?.data) {
+        if (err.response.data.error) {
+          errorMessage = err.response.data.error;
+        } else if (err.response.data.errors && Array.isArray(err.response.data.errors)) {
+          errorMessage = `Ошибки валидации:\n${err.response.data.errors.join('\n')}`;
+        } else if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

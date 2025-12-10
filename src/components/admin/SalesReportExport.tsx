@@ -22,8 +22,20 @@ const SalesReportExport: React.FC = () => {
           setError('Укажите начальную и конечную даты');
           return;
         }
-        start = startDate;
-        end = endDate;
+        
+        // Проверяем и исправляем порядок дат, если они в обратном порядке
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        
+        if (startDateObj > endDateObj) {
+          // Если начальная дата больше конечной, меняем их местами
+          setError('Начальная дата должна быть раньше конечной. Даты будут автоматически исправлены.');
+          start = endDate;
+          end = startDate;
+        } else {
+          start = startDate;
+          end = endDate;
+        }
       }
 
       const blob = await reportService.exportSalesReportPdf(start, end, undefined, period);
