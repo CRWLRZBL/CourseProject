@@ -16,7 +16,7 @@ const Header: React.FC = () => {
   return (
     <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
       <Container>
-        <Navbar.Brand style={{ cursor: 'default', pointerEvents: 'none' }}>
+        <Navbar.Brand style={{ cursor: 'default', pointerEvents: 'none', color: '#0d6efd' }}>
           <Icon name="directions_car" className="me-2" style={{ verticalAlign: 'middle' }} />
           Автосалон
         </Navbar.Brand>
