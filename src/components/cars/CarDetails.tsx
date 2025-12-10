@@ -152,6 +152,11 @@ const CarDetails: React.FC<CarDetailsProps> = ({ carId }) => {
                   <Badge 
                     bg={utils.getStatusVariant(car.status, 'car')}
                     className="mb-2"
+                    style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      padding: '6px 12px'
+                    }}
                   >
                     {utils.getStatusLabel(car.status, 'car')}
                   </Badge>

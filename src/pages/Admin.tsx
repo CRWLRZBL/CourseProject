@@ -403,16 +403,17 @@ const Admin: React.FC = () => {
                               <td>{formatPrice(order.totalPrice)}</td>
                               <td>
                                 <Badge 
-                                  bg={getStatusVariant(order.orderStatus)}
+                                  bg={getStatusVariant(order.orderStatus, 'order')}
                                   style={{
                                     backgroundColor: order.orderStatus === 'Pending' ? '#ffc107' : 
                                                      order.orderStatus === 'Confirmed' ? '#17a2b8' : 
                                                      order.orderStatus === 'InProduction' ? '#007bff' : 
                                                      order.orderStatus === 'Completed' ? '#28a745' : 
-                                                     order.orderStatus === 'Cancelled' ? '#dc3545' : '#6c757d',
-                                    color: '#fff',
+                                                     order.orderStatus === 'Cancelled' ? '#dc3545' : '#495057',
+                                    color: order.orderStatus === 'Pending' ? '#000' : '#fff',
                                     padding: '6px 12px',
-                                    fontSize: '0.875rem'
+                                    fontSize: '0.875rem',
+                                    fontWeight: '500'
                                   }}
                                 >
                                   {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus}
@@ -513,16 +514,17 @@ const Admin: React.FC = () => {
                               <td>{formatPrice(order.totalPrice)}</td>
                               <td>
                                 <Badge 
-                                  bg={getStatusVariant(order.orderStatus)}
+                                  bg={getStatusVariant(order.orderStatus, 'order')}
                                   style={{
                                     backgroundColor: order.orderStatus === 'Pending' ? '#ffc107' : 
                                                      order.orderStatus === 'Confirmed' ? '#17a2b8' : 
                                                      order.orderStatus === 'InProduction' ? '#007bff' : 
                                                      order.orderStatus === 'Completed' ? '#28a745' : 
-                                                     order.orderStatus === 'Cancelled' ? '#dc3545' : '#6c757d',
-                                    color: '#fff',
+                                                     order.orderStatus === 'Cancelled' ? '#dc3545' : '#495057',
+                                    color: order.orderStatus === 'Pending' ? '#000' : '#fff',
                                     padding: '6px 12px',
-                                    fontSize: '0.875rem'
+                                    fontSize: '0.875rem',
+                                    fontWeight: '500'
                                   }}
                                 >
                                   {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus}
@@ -713,10 +715,11 @@ const Admin: React.FC = () => {
                                 style={{
                                   backgroundColor: car.status === 'Available' ? '#28a745' : 
                                                    car.status === 'Reserved' ? '#ffc107' : 
-                                                   car.status === 'Sold' ? '#dc3545' : '#6c757d',
-                                  color: '#fff',
+                                                   car.status === 'Sold' ? '#dc3545' : '#495057',
+                                  color: car.status === 'Reserved' ? '#000' : '#fff',
                                   padding: '6px 12px',
-                                  fontSize: '0.875rem'
+                                  fontSize: '0.875rem',
+                                  fontWeight: '500'
                                 }}
                               >
                                 {CAR_STATUS_LABELS[car.status] || car.status}

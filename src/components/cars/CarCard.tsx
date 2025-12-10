@@ -88,6 +88,12 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
         <Badge 
           bg={utils.getStatusVariant(car.status, 'car')} 
           className="position-absolute top-0 end-0 m-2"
+          style={{
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            padding: '6px 12px',
+            textShadow: car.status === 'Reserved' ? 'none' : '0 1px 2px rgba(0,0,0,0.1)'
+          }}
         >
           {utils.getStatusLabel(car.status, 'car')}
         </Badge>

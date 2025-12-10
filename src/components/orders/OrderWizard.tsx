@@ -469,43 +469,6 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
             totalPrice={currentConfig.totalPrice || displayCar.basePrice}
             basePrice={displayCar.basePrice}
           />
-          
-          {/* Кнопка оформления заказа для сводки */}
-          <div className="order-action-bar mt-4">
-            <Card className="shadow-lg border-0">
-              <Card.Body className="p-4">
-                <Row className="align-items-center">
-                  <Col md={6} className="mb-3 mb-md-0">
-                    {error && (
-                      <Alert variant="danger" className="mb-0 py-2">
-                        <small>{error}</small>
-                      </Alert>
-                    )}
-                    {!error && (
-                      <div>
-                        <div className="text-muted small mb-1">Итоговая стоимость</div>
-                        <div className="h3 mb-0 text-primary fw-bold">
-                          {formatPrice(currentConfig.totalPrice || displayCar.basePrice)}
-                        </div>
-                      </div>
-                    )}
-                  </Col>
-                  <Col md={6} className="text-md-end">
-                    <Button 
-                      variant="primary" 
-                      size="lg"
-                      onClick={handleCreateOrder}
-                      disabled={!initialConfigurationId}
-                      className="w-100 w-md-auto px-5"
-                    >
-                      <Icon name="check_circle" className="me-2" style={{ verticalAlign: 'middle' }} />
-                      Оформить заказ
-                    </Button>
-                  </Col>
-                </Row>
-              </Card.Body>
-            </Card>
-          </div>
         </>
       ) : (
         <>

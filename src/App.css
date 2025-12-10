@@ -656,26 +656,58 @@ html, body {
 .badge-status-pending {
   background-color: #ffc107;
   color: #000;
+  font-weight: 500;
 }
 
 .badge-status-confirmed {
-  background-color: #0dcaf0;
-  color: #000;
+  background-color: #17a2b8;
+  color: #fff;
+  font-weight: 500;
 }
 
 .badge-status-inproduction {
   background-color: #0d6efd;
   color: #fff;
+  font-weight: 500;
 }
 
 .badge-status-completed {
   background-color: #198754;
   color: #fff;
+  font-weight: 500;
 }
 
 .badge-status-cancelled {
   background-color: #dc3545;
   color: #fff;
+  font-weight: 500;
+}
+
+/* Улучшенная читабельность для статусов с серым фоном */
+.badge.bg-secondary {
+  background-color: #495057 !important;
+  color: #fff !important;
+  font-weight: 500;
+  border: 1px solid #343a40;
+}
+
+/* Статусы автомобилей */
+.badge.bg-success {
+  background-color: #28a745 !important;
+  color: #fff !important;
+  font-weight: 500;
+}
+
+.badge.bg-warning {
+  background-color: #ffc107 !important;
+  color: #000 !important;
+  font-weight: 500;
+}
+
+.badge.bg-danger {
+  background-color: #dc3545 !important;
+  color: #fff !important;
+  font-weight: 500;
 }
 
 /* Car Configurator Styles */
@@ -956,7 +988,11 @@ html, body {
 }
 
 .feature-icon-wrapper {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
   padding: 1rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 50%;
