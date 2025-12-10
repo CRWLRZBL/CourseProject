@@ -101,6 +101,8 @@ const OrderManagement: React.FC = () => {
    */
   const handleStatusUpdate = async (orderId: number, newStatus: string) => {
     try {
+      setError(''); // Очищаем предыдущие ошибки
+      console.log('Updating order status:', { orderId, newStatus });
       // Отправляем запрос на обновление статуса заказа через сервис
       // Передаем ID заказа, новый статус и комментарий об изменении
       await orderService.updateOrderStatus(
@@ -111,9 +113,15 @@ const OrderManagement: React.FC = () => {
       
       // После успешного обновления перезагружаем список заказов для отображения изменений
       await loadOrders();
-    } catch (err) {
+    } catch (err: any) {
+      console.error('Error updating order status:', err);
+      console.error('Error response:', err.response);
       // При ошибке устанавливаем сообщение об ошибке
-      setError('Ошибка при обновлении статуса заказа');
+      const errorMessage = err.response?.data?.error 
+        || err.response?.data?.message 
+        || err.message 
+        || 'Ошибка при обновлении статуса заказа';
+      setError(errorMessage);
     }
   };
 

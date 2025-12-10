@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Button, Row, Col, Alert, Badge } from 'react-bootstrap';
-import { Car, Configuration, AdditionalOption } from '../../services/models/car';
+import { Car, Configuration, AdditionalOption, Model } from '../../services/models/car';
 import { carService } from '../../services/api/carService';
 import CarConfigurator from '../cars/CarConfigurator';
 import Icon from '../common/Icon';
@@ -30,6 +30,7 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
   onOrderCreate 
 }) => {
   const [car, setCar] = useState<Car | null>(null);
+  const [model, setModel] = useState<Model | null>(null);
   const [configurations, setConfigurations] = useState<Configuration[]>([]);
   const [options, setOptions] = useState<AdditionalOption[]>([]);
   const [currentConfig, setCurrentConfig] = useState<{
@@ -48,33 +49,32 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
   const [error, setError] = useState('');
   const [errors, setErrors] = useState<{
     car?: string;
+    model?: string;
     configurations?: string;
     options?: string;
   }>({});
 
-  useEffect(() => {
-    if (carId) {
-      loadData();
-    } else if (modelId) {
-      // Если перешли из конфигуратора, загружаем только опции
-      loadOptions();
-      if (initialConfigurationId) {
-        setCurrentConfig(prev => ({
-          ...prev,
-          configurationId: initialConfigurationId,
-        }));
+  const loadOptions = useCallback(async () => {
+    try {
+      const optionsData = await carService.getAdditionalOptions();
+      setOptions(optionsData);
+    } catch (err: any) {
+      const errorMessage = 'Не удалось загрузить дополнительные опции';
+      setErrors(prev => ({ ...prev, options: errorMessage }));
+      
+      if (import.meta.env.DEV) {
+        console.error('Ошибка загрузки опций:', {
+          status: err.response?.status,
+          message: err.message,
+          url: err.config?.url
+        });
       }
-      if (initialOptionIds && initialOptionIds.length > 0) {
-        setCurrentConfig(prev => ({
-          ...prev,
-          optionIds: initialOptionIds,
-        }));
-      }
-      setLoading(false);
     }
-  }, [carId, modelId, initialConfigurationId, initialOptionIds]);
+  }, []);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
+    if (!carId) return;
+    
     setLoading(true);
     setError('');
     setErrors({});
@@ -136,14 +136,32 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
     }
 
     try {
-      const optionsData = await carService.getAdditionalOptions();
-      setOptions(optionsData);
+      await loadOptions();
     } catch (err: any) {
-      const errorMessage = 'Не удалось загрузить дополнительные опции';
-      setErrors(prev => ({ ...prev, options: errorMessage }));
+      // Ошибка уже обработана в loadOptions
+    }
+
+    setLoading(false);
+  }, [carId, loadOptions]);
+
+  const loadModelData = useCallback(async () => {
+    if (!modelId) return;
+    
+    setLoading(true);
+    setError('');
+    setErrors({});
+    
+    try {
+      const modelData = await carService.getModelById(Number(modelId));
+      setModel(modelData);
+    } catch (err: any) {
+      const errorMessage = err.response?.status === 404 
+        ? 'Модель не найдена' 
+        : 'Не удалось загрузить информацию о модели';
+      setErrors(prev => ({ ...prev, model: errorMessage }));
       
       if (import.meta.env.DEV) {
-        console.error('Ошибка загрузки опций:', {
+        console.error('Ошибка загрузки модели:', {
           status: err.response?.status,
           message: err.message,
           url: err.config?.url
@@ -151,8 +169,87 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
       }
     }
 
+    try {
+      const configsData = await carService.getConfigurationsByModelId(Number(modelId));
+      setConfigurations(configsData);
+      // Выбираем указанную комплектацию или первую по умолчанию
+      // Но только если комплектация еще не была установлена
+      setCurrentConfig(prev => {
+        if (prev.configurationId) {
+          // Если комплектация уже установлена (из initialConfigurationId), не перезаписываем
+          return prev;
+        }
+        if (initialConfigurationId) {
+          return {
+            ...prev,
+            configurationId: initialConfigurationId,
+          };
+        } else if (configsData.length > 0) {
+          return {
+            ...prev,
+            configurationId: configsData[0].configurationId,
+          };
+        }
+        return prev;
+      });
+    } catch (err: any) {
+      let errorMessage = 'Не удалось загрузить комплектации';
+      
+      if (err.response?.status === 500) {
+        const errorData = err.response?.data;
+        if (typeof errorData === 'string' && errorData.includes('JsonException')) {
+          errorMessage = 'Ошибка обработки данных на сервере. Комплектации временно недоступны. Обратитесь в поддержку.';
+        } else {
+          errorMessage = 'Ошибка сервера при загрузке комплектаций. Попробуйте обновить страницу или обратитесь в поддержку.';
+        }
+      } else if (err.response?.status === 404) {
+        errorMessage = 'Комплектации для этой модели не найдены';
+      }
+      
+      setErrors(prev => ({ ...prev, configurations: errorMessage }));
+      
+      if (import.meta.env.DEV) {
+        console.error('Ошибка загрузки комплектаций:', {
+          status: err.response?.status,
+          message: err.message,
+          url: err.config?.url
+        });
+      }
+    }
+
+    try {
+      await loadOptions();
+    } catch (err: any) {
+      // Ошибка уже обработана в loadOptions
+    }
+
     setLoading(false);
-  };
+  }, [modelId, initialConfigurationId, initialOptionIds, loadOptions]);
+
+  // Инициализируем начальные значения из пропсов
+  useEffect(() => {
+    if (initialConfigurationId) {
+      setCurrentConfig(prev => ({
+        ...prev,
+        configurationId: initialConfigurationId,
+      }));
+    }
+    if (initialOptionIds && initialOptionIds.length > 0) {
+      setCurrentConfig(prev => ({
+        ...prev,
+        optionIds: initialOptionIds,
+      }));
+    }
+  }, [initialConfigurationId, initialOptionIds]);
+
+  useEffect(() => {
+    if (carId) {
+      loadData();
+    } else if (modelId) {
+      // Если перешли из конфигуратора, загружаем модель и опции
+      loadModelData();
+    }
+  }, [carId, modelId, loadData, loadModelData]);
 
   const handleConfigurationChange = (config: {
     colorId?: number;
@@ -217,6 +314,43 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
     );
   }
 
+  if (!car && !model && modelId) {
+    return (
+      <Alert variant="warning">
+        <Alert.Heading>Модель не найдена</Alert.Heading>
+        <p>Не удалось загрузить информацию о модели. Проверьте правильность ссылки.</p>
+        <Button variant="outline-warning" onClick={loadModelData} className="mt-2">
+          Повторить попытку
+        </Button>
+      </Alert>
+    );
+  }
+
+  // Создаем объект car из model для использования в CarConfigurator
+  const displayCar: Car | null = car || (model ? {
+    carId: 0,
+    modelId: model.modelId,
+    brandName: model.brandName,
+    modelName: model.modelName,
+    bodyType: model.bodyType,
+    basePrice: model.basePrice,
+    color: initialColor || '',
+    status: '',
+    vin: '',
+    modelYear: model.modelYear,
+    fuelType: model.fuelType || '',
+    engineCapacity: model.engineCapacity || 0,
+  } : null);
+
+  if (!displayCar) {
+    return (
+      <Alert variant="danger">
+        <Alert.Heading>Ошибка</Alert.Heading>
+        <p>Не удалось загрузить данные для оформления заказа.</p>
+      </Alert>
+    );
+  }
+
   return (
     <div className="order-wizard">
       {/* Информация об автомобиле */}
@@ -226,12 +360,12 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
             <Col>
               <h4 className="mb-0 d-flex align-items-center">
                 <Icon name="directions_car" className="me-2" style={{ verticalAlign: 'middle' }} />
-                {car.brandName} {car.modelName}
+                {displayCar.brandName} {displayCar.modelName}
               </h4>
             </Col>
             <Col xs="auto">
               <Badge bg="light" text="dark" className="fs-6 px-3 py-2">
-                {formatPrice(car.basePrice)}
+                {formatPrice(displayCar.basePrice)}
               </Badge>
             </Col>
           </Row>
@@ -241,13 +375,13 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
             <Col md={4}>
               <div className="d-flex align-items-center">
                 <span className="text-muted me-2">Тип кузова:</span>
-                <span className="fw-semibold">{car.bodyType}</span>
+                <span className="fw-semibold">{displayCar.bodyType}</span>
               </div>
             </Col>
             <Col md={4}>
               <div className="d-flex align-items-center">
                 <span className="text-muted me-2">Год выпуска:</span>
-                <span className="fw-semibold">{car.modelYear}</span>
+                <span className="fw-semibold">{displayCar.modelYear}</span>
               </div>
             </Col>
           </Row>
@@ -268,16 +402,19 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
       {errors.options && (
         <Alert variant="warning" className="mb-3">
           <p className="mb-2">{errors.options}</p>
-          <Button variant="outline-warning" size="sm" onClick={loadData}>
+          <Button variant="outline-warning" size="sm" onClick={carId ? loadData : loadModelData}>
             Повторить загрузку
           </Button>
         </Alert>
       )}
 
       <CarConfigurator
-        car={car}
+        car={displayCar}
         configurations={configurations}
         options={options}
+        initialConfigurationId={initialConfigurationId || currentConfig.configurationId || undefined}
+        initialColor={initialColor}
+        initialOptionIds={initialOptionIds && initialOptionIds.length > 0 ? initialOptionIds : currentConfig.optionIds.length > 0 ? currentConfig.optionIds : undefined}
         onConfigurationChange={handleConfigurationChange}
       />
 
@@ -296,7 +433,7 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
                   <div>
                     <div className="text-muted small mb-1">Итоговая стоимость</div>
                     <div className="h3 mb-0 text-primary fw-bold">
-                      {formatPrice(currentConfig.totalPrice || car.basePrice)}
+                      {formatPrice(currentConfig.totalPrice || displayCar.basePrice)}
                     </div>
                   </div>
                 )}

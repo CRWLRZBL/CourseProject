@@ -67,6 +67,18 @@ const Order: React.FC = () => {
     }
 
     try {
+      setError(''); // Очищаем предыдущие ошибки
+      setSuccess(''); // Очищаем предыдущие успешные сообщения
+      
+      console.log('Creating order with data:', {
+        userId: user.userId,
+        carId: orderData.carId,
+        modelId: orderData.modelId,
+        configurationId: orderData.configurationId,
+        color: orderData.color,
+        optionIds: orderData.optionIds
+      });
+
       const result = await orderService.createOrder({
         userId: user.userId,
         carId: orderData.carId,
@@ -76,6 +88,8 @@ const Order: React.FC = () => {
         optionIds: orderData.optionIds
       });
 
+      console.log('Order created successfully:', result);
+
       setSuccess(`Заказ №${result.orderId} успешно создан! ${orderData.carId ? '' : 'Автомобиль будет создан со статусом "В ожидании".'}`);
       
       // Перенаправляем на страницу заказов через 2 секунды
@@ -83,7 +97,17 @@ const Order: React.FC = () => {
         navigate('/profile');
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Ошибка при создании заказа');
+      console.error('Error creating order:', err);
+      console.error('Error response:', err.response);
+      console.error('Error data:', err.response?.data);
+      
+      const errorMessage = err.response?.data?.error 
+        || err.response?.data?.message 
+        || err.message 
+        || 'Ошибка при создании заказа. Попробуйте позже.';
+      
+      setError(errorMessage);
+      setSuccess(''); // Очищаем успешное сообщение при ошибке
     }
   };
 

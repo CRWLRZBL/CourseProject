@@ -3,12 +3,12 @@ FROM node:20-alpine AS build
 WORKDIR /app
 
 # Копируем package.json и package-lock.json по отдельности
-COPY frontend/frontend/package.json ./
-COPY frontend/frontend/package-lock.json* ./
+COPY frontend/package.json ./
+COPY frontend/package-lock.json* ./
 RUN npm ci
 
 # Копируем остальные файлы проекта
-COPY frontend/frontend/ ./
+COPY frontend/ ./
 
 # Устанавливаем переменные окружения для сборки (Vite требует их во время сборки)
 ARG VITE_API_URL=http://localhost:5171/api

@@ -49,10 +49,18 @@ const Admin: React.FC = () => {
 
   const handleStatusUpdate = async (orderId: number, newStatus: string) => {
     try {
+      setError(''); // Очищаем предыдущие ошибки
+      console.log('Updating order status:', { orderId, newStatus });
       await orderService.updateOrderStatus(orderId, newStatus);
       await loadData(); // Перезагружаем данные
-    } catch (err) {
-      setError('Ошибка при обновлении статуса');
+    } catch (err: any) {
+      console.error('Error updating order status:', err);
+      console.error('Error response:', err.response);
+      const errorMessage = err.response?.data?.error 
+        || err.response?.data?.message 
+        || err.message 
+        || 'Ошибка при обновлении статуса';
+      setError(errorMessage);
     }
   };
 

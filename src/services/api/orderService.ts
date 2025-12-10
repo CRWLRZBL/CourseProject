@@ -18,6 +18,11 @@ export const orderService = {
   },
 
   async updateOrderStatus(orderId: number, status: string, notes?: string): Promise<void> {
-    await apiClient.put(`/orders/${orderId}/status`, { status, notes });
+    const requestBody: { status: string; notes?: string } = { status };
+    if (notes) {
+      requestBody.notes = notes;
+    }
+    const response = await apiClient.put(`/orders/${orderId}/status`, requestBody);
+    return response.data;
   }
 };

@@ -8,6 +8,9 @@ interface CarConfiguratorProps {
   car: Car;
   configurations: Configuration[];
   options: AdditionalOption[];
+  initialConfigurationId?: number;
+  initialColor?: string;
+  initialOptionIds?: number[];
   onConfigurationChange: (config: {
     colorId?: number;
     engineId?: number;
@@ -49,15 +52,25 @@ const CarConfigurator: React.FC<CarConfiguratorProps> = ({
   car,
   configurations,
   options,
+  initialConfigurationId,
+  initialColor,
+  initialOptionIds,
   onConfigurationChange,
 }) => {
-  const [selectedColor, setSelectedColor] = useState<number>(1);
+  // Находим colorId по имени цвета
+  const getColorIdByName = (colorName?: string): number => {
+    if (!colorName) return 1; // По умолчанию Ледниковый
+    const color = DEFAULT_COLORS.find(c => c.colorName === colorName);
+    return color ? color.colorId : 1;
+  };
+
+  const [selectedColor, setSelectedColor] = useState<number>(getColorIdByName(initialColor));
   const [selectedEngine, setSelectedEngine] = useState<number>(1);
   const [selectedTransmission, setSelectedTransmission] = useState<number>(1);
   const [selectedConfig, setSelectedConfig] = useState<number | null>(
-    configurations.length > 0 ? configurations[0].configurationId : null
+    initialConfigurationId || (configurations.length > 0 ? configurations[0].configurationId : null)
   );
-  const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<number[]>(initialOptionIds || []);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ru-RU', {
@@ -94,6 +107,28 @@ const CarConfigurator: React.FC<CarConfiguratorProps> = ({
 
     return total;
   };
+
+  // Синхронизируем начальные значения при изменении пропсов
+  useEffect(() => {
+    if (initialConfigurationId && initialConfigurationId !== selectedConfig) {
+      setSelectedConfig(initialConfigurationId);
+    }
+  }, [initialConfigurationId, selectedConfig]);
+
+  useEffect(() => {
+    if (initialColor) {
+      const colorId = getColorIdByName(initialColor);
+      if (colorId !== selectedColor) {
+        setSelectedColor(colorId);
+      }
+    }
+  }, [initialColor, selectedColor]);
+
+  useEffect(() => {
+    if (initialOptionIds && initialOptionIds.length > 0 && JSON.stringify(initialOptionIds) !== JSON.stringify(selectedOptions)) {
+      setSelectedOptions(initialOptionIds);
+    }
+  }, [initialOptionIds]);
 
   useEffect(() => {
     const totalPrice = calculateTotalPrice();
