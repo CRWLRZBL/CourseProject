@@ -30,7 +30,7 @@ GO
 
 -- Создание базы данных с правильной кодировкой для поддержки кириллицы
 CREATE DATABASE Autosalon
-COLLATE SQL_Latin1_General_CP1_CI_AS;
+COLLATE Cyrillic_General_CI_AS;
 GO
 
 PRINT 'База данных Autosalon создана';
@@ -400,18 +400,27 @@ INSERT INTO [dbo].[Models] ([BrandID], [ModelName], [ModelYear], [BodyType], [Ba
     (@LadaBrandID, 'Aura', 2024, 'Sedan', 1599900.00, 'Премиум седан LADA Aura', 1.8, 'Petrol', 1);
 GO
 
--- Вставка цветов
-INSERT INTO [dbo].[Colors] ([ColorName], [ColorCode], [PriceModifier], [IsAvailable]) VALUES
-    ('Ледниковый', '#FFFFFF', 0.00, 1),
-    ('Пантера', '#000000', 20000.00, 1),
-    ('Платина', '#C0C0C0', 20000.00, 1),
-    ('Борнео', '#1E3A8A', 20000.00, 1),
-    ('Капитан', '#3B82F6', 20000.00, 1),
-    ('Кориандр', '#92400E', 20000.00, 1),
-    ('Фламенко', '#DC2626', 20000.00, 1),
-    ('Несси', '#065F46', 20000.00, 1),
-    ('Несси 2', '#065F46', 20000.00, 1),
-    ('Табаско', '#B91C1C', 20000.00, 1);
+-- Вставка цветов (с проверкой на существование)
+IF NOT EXISTS (SELECT 1 FROM [dbo].[Colors] WHERE ColorName = N'Ледниковый')
+    INSERT INTO [dbo].[Colors] ([ColorName], [ColorCode], [PriceModifier], [IsAvailable]) VALUES (N'Ледниковый', '#FFFFFF', 0.00, 1);
+IF NOT EXISTS (SELECT 1 FROM [dbo].[Colors] WHERE ColorName = N'Пантера')
+    INSERT INTO [dbo].[Colors] ([ColorName], [ColorCode], [PriceModifier], [IsAvailable]) VALUES (N'Пантера', '#000000', 20000.00, 1);
+IF NOT EXISTS (SELECT 1 FROM [dbo].[Colors] WHERE ColorName = N'Платина')
+    INSERT INTO [dbo].[Colors] ([ColorName], [ColorCode], [PriceModifier], [IsAvailable]) VALUES (N'Платина', '#C0C0C0', 20000.00, 1);
+IF NOT EXISTS (SELECT 1 FROM [dbo].[Colors] WHERE ColorName = N'Борнео')
+    INSERT INTO [dbo].[Colors] ([ColorName], [ColorCode], [PriceModifier], [IsAvailable]) VALUES (N'Борнео', '#1E3A8A', 20000.00, 1);
+IF NOT EXISTS (SELECT 1 FROM [dbo].[Colors] WHERE ColorName = N'Капитан')
+    INSERT INTO [dbo].[Colors] ([ColorName], [ColorCode], [PriceModifier], [IsAvailable]) VALUES (N'Капитан', '#3B82F6', 20000.00, 1);
+IF NOT EXISTS (SELECT 1 FROM [dbo].[Colors] WHERE ColorName = N'Кориандр')
+    INSERT INTO [dbo].[Colors] ([ColorName], [ColorCode], [PriceModifier], [IsAvailable]) VALUES (N'Кориандр', '#92400E', 20000.00, 1);
+IF NOT EXISTS (SELECT 1 FROM [dbo].[Colors] WHERE ColorName = N'Фламенко')
+    INSERT INTO [dbo].[Colors] ([ColorName], [ColorCode], [PriceModifier], [IsAvailable]) VALUES (N'Фламенко', '#DC2626', 20000.00, 1);
+IF NOT EXISTS (SELECT 1 FROM [dbo].[Colors] WHERE ColorName = N'Несси')
+    INSERT INTO [dbo].[Colors] ([ColorName], [ColorCode], [PriceModifier], [IsAvailable]) VALUES (N'Несси', '#065F46', 20000.00, 1);
+IF NOT EXISTS (SELECT 1 FROM [dbo].[Colors] WHERE ColorName = N'Несси 2')
+    INSERT INTO [dbo].[Colors] ([ColorName], [ColorCode], [PriceModifier], [IsAvailable]) VALUES (N'Несси 2', '#065F46', 20000.00, 1);
+IF NOT EXISTS (SELECT 1 FROM [dbo].[Colors] WHERE ColorName = N'Табаско')
+    INSERT INTO [dbo].[Colors] ([ColorName], [ColorCode], [PriceModifier], [IsAvailable]) VALUES (N'Табаско', '#B91C1C', 20000.00, 1);
 GO
 
 -- Вставка двигателей
@@ -431,15 +440,15 @@ INSERT INTO [dbo].[Transmissions] ([TransmissionName], [TransmissionType], [Gear
     ('Вариатор', 'Вариатор', 0, 120000.00, 1);
 GO
 
--- Получаем ID для связей
-DECLARE @LedaGlacierColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Ледниковый');
-DECLARE @PantherColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Пантера');
-DECLARE @PlatinumColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Платина');
-DECLARE @BorneoColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Борнео');
-DECLARE @CaptainColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Капитан');
-DECLARE @CorianderColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Кориандр');
-DECLARE @FlamencoColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Фламенко');
-DECLARE @NessyColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = 'Несси');
+-- Получаем ID для связей (используем N префикс для Unicode)
+DECLARE @LedaGlacierColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = N'Ледниковый');
+DECLARE @PantherColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = N'Пантера');
+DECLARE @PlatinumColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = N'Платина');
+DECLARE @BorneoColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = N'Борнео');
+DECLARE @CaptainColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = N'Капитан');
+DECLARE @CorianderColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = N'Кориандр');
+DECLARE @FlamencoColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = N'Фламенко');
+DECLARE @NessyColorID INT = (SELECT ColorID FROM [dbo].[Colors] WHERE ColorName = N'Несси');
 
 DECLARE @Engine16_90ID INT = (SELECT EngineID FROM [dbo].[Engines] WHERE EngineName = '1.6L 90 л.с.');
 DECLARE @Engine16_106ID INT = (SELECT EngineID FROM [dbo].[Engines] WHERE EngineName = '1.6L 106 л.с. Turbo');
@@ -452,9 +461,9 @@ DECLARE @Transmission6MTID INT = (SELECT TransmissionID FROM [dbo].[Transmission
 DECLARE @TransmissionATID INT = (SELECT TransmissionID FROM [dbo].[Transmissions] WHERE TransmissionName = 'Автоматическая');
 DECLARE @TransmissionCVTID INT = (SELECT TransmissionID FROM [dbo].[Transmissions] WHERE TransmissionName = 'Вариатор');
 
--- Получаем ID моделей для создания связей и комплектаций
-DECLARE @GrantaSedanID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Седан');
-DECLARE @GrantaHatchbackID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Хэтчбек');
+-- Получаем ID моделей для создания связей и комплектаций (используем N префикс для Unicode)
+DECLARE @GrantaSedanID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Granta Седан');
+DECLARE @GrantaHatchbackID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Granta Хэтчбек');
 DECLARE @GrantaCrossID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Cross');
 DECLARE @GrantaSportID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Sport');
 DECLARE @GrantaSportlineID INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Granta Sportline');
