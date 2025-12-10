@@ -82,7 +82,7 @@ const CarDetails: React.FC<CarDetailsProps> = ({ carId }) => {
   }
 
   const carImages = getCarImages();
-  const mainImage = carImages[selectedImage] || '/images/cars/default.jpg';
+  const mainImage = carImages[selectedImage] || '/images/cars/Granta/Sedan-Ледниковый.png';
 
   return (
     <div className="car-details">
@@ -98,7 +98,7 @@ const CarDetails: React.FC<CarDetailsProps> = ({ carId }) => {
                   className="img-fluid rounded"
                   style={{ maxHeight: '400px', width: 'auto' }}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/cars/default.jpg';
+                    (e.target as HTMLImageElement).src = '/images/cars/Granta/Sedan-Ледниковый.png';
                   }}
                 />
               </div>
@@ -125,7 +125,7 @@ const CarDetails: React.FC<CarDetailsProps> = ({ carId }) => {
                         className="w-100 h-100"
                         style={{ objectFit: 'cover' }}
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/images/cars/default.jpg';
+                          (e.target as HTMLImageElement).src = '/images/cars/Granta/Sedan-Ледниковый.png';
                         }}
                       />
                     </div>

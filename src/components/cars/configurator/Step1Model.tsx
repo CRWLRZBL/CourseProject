@@ -52,7 +52,7 @@ const Step1Model: React.FC<Step1ModelProps> = ({
                     alt={`${model.brandName} ${model.modelName}`}
                     className="model-image"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/cars/default.jpg';
+                      (e.target as HTMLImageElement).src = '/images/cars/Granta/Sedan-Ледниковый.png';
                     }}
                   />
                 </div>

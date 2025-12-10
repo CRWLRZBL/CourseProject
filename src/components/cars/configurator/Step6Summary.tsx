@@ -184,7 +184,7 @@ const Step6Summary: React.FC<Step6SummaryProps> = ({ state, onOrderCreate }) => 
                         summaryData.configuration?.configurationName,
                         state.selectedColorName || summaryData.color?.name
                       )
-                    : '/images/cars/default.jpg')
+                    : '/images/cars/Granta/Sedan-Ледниковый.png')
                 }
                 alt={`${state.selectedModel?.brandName} ${state.selectedModel?.modelName}`}
                 className="summary-car-img"
@@ -200,7 +200,7 @@ const Step6Summary: React.FC<Step6SummaryProps> = ({ state, onOrderCreate }) => 
                     );
                     (e.target as HTMLImageElement).src = fallbackPath;
                   } else {
-                    (e.target as HTMLImageElement).src = '/images/cars/default.jpg';
+                    (e.target as HTMLImageElement).src = '/images/cars/Granta/Sedan-Ледниковый.png';
                   }
                 }}
               />

@@ -101,12 +101,12 @@ const Step1FamilyModel: React.FC<Step1FamilyModelProps> = ({
                             family.models[0].imageUrl,
                             undefined
                           )
-                        : '/images/cars/default.jpg'
+                        : '/images/cars/Granta/Sedan-Ледниковый.png'
                     }
                     alt={family.familyName}
                     className="family-image"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/cars/default.jpg';
+                      (e.target as HTMLImageElement).src = '/images/cars/Granta/Sedan-Ледниковый.png';
                     }}
                   />
                 </div>
@@ -164,7 +164,7 @@ const Step1FamilyModel: React.FC<Step1FamilyModelProps> = ({
                         alt={`${model.brandName} ${model.modelName}`}
                         className="model-image"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/images/cars/default.jpg';
+                          (e.target as HTMLImageElement).src = '/images/cars/Granta/Sedan-Ледниковый.png';
                         }}
                       />
                     </div>

@@ -35,21 +35,21 @@ const Home: React.FC = () => {
       id: 4,
       name: 'LADA Vesta Седан',
       price: 1239900,
-      image: '/images/cars/4.jpg',
+      image: '/images/cars/Vesta/Sedan-Ледниковый.png',
       type: 'Sedan'
     },
     {
       id: 1,
       name: 'LADA Granta Седан',
       price: 749900,
-      image: '/images/cars/1.jpg',
+      image: '/images/cars/Granta/Sedan-Ледниковый.png',
       type: 'Sedan'
     },
     {
       id: 9,
       name: 'LADA Niva Travel',
       price: 1314000,
-      image: '/images/cars/9.jpg',
+      image: '/images/cars/Niva Travel/Travel-Ледниковый.png',
       type: 'SUV'
     }
   ];
@@ -119,7 +119,7 @@ const Home: React.FC = () => {
                       className="img-fluid"
                       style={{ maxHeight: '450px', filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.3))' }}
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/images/cars/4.jpg';
+                        (e.target as HTMLImageElement).src = '/images/cars/Vesta/Sedan-Ледниковый.png';
                       }}
                     />
                   </div>
@@ -159,7 +159,7 @@ const Home: React.FC = () => {
                     style={{ height: '220px', objectFit: 'cover', transition: 'transform 0.3s ease' }}
                     className="car-card-image"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/cars/default.jpg';
+                        (e.target as HTMLImageElement).src = '/images/cars/Granta/Sedan-Ледниковый.png';
                     }}
                   />
                   <Badge 

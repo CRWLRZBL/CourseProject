@@ -231,26 +231,27 @@ export const META_DATA = {
 } as const;
 
 // Популярные модели для главной страницы
+// Используем реальные пути к изображениям моделей
 export const POPULAR_MODELS = [
   {
     id: 4,
     name: 'LADA Vesta Седан',
     price: 1239900,
-    image: '/images/cars/4.jpg',
+    image: '/images/cars/Vesta/Sedan-Ледниковый.png',
     type: 'Sedan' as const,
   },
   {
     id: 1,
     name: 'LADA Granta Седан',
     price: 749900,
-    image: '/images/cars/1.jpg',
+    image: '/images/cars/Granta/Sedan-Ледниковый.png',
     type: 'Sedan' as const,
   },
   {
     id: 9,
     name: 'LADA Niva Travel',
     price: 1314000,
-    image: '/images/cars/9.jpg',
+    image: '/images/cars/Niva Travel/Travel-Ледниковый.png',
     type: 'SUV' as const,
   },
 ] as const;

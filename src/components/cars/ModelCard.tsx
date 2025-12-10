@@ -81,7 +81,10 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
         
         <Card.Img 
           variant="top" 
-          src={imageError ? '/images/cars/default.jpg' : (currentImagePath || imagePath)}
+          src={imageError 
+            ? '/images/cars/Granta/Sedan-Ледниковый.png' 
+            : (currentImagePath || imagePath || '/images/cars/Granta/Sedan-Ледниковый.png')
+          }
           alt={`${model.brandName || ''} ${model.modelName || ''}`}
           className="car-card-image"
           style={{ 

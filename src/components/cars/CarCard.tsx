@@ -3,6 +3,7 @@ import { Card, Button, Badge, Spinner } from 'react-bootstrap';
 import { Car } from '../../services/models/car';
 import { useNavigate } from 'react-router-dom';
 import { utils, CAR_STATUS, BODY_TYPE_LABELS, FUEL_TYPE_LABELS } from '../../utils/constants';
+import { getModelImagePath } from '../../utils/imageUtils';
 
 /**
  * Интерфейс для пропсов компонента CarCard.
@@ -67,10 +68,13 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
           </div>
         )}
         
-        {/* Изображение автомобиля: используем изображение по умолчанию при ошибке, иначе - изображение конкретного автомобиля */}
+        {/* Изображение автомобиля: используем правильный путь к изображению модели */}
         <Card.Img 
           variant="top" 
-          src={imageError ? '/images/cars/default.jpg' : `/images/cars/${car.carId}.jpg`}
+          src={imageError 
+            ? getModelImagePath(car.modelName || '', car.bodyType || '', car.imageUrl, undefined, 'Ледниковый')
+            : getModelImagePath(car.modelName || '', car.bodyType || '', car.imageUrl, undefined, car.color || 'Ледниковый')
+          }
           alt={`${car.brandName || ''} ${car.modelName || ''}`}
           className="car-card-image"
           style={{ 

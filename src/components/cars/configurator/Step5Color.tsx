@@ -164,16 +164,17 @@ const Step5Color: React.FC<Step5ColorProps> = ({
   // Функция для получения пути к изображению автомобиля в выбранном цвете
   const getCarImagePath = (): string => {
     if (!modelName) {
-      return '/images/cars/default.jpg';
+      // Если нет модели, возвращаем базовое изображение Granta в цвете Ледниковый
+      return '/images/cars/Granta/Sedan-Ледниковый.png';
     }
 
     // Используем функцию getModelImagePath из imageUtils для правильного формирования пути
-    const bodyType = configurationName || 'Sedan';
+    const currentBodyType = bodyType || configurationName || 'Sedan';
     const colorName = selectedColorId && colors.length > 0 && selectedColorId <= colors.length
       ? colors[selectedColorId - 1].name
       : null;
     
-    return getModelImagePath(modelName, bodyType, undefined, configurationName, colorName);
+    return getModelImagePath(modelName, currentBodyType, undefined, configurationName, colorName);
   };
 
   if (loading) {
@@ -212,7 +213,8 @@ const Step5Color: React.FC<Step5ColorProps> = ({
                   : 'none',
               }}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/images/cars/default.jpg';
+                // При ошибке используем базовое изображение модели в цвете Ледниковый
+                (e.target as HTMLImageElement).src = getModelImagePath(modelName || '', bodyType || '', undefined, configurationName, 'Ледниковый');
               }}
             />
           </div>
