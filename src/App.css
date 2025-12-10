@@ -126,6 +126,13 @@ html, body {
   font-size: 1.5rem;
 }
 
+/* Синий цвет для "Автосалон" в темном navbar */
+.navbar.bg-dark .navbar-brand-custom,
+.navbar-dark .navbar-brand-custom,
+.navbar[data-bs-theme="dark"] .navbar-brand-custom {
+  color: #0d6efd !important;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
   .car-card {
