@@ -887,6 +887,72 @@ INSERT INTO [dbo].[Cars] ([ModelID], [VIN], [Color], [Status], [Mileage]) VALUES
     (@AuraModelID, 'X9FMXXEEBDM123630', 'Кориандр', 'Available', 0);
 GO
 
+-- =====================================================
+-- Заполнение заказов (Orders)
+-- =====================================================
+-- Переобъявляем переменные пользователей (после GO они теряются)
+DECLARE @ClientUserID INT = (SELECT UserID FROM [dbo].[Users] WHERE Email = 'client@test.ru');
+
+-- Переобъявляем переменные моделей (после GO они теряются)
+DECLARE @GrantaSedanModelIDForOrders INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Granta Седан');
+DECLARE @VestaSedanModelIDForOrders INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Vesta Седан');
+DECLARE @NivaTravelModelIDForOrders INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Niva Travel');
+DECLARE @LargusUniversalModelIDForOrders INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Largus Универсал');
+
+-- Переобъявляем переменные моделей для получения комплектаций
+DECLARE @GrantaSedanIDForOrders INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Granta Седан');
+DECLARE @VestaSedanIDForOrders INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Vesta Седан');
+DECLARE @NivaTravelIDForOrders INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = 'Niva Travel');
+DECLARE @LargusUniversalIDForOrders INT = (SELECT ModelID FROM [dbo].[Models] WHERE ModelName = N'Largus Универсал');
+
+-- Получаем ID первого автомобиля каждого типа для заказов
+DECLARE @FirstGrantaCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @GrantaSedanModelIDForOrders ORDER BY CarID);
+DECLARE @FirstVestaCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @VestaSedanModelIDForOrders ORDER BY CarID);
+DECLARE @SecondVestaCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @VestaSedanModelIDForOrders ORDER BY CarID OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY);
+DECLARE @ThirdVestaCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @VestaSedanModelIDForOrders ORDER BY CarID OFFSET 2 ROWS FETCH NEXT 1 ROWS ONLY);
+DECLARE @SecondGrantaCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @GrantaSedanModelIDForOrders ORDER BY CarID OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY);
+DECLARE @FirstNivaTravelCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @NivaTravelModelIDForOrders ORDER BY CarID);
+DECLARE @FirstLargusCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @LargusUniversalModelIDForOrders ORDER BY CarID);
+
+-- Получаем ID комплектаций
+DECLARE @GrantaStandardConfigID INT = (SELECT TOP 1 ConfigurationID FROM [dbo].[Configurations] WHERE ModelID = @GrantaSedanIDForOrders AND ConfigurationName = 'Standard');
+DECLARE @GrantaComfortConfigID INT = (SELECT TOP 1 ConfigurationID FROM [dbo].[Configurations] WHERE ModelID = @GrantaSedanIDForOrders AND ConfigurationName = 'Comfort');
+DECLARE @VestaComfortConfigID INT = (SELECT TOP 1 ConfigurationID FROM [dbo].[Configurations] WHERE ModelID = @VestaSedanIDForOrders AND ConfigurationName = 'Comfort');
+DECLARE @VestaSportlineConfigID INT = (SELECT TOP 1 ConfigurationID FROM [dbo].[Configurations] WHERE ModelID = @VestaSedanIDForOrders AND ConfigurationName = 'Sportline');
+DECLARE @NivaTravelLuxuryConfigID INT = (SELECT TOP 1 ConfigurationID FROM [dbo].[Configurations] WHERE ModelID = @NivaTravelIDForOrders AND ConfigurationName = 'Luxury');
+DECLARE @LargusComfortConfigID INT = (SELECT TOP 1 ConfigurationID FROM [dbo].[Configurations] WHERE ModelID = @LargusUniversalIDForOrders AND ConfigurationName = 'Comfort');
+
+-- Получаем базовые цены моделей для расчета итоговой цены
+DECLARE @GrantaBasePrice DECIMAL(15, 2) = (SELECT BasePrice FROM [dbo].[Models] WHERE ModelID = @GrantaSedanIDForOrders);
+DECLARE @VestaBasePrice DECIMAL(15, 2) = (SELECT BasePrice FROM [dbo].[Models] WHERE ModelID = @VestaSedanIDForOrders);
+DECLARE @NivaTravelBasePrice DECIMAL(15, 2) = (SELECT BasePrice FROM [dbo].[Models] WHERE ModelID = @NivaTravelIDForOrders);
+DECLARE @LargusBasePrice DECIMAL(15, 2) = (SELECT BasePrice FROM [dbo].[Models] WHERE ModelID = @LargusUniversalIDForOrders);
+
+-- Получаем дополнительные цены комплектаций
+DECLARE @GrantaComfortPrice DECIMAL(15, 2) = (SELECT AdditionalPrice FROM [dbo].[Configurations] WHERE ConfigurationID = @GrantaComfortConfigID);
+DECLARE @VestaComfortPrice DECIMAL(15, 2) = (SELECT AdditionalPrice FROM [dbo].[Configurations] WHERE ConfigurationID = @VestaComfortConfigID);
+DECLARE @VestaSportlinePrice DECIMAL(15, 2) = (SELECT AdditionalPrice FROM [dbo].[Configurations] WHERE ConfigurationID = @VestaSportlineConfigID);
+DECLARE @NivaTravelLuxuryPrice DECIMAL(15, 2) = (SELECT AdditionalPrice FROM [dbo].[Configurations] WHERE ConfigurationID = @NivaTravelLuxuryConfigID);
+DECLARE @LargusComfortPrice DECIMAL(15, 2) = (SELECT AdditionalPrice FROM [dbo].[Configurations] WHERE ConfigurationID = @LargusComfortConfigID);
+
+-- Создаем тестовые заказы с разными статусами
+INSERT INTO [dbo].[Orders] ([UserID], [CarID], [ConfigurationID], [TotalPrice], [OrderStatus], [OrderDate], [DeliveryDate], [Notes]) VALUES
+    -- Заказы в статусе Pending
+    (@ClientUserID, @FirstGrantaCarID, @GrantaComfortConfigID, @GrantaBasePrice + @GrantaComfortPrice, 'Pending', DATEADD(day, -5, GETDATE()), NULL, N'Ожидает подтверждения'),
+    (@ClientUserID, @FirstVestaCarID, @VestaComfortConfigID, @VestaBasePrice + @VestaComfortPrice, 'Pending', DATEADD(day, -3, GETDATE()), NULL, N'Заказ на рассмотрении'),
+    
+    -- Заказы в статусе Confirmed
+    (@ClientUserID, @SecondVestaCarID, @VestaSportlineConfigID, @VestaBasePrice + @VestaSportlinePrice, 'Confirmed', DATEADD(day, -10, GETDATE()), DATEADD(day, 15, GETDATE()), N'Заказ подтвержден, ожидает производства'),
+    (@ClientUserID, @FirstNivaTravelCarID, @NivaTravelLuxuryConfigID, @NivaTravelBasePrice + @NivaTravelLuxuryPrice, 'Confirmed', DATEADD(day, -7, GETDATE()), DATEADD(day, 20, GETDATE()), N'Заказ в обработке'),
+    
+    -- Заказы в статусе InProduction
+    (@ClientUserID, @FirstLargusCarID, @LargusComfortConfigID, @LargusBasePrice + @LargusComfortPrice, 'InProduction', DATEADD(day, -15, GETDATE()), DATEADD(day, 5, GETDATE()), N'Автомобиль в производстве'),
+    
+    -- Заказы в статусе Completed
+    (@ClientUserID, @SecondGrantaCarID, @GrantaStandardConfigID, @GrantaBasePrice, 'Completed', DATEADD(day, -30, GETDATE()), DATEADD(day, -5, GETDATE()), N'Заказ выполнен, автомобиль получен'),
+    (@ClientUserID, @ThirdVestaCarID, @VestaComfortConfigID, @VestaBasePrice + @VestaComfortPrice, 'Completed', DATEADD(day, -25, GETDATE()), DATEADD(day, -3, GETDATE()), N'Заказ успешно выполнен');
+GO
+
 PRINT '========================================';
 PRINT 'База данных Autosalon успешно создана!';
 PRINT '========================================';
@@ -910,6 +976,7 @@ PRINT '  - Связей Модель-Двигатель: 30+';
 PRINT '  - Связей Модель-Трансмиссия: 30+';
 PRINT '  - Дополнительных опций: 12';
 PRINT '  - Тестовых автомобилей: 18';
+PRINT '  - Тестовых заказов: 7';
 PRINT '';
 PRINT 'Все связи заполнены корректно!';
 PRINT 'База данных готова к использованию!';
