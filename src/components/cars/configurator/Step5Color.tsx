@@ -12,6 +12,7 @@ interface Color {
 interface Step5ColorProps {
   modelId?: number;
   modelName?: string;
+  bodyType?: string;
   configurationName?: string;
   selectedColorId: number | null;
   onColorSelect: (colorId: number, colorName: string) => void;
@@ -21,6 +22,7 @@ interface Step5ColorProps {
 const Step5Color: React.FC<Step5ColorProps> = ({
   modelId,
   modelName,
+  bodyType: propBodyType,
   configurationName,
   selectedColorId,
   onColorSelect,
@@ -30,6 +32,10 @@ const Step5Color: React.FC<Step5ColorProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const hasAutoSelectedRef = useRef(false);
+  
+  // Вычисляем bodyType на уровне компонента (для использования в разных функциях)
+  // Используем prop bodyType если он есть, иначе configurationName, иначе 'Sedan'
+  const bodyType = propBodyType || configurationName || 'Sedan';
 
   useEffect(() => {
     loadColors();
@@ -112,8 +118,7 @@ const Step5Color: React.FC<Step5ColorProps> = ({
         : [];
 
       // Фильтруем цвета по наличию изображений для данной модели и комплектации
-      // Используем configurationName как bodyType, если оно есть, иначе используем 'Sedan'
-      const bodyType = configurationName || 'Sedan';
+      // bodyType уже определен на уровне компонента
       
       // Проверяем все цвета последовательно с задержкой, чтобы не перегружать браузер
       const filteredColors: Color[] = [];
@@ -169,12 +174,12 @@ const Step5Color: React.FC<Step5ColorProps> = ({
     }
 
     // Используем функцию getModelImagePath из imageUtils для правильного формирования пути
-    const currentBodyType = bodyType || configurationName || 'Sedan';
+    // bodyType уже определен на уровне компонента
     const colorName = selectedColorId && colors.length > 0 && selectedColorId <= colors.length
       ? colors[selectedColorId - 1].name
       : null;
     
-    return getModelImagePath(modelName, currentBodyType, undefined, configurationName, colorName);
+    return getModelImagePath(modelName, bodyType, undefined, configurationName, colorName);
   };
 
   if (loading) {

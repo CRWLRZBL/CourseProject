@@ -237,6 +237,7 @@ const CarConfiguratorWizard: React.FC = () => {
           <Step5Color
             modelId={state.selectedModel?.modelId}
             modelName={state.selectedModel?.modelName}
+            bodyType={state.selectedModel?.bodyType}
             configurationName={state.selectedConfigurationId 
               ? summaryData.configuration?.configurationName 
               : undefined}
