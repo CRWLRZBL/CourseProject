@@ -5,6 +5,7 @@ using CourseProjectAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace CourseProjectAPI.Controllers
@@ -15,11 +16,13 @@ namespace CourseProjectAPI.Controllers
     {
         private readonly ICarService _carService;
         private readonly AutoSalonContext _context;
+        private readonly ILogger<CarsController> _logger;
 
-        public CarsController(ICarService carService, AutoSalonContext context)
+        public CarsController(ICarService carService, AutoSalonContext context, ILogger<CarsController> logger)
         {
             _carService = carService;
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -137,7 +140,10 @@ namespace CourseProjectAPI.Controllers
         {
             try
             {
+                _logger?.LogInformation($"Getting configurations for modelId: {modelId}");
                 var configurations = await _carService.GetConfigurationsByModelIdAsync(modelId);
+                _logger?.LogInformation($"Found {configurations.Count} configurations for modelId: {modelId}");
+                
                 var configurationDtos = configurations.Select(c => new ConfigurationDto
                 {
                     ConfigurationId = c.ConfigurationId,
@@ -155,6 +161,7 @@ namespace CourseProjectAPI.Controllers
             }
             catch (Exception ex)
             {
+                _logger?.LogError(ex, $"Error getting configurations for modelId: {modelId}");
                 return StatusCode(500, new { Error = ex.Message });
             }
         }

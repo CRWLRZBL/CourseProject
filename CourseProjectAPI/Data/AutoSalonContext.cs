@@ -205,7 +205,7 @@ public partial class AutoSalonContext : DbContext
             entity.Property(e => e.ColorId).HasColumnName("ColorID");
             entity.Property(e => e.ImageUrl).HasMaxLength(500);
 
-            entity.HasOne(d => d.Model).WithMany()
+            entity.HasOne(d => d.Model).WithMany(m => m.ModelColors)
                 .HasForeignKey(d => d.ModelId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_ModelColors_Models");
@@ -223,7 +223,7 @@ public partial class AutoSalonContext : DbContext
             entity.Property(e => e.ModelId).HasColumnName("ModelID");
             entity.Property(e => e.EngineId).HasColumnName("EngineID");
 
-            entity.HasOne(d => d.Model).WithMany()
+            entity.HasOne(d => d.Model).WithMany(m => m.ModelEngines)
                 .HasForeignKey(d => d.ModelId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_ModelEngines_Models");
@@ -241,7 +241,7 @@ public partial class AutoSalonContext : DbContext
             entity.Property(e => e.ModelId).HasColumnName("ModelID");
             entity.Property(e => e.TransmissionId).HasColumnName("TransmissionID");
 
-            entity.HasOne(d => d.Model).WithMany()
+            entity.HasOne(d => d.Model).WithMany(m => m.ModelTransmissions)
                 .HasForeignKey(d => d.ModelId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_ModelTransmissions_Models");
