@@ -133,17 +133,6 @@ const Admin: React.FC = () => {
     }).format(price);
   };
 
-  if (!user || user.roleName !== 'Admin') {
-    return <Navigate to="/" replace />;
-  }
-
-  if (loading) {
-    return <LoadingSpinner message="Загрузка админ-панели..." />;
-  }
-
-  const pendingOrders = orders.filter(order => order.orderStatus === 'Pending');
-  const availableCars = cars.filter(car => car.status === 'Available' || car.status === 'В наличии');
-
   // Фильтрация и сортировка заказов
   const filteredAndSortedOrders = useMemo(() => {
     let filtered = [...orders];
@@ -250,6 +239,18 @@ const Admin: React.FC = () => {
     if (field !== sortField) return <span className="text-muted ms-1">↕️</span>;
     return sortDirection === 'asc' ? <span className="ms-1">↑</span> : <span className="ms-1">↓</span>;
   };
+
+  // Условные return после всех хуков
+  if (!user || user.roleName !== 'Admin') {
+    return <Navigate to="/" replace />;
+  }
+
+  if (loading) {
+    return <LoadingSpinner message="Загрузка админ-панели..." />;
+  }
+
+  const pendingOrders = orders.filter(order => order.orderStatus === 'Pending');
+  const availableCars = cars.filter(car => car.status === 'Available' || car.status === 'В наличии');
 
   return (
     <div className="admin-page">

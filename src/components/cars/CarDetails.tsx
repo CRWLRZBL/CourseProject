@@ -5,6 +5,7 @@ import { Car, Configuration } from '../../services/models/car';
 import { carService } from '../../services/api/carService';
 import { utils, CAR_STATUS } from '../../utils/constants';
 import LoadingSpinner from '../common/LoadingSpinner';
+import { getModelImagePath } from '../../utils/imageUtils';
 
 interface CarDetailsProps {
   carId: number;
@@ -48,12 +49,18 @@ const CarDetails: React.FC<CarDetailsProps> = ({ carId }) => {
   const getCarImages = () => {
     if (!car) return [];
     
+    // Используем правильный путь на основе данных автомобиля
+    const mainImage = getModelImagePath(
+      car.modelName || '',
+      car.bodyType || 'Sedan',
+      car.configurationName,
+      undefined,
+      car.color || 'Ледниковый'
+    );
+    
     // В реальном приложении здесь был бы массив изображений из API
-    return [
-      `/images/cars/${carId}.jpg`,
-      `/images/cars/${carId}_2.jpg`,
-      `/images/cars/${carId}_3.jpg`
-    ].filter((_, index) => index === 0 || Math.random() > 0.5); // Имитация наличия доп. фото
+    // Пока возвращаем только основное изображение
+    return [mainImage];
   };
 
   if (loading) {

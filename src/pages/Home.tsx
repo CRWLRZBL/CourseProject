@@ -3,6 +3,7 @@ import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Icon from '../components/common/Icon';
+import { getModelImagePath } from '../utils/imageUtils';
 
 const Home: React.FC = () => {
   const { user } = useAuth();
@@ -114,7 +115,7 @@ const Home: React.FC = () => {
                 <div className="hero-image mt-4 mt-lg-0">
                   <div className="hero-image-wrapper">
                     <img 
-                      src="/images/cars/4.jpg" 
+                      src={getModelImagePath('Vesta Седан', 'Sedan', undefined, undefined, 'Ледниковый')}
                       alt="LADA Vesta" 
                       className="img-fluid"
                       style={{ maxHeight: '450px', filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.3))' }}
