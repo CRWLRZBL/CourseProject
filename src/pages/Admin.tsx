@@ -6,7 +6,7 @@ import { Order } from '../services/models/order';
 import { Car } from '../services/models/car';
 import { orderService } from '../services/api/orderService';
 import { carService } from '../services/api/carService';
-import { ORDER_STATUS_LABELS, CAR_STATUS_LABELS, CAR_STATUS } from '../utils/constants';
+import { ORDER_STATUS_LABELS, CAR_STATUS_LABELS, CAR_STATUS, utils } from '../utils/constants';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorAlert from '../components/common/ErrorAlert';
 import SalesReportExport from '../components/admin/SalesReportExport';
@@ -461,7 +461,7 @@ const Admin: React.FC = () => {
                                     {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus}
                                   </Badge>
                                 </td>
-                                <td><small>{formatDate(order.orderDate)}</small></td>
+                                <td><small>{utils.formatDate(order.orderDate)}</small></td>
                               </tr>
                             ))}
                           </tbody>

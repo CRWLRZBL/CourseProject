@@ -11,7 +11,7 @@ import Icon from '../components/common/Icon';
 const Order: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   
   const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,6 +25,12 @@ const Order: React.FC = () => {
   const optionIds = searchParams.get('optionIds');
 
   useEffect(() => {
+    // Дожидаемся загрузки пользователя из контекста
+    if (isLoading) {
+      return;
+    }
+
+    // Только после загрузки проверяем авторизацию
     if (!user) {
       navigate('/profile?redirect=order');
       return;
@@ -38,7 +44,7 @@ const Order: React.FC = () => {
     } else {
       setLoading(false);
     }
-  }, [carId, modelId, user, navigate]);
+  }, [carId, modelId, user, isLoading, navigate]);
 
   const loadCar = async () => {
     try {

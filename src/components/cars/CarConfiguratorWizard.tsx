@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Button, Card, Badge } from 'react-bootstrap';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Model } from '../../services/models/car';
 import { carService } from '../../services/api/carService';
 import Step1Model from './configurator/Step1Model';
@@ -47,6 +47,7 @@ const CONFIGURATOR_STORAGE_KEY = 'carConfiguratorState';
 const CarConfiguratorWizard: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Загружаем сохраненное состояние из localStorage
   const loadSavedState = (): { state: ConfiguratorState; step: number } | null => {
@@ -100,10 +101,42 @@ const CarConfiguratorWizard: React.FC = () => {
     loadModels();
   }, []);
 
+  // Отслеживаем предыдущий путь
+  const prevPathRef = useRef(location.pathname);
+
   // Сохраняем состояние при каждом изменении
   useEffect(() => {
-    saveState(state, currentStep);
-  }, [state, currentStep]);
+    // Сохраняем только если мы на странице конфигуратора
+    if (location.pathname.includes('/configurator')) {
+      saveState(state, currentStep);
+    }
+  }, [state, currentStep, location.pathname]);
+
+  // Отслеживаем изменения пути для очистки состояния при переходе на другую страницу
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const prevPath = prevPathRef.current;
+
+    // Если путь изменился с /configurator на что-то другое - очищаем состояние
+    if (prevPath.includes('/configurator') && !currentPath.includes('/configurator')) {
+      localStorage.removeItem(CONFIGURATOR_STORAGE_KEY);
+    }
+
+    // Обновляем предыдущий путь
+    prevPathRef.current = currentPath;
+  }, [location.pathname]);
+
+  // Очищаем состояние при размонтировании компонента (уходе со страницы)
+  useEffect(() => {
+    return () => {
+      // Проверяем, действительно ли мы ушли со страницы конфигуратора
+      setTimeout(() => {
+        if (!window.location.pathname.includes('/configurator')) {
+          localStorage.removeItem(CONFIGURATOR_STORAGE_KEY);
+        }
+      }, 0);
+    };
+  }, []);
 
   // Загружаем предвыбранную модель из URL параметров
   useEffect(() => {
