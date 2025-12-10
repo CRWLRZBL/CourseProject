@@ -504,12 +504,12 @@ const Admin: React.FC = () => {
                           </tr>
                         ) : (
                           paginatedOrders.map(order => (
-                          <tr key={order.orderId}>
-                            <td>#{order.orderId}</td>
-                            <td>{order.customerName}</td>
-                            <td>{order.carModel}</td>
-                            <td>{order.configuration}</td>
-                            <td>{formatPrice(order.totalPrice)}</td>
+                            <tr key={order.orderId}>
+                              <td>#{order.orderId}</td>
+                              <td>{order.customerName}</td>
+                              <td>{order.carModel}</td>
+                              <td>{order.configuration}</td>
+                              <td>{formatPrice(order.totalPrice)}</td>
                               <td>
                                 <Badge 
                                   bg={getStatusVariant(order.orderStatus)}
@@ -567,8 +567,10 @@ const Admin: React.FC = () => {
                                 )}
                               </div>
                             </td>
-                          </tr>
-                        ))}
+                            </tr>
+                          ))
+                        )
+                      }
                       </tbody>
                     </Table>
                     
