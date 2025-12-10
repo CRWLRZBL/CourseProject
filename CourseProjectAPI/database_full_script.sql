@@ -908,9 +908,11 @@ DECLARE @LargusUniversalIDForOrders INT = (SELECT ModelID FROM [dbo].[Models] WH
 -- Получаем ID первого автомобиля каждого типа для заказов
 DECLARE @FirstGrantaCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @GrantaSedanModelIDForOrders ORDER BY CarID);
 DECLARE @FirstVestaCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @VestaSedanModelIDForOrders ORDER BY CarID);
-DECLARE @SecondVestaCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @VestaSedanModelIDForOrders ORDER BY CarID OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY);
-DECLARE @ThirdVestaCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @VestaSedanModelIDForOrders ORDER BY CarID OFFSET 2 ROWS FETCH NEXT 1 ROWS ONLY);
-DECLARE @SecondGrantaCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @GrantaSedanModelIDForOrders ORDER BY CarID OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY);
+-- Используем подзапросы вместо OFFSET/FETCH для совместимости
+DECLARE @SecondVestaCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @VestaSedanModelIDForOrders AND CarID > @FirstVestaCarID ORDER BY CarID);
+DECLARE @ThirdVestaCarID INT;
+SELECT TOP 1 @ThirdVestaCarID = CarID FROM (SELECT TOP 3 CarID FROM [dbo].[Cars] WHERE ModelID = @VestaSedanModelIDForOrders ORDER BY CarID) AS Sub ORDER BY CarID DESC;
+DECLARE @SecondGrantaCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @GrantaSedanModelIDForOrders AND CarID > @FirstGrantaCarID ORDER BY CarID);
 DECLARE @FirstNivaTravelCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @NivaTravelModelIDForOrders ORDER BY CarID);
 DECLARE @FirstLargusCarID INT = (SELECT TOP 1 CarID FROM [dbo].[Cars] WHERE ModelID = @LargusUniversalModelIDForOrders ORDER BY CarID);
 
