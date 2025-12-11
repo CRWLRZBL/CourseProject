@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Container, Row, Col, Card, Nav, Tab, Tabs, Table, Badge, Button, Modal, Form, InputGroup } from 'react-bootstrap';
+import { Container, Row, Col, Card, Nav, Table, Badge, Button, Modal, Form, InputGroup } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Order } from '../services/models/order';
@@ -13,7 +13,7 @@ import SalesReportExport from '../components/admin/SalesReportExport';
 import CarImport from '../components/admin/CarImport';
 import Pagination from '../components/common/Pagination';
 
-type SortField = 'orderId' | 'customerName' | 'carModel' | 'totalPrice' | 'orderStatus';
+type SortField = 'orderId' | 'customerName' | 'carModel' | 'totalPrice' | 'orderStatus' | 'orderDate';
 type CarSortField = 'carId' | 'brandName' | 'modelName' | 'color' | 'basePrice' | 'status';
 type SortDirection = 'asc' | 'desc';
 
@@ -30,6 +30,7 @@ const Admin: React.FC = () => {
   
   // Состояния для поиска и фильтрации заказов
   const [orderSearch, setOrderSearch] = useState('');
+  const [orderStatusFilter, setOrderStatusFilter] = useState<string>('all');
   const [orderSortField, setOrderSortField] = useState<SortField>('orderId');
   const [orderSortDirection, setOrderSortDirection] = useState<SortDirection>('desc');
   const [orderPage, setOrderPage] = useState(1);
@@ -192,12 +193,21 @@ const Admin: React.FC = () => {
       );
     }
 
+    // Фильтр по статусу
+    if (orderStatusFilter !== 'all') {
+      filtered = filtered.filter(order => order.orderStatus === orderStatusFilter);
+    }
+
     // Сортировка
     filtered.sort((a, b) => {
       let aValue: any = a[orderSortField];
       let bValue: any = b[orderSortField];
 
-      if (typeof aValue === 'string') {
+      // Обработка даты
+      if (orderSortField === 'orderDate') {
+        aValue = new Date(aValue).getTime();
+        bValue = new Date(bValue).getTime();
+      } else if (typeof aValue === 'string') {
         aValue = aValue.toLowerCase();
         bValue = bValue.toLowerCase();
       }
@@ -208,7 +218,7 @@ const Admin: React.FC = () => {
     });
 
     return filtered;
-  }, [orders, orderSearch, orderSortField, orderSortDirection]);
+  }, [orders, orderSearch, orderStatusFilter, orderSortField, orderSortDirection]);
 
   // Пагинация заказов
   const paginatedOrders = useMemo(() => {
@@ -356,10 +366,9 @@ const Admin: React.FC = () => {
           </Col>
 
           <Col lg={9}>
-            <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'orders')}>
-              
-              {/* Управление заказами с дашбордом */}
-              <Tab eventKey="orders" title="Панель управления">
+            {/* Управление заказами с дашбордом */}
+            {activeTab === 'orders' && (
+              <>
                 {/* Статистика */}
                 <Card className="shadow-sm border-0 mb-4">
                   <Card.Header className="bg-light">
@@ -421,60 +430,11 @@ const Admin: React.FC = () => {
                     </h4>
                   </Card.Header>
                   <Card.Body>
-                    {/* Последние 5 заказов */}
-                    {orders.length > 0 && (
-                      <div className="mb-4">
-                        <h5>Последние заказы</h5>
-                        <Table responsive striped>
-                          <thead>
-                            <tr>
-                              <th>№</th>
-                              <th>Клиент</th>
-                              <th>Автомобиль</th>
-                              <th>Стоимость</th>
-                              <th>Статус</th>
-                              <th>Дата</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {orders.slice(0, 5).map(order => (
-                              <tr key={order.orderId}>
-                                <td>#{order.orderId}</td>
-                                <td>{order.customerName}</td>
-                                <td>{order.carModel}</td>
-                                <td>{formatPrice(order.totalPrice)}</td>
-                                <td>
-                                  <Badge 
-                                    bg={getStatusVariant(order.orderStatus, 'order')}
-                                    style={{
-                                      backgroundColor: order.orderStatus === 'Pending' ? '#ffc107' : 
-                                                       order.orderStatus === 'Confirmed' ? '#17a2b8' : 
-                                                       order.orderStatus === 'InProduction' ? '#007bff' : 
-                                                       order.orderStatus === 'Completed' ? '#28a745' : 
-                                                       order.orderStatus === 'Cancelled' ? '#dc3545' : '#495057',
-                                      color: order.orderStatus === 'Pending' ? '#000' : '#fff',
-                                      padding: '6px 12px',
-                                      fontSize: '0.875rem',
-                                      fontWeight: '500'
-                                    }}
-                                  >
-                                    {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus}
-                                  </Badge>
-                                </td>
-                                <td><small>{utils.formatDate(order.orderDate)}</small></td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </Table>
-                        <hr className="my-4" />
-                      </div>
-                    )}
-
                     {/* Поиск и фильтры */}
                     <Row className="mb-3">
-                      <Col md={6}>
+                      <Col md={5}>
                         <InputGroup>
-                          <InputGroup.Text>🔍</InputGroup.Text>
+                          <InputGroup.Text><i className="bi bi-search"></i></InputGroup.Text>
                           <Form.Control
                             placeholder="Поиск по клиенту, автомобилю, комплектации или № заказа..."
                             value={orderSearch}
@@ -485,7 +445,21 @@ const Admin: React.FC = () => {
                           />
                         </InputGroup>
                       </Col>
-                      <Col md={6} className="text-end">
+                      <Col md={3}>
+                        <Form.Select
+                          value={orderStatusFilter}
+                          onChange={(e) => {
+                            setOrderStatusFilter(e.target.value);
+                            setOrderPage(1);
+                          }}
+                        >
+                          <option value="all">Все статусы</option>
+                          {Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => (
+                            <option key={value} value={value}>{label}</option>
+                          ))}
+                        </Form.Select>
+                      </Col>
+                      <Col md={4} className="text-end">
                         <small className="text-muted">
                           Найдено: {filteredAndSortedOrders.length} заказов
                         </small>
@@ -526,13 +500,19 @@ const Admin: React.FC = () => {
                           >
                             Статус <SortIcon field="orderStatus" sortField={orderSortField} sortDirection={orderSortDirection} />
                           </th>
+                          <th 
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            onClick={() => handleSort('orderDate', orderSortField, orderSortDirection, setOrderSortField, setOrderSortDirection)}
+                          >
+                            Дата <SortIcon field="orderDate" sortField={orderSortField} sortDirection={orderSortDirection} />
+                          </th>
                           <th>Действия</th>
                         </tr>
                       </thead>
                       <tbody>
                         {paginatedOrders.length === 0 ? (
                           <tr>
-                            <td colSpan={7} className="text-center py-5 text-muted">
+                            <td colSpan={8} className="text-center py-5 text-muted">
                               Заказы не найдены
                             </td>
                           </tr>
@@ -546,14 +526,8 @@ const Admin: React.FC = () => {
                               <td>{formatPrice(order.totalPrice)}</td>
                               <td>
                                 <Badge 
-                                  bg={getStatusVariant(order.orderStatus, 'order')}
+                                  bg="secondary"
                                   style={{
-                                    backgroundColor: order.orderStatus === 'Pending' ? '#ffc107' : 
-                                                     order.orderStatus === 'Confirmed' ? '#17a2b8' : 
-                                                     order.orderStatus === 'InProduction' ? '#007bff' : 
-                                                     order.orderStatus === 'Completed' ? '#28a745' : 
-                                                     order.orderStatus === 'Cancelled' ? '#dc3545' : '#495057',
-                                    color: order.orderStatus === 'Pending' ? '#000' : '#fff',
                                     padding: '6px 12px',
                                     fontSize: '0.875rem',
                                     fontWeight: '500'
@@ -562,11 +536,14 @@ const Admin: React.FC = () => {
                                   {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus}
                                 </Badge>
                               </td>
+                              <td>
+                                <small>{utils.formatDate(order.orderDate)}</small>
+                              </td>
                             <td>
                               <div className="btn-group btn-group-sm">
                                 {order.orderStatus === 'Cancelled' ? (
                                   <Button 
-                                    variant="outline-danger" 
+                                    variant="outline-secondary" 
                                     size="sm"
                                     onClick={() => handleDeleteOrder(order.orderId)}
                                   >
@@ -577,7 +554,7 @@ const Admin: React.FC = () => {
                                   getAvailableActions(order.orderStatus).map((action, idx) => (
                                     <Button
                                       key={idx}
-                                      variant={action.variant as any}
+                                      variant="outline-secondary"
                                       size="sm"
                                       onClick={() => handleStatusUpdate(order.orderId, action.status)}
                                     >
@@ -608,10 +585,12 @@ const Admin: React.FC = () => {
                     )}
                   </Card.Body>
                 </Card>
-              </Tab>
+              </>
+            )}
 
-              {/* Управление автомобилями */}
-              <Tab eventKey="cars" title="Автомобили">
+            {/* Управление автомобилями */}
+            {activeTab === 'cars' && (
+              <>
                 <Row>
                   <Col md={12} className="mb-4">
                     <CarImport />
@@ -634,7 +613,7 @@ const Admin: React.FC = () => {
                     <Row className="mb-3">
                       <Col md={4}>
                         <InputGroup>
-                          <InputGroup.Text>🔍</InputGroup.Text>
+                          <InputGroup.Text><i className="bi bi-search"></i></InputGroup.Text>
                           <Form.Control
                             placeholder="Поиск по марке, модели, цвету, VIN или ID..."
                             value={carSearch}
@@ -786,14 +765,15 @@ const Admin: React.FC = () => {
                     )}
                   </Card.Body>
                 </Card>
-              </Tab>
+              </>
+            )}
 
-              {/* Отчеты по продажам */}
-              <Tab eventKey="reports" title="Отчеты">
+            {/* Отчеты по продажам */}
+            {activeTab === 'reports' && (
+              <>
                 <SalesReportExport />
-              </Tab>
-
-            </Tabs>
+              </>
+            )}
           </Col>
         </Row>
 

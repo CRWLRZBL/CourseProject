@@ -40,7 +40,7 @@ const Profile: React.FC = () => {
                 <Card className="shadow-sm border-0 mb-4">
                   <Card.Header className="bg-gradient bg-primary text-white">
                     <h5 className="mb-0 d-flex align-items-center">
-                      <span className="me-2">👤</span>
+                      <i className="bi bi-person me-2"></i>
                       Информация о пользователе
                     </h5>
                   </Card.Header>
@@ -73,7 +73,7 @@ const Profile: React.FC = () => {
                     <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'orders')} className="border-0">
                       <Tab eventKey="orders" title={
                         <span className="d-flex align-items-center">
-                          <span className="me-2">📦</span>
+                          <i className="bi bi-cart-check me-2"></i>
                           Мои заказы
                         </span>
                       } />

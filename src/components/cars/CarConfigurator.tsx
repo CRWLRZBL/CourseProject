@@ -202,7 +202,10 @@ const CarConfigurator: React.FC<CarConfiguratorProps> = ({
       {/* Выбор двигателя */}
       <Card className="mb-4">
         <Card.Header>
-          <h5 className="mb-0">⚙️ Выбор двигателя</h5>
+          <h5 className="mb-0">
+            <i className="bi bi-gear me-2"></i>
+            Выбор двигателя
+          </h5>
         </Card.Header>
         <Card.Body>
           <Row className="g-3">
@@ -290,7 +293,10 @@ const CarConfigurator: React.FC<CarConfiguratorProps> = ({
       {configurations.length > 0 && (
         <Card className="mb-4">
           <Card.Header>
-            <h5 className="mb-0">📦 Комплектация</h5>
+            <h5 className="mb-0">
+              <i className="bi bi-box-seam me-2"></i>
+              Комплектация
+            </h5>
           </Card.Header>
           <Card.Body>
             {configurations.map(config => (
@@ -376,7 +382,10 @@ const CarConfigurator: React.FC<CarConfiguratorProps> = ({
       {/* Сводка конфигурации */}
       <Card className="mb-4 bg-light">
         <Card.Header>
-          <h5 className="mb-0">📋 Сводка конфигурации</h5>
+          <h5 className="mb-0">
+            <i className="bi bi-file-text me-2"></i>
+            Сводка конфигурации
+          </h5>
         </Card.Header>
         <Card.Body>
           <Row>

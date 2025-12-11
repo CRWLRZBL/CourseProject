@@ -67,7 +67,10 @@ const SalesReportExport: React.FC = () => {
   return (
     <Card className="shadow-sm border-0">
       <Card.Header className="bg-light">
-        <h4 className="mb-0">📊 Экспорт отчета по продажам</h4>
+        <h4 className="mb-0">
+          <i className="bi bi-graph-up-arrow me-2"></i>
+          Экспорт отчета по продажам
+        </h4>
       </Card.Header>
       <Card.Body>
         {error && (
@@ -120,7 +123,17 @@ const SalesReportExport: React.FC = () => {
             disabled={loading}
             className="w-100"
           >
-            {loading ? 'Генерация PDF...' : '📥 Экспортировать в PDF'}
+            {loading ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Генерация PDF...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-file-earmark-pdf me-2"></i>
+                Экспортировать в PDF
+              </>
+            )}
           </Button>
         </Form>
       </Card.Body>

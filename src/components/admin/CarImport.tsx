@@ -90,7 +90,10 @@ const CarImport: React.FC = () => {
   return (
     <Card className="shadow-sm border-0">
       <Card.Header className="bg-light">
-        <h4 className="mb-0">📥 Импорт автомобилей из Excel</h4>
+        <h4 className="mb-0">
+          <i className="bi bi-file-earmark-arrow-down me-2"></i>
+          Импорт автомобилей из Excel
+        </h4>
       </Card.Header>
       <Card.Body>
         {error && (
@@ -129,7 +132,8 @@ const CarImport: React.FC = () => {
             onClick={handleDownloadTemplate}
             className="w-100 mb-3"
           >
-            📄 Скачать шаблон Excel
+            <i className="bi bi-file-earmark-excel me-2"></i>
+            Скачать шаблон Excel
           </Button>
         </div>
 

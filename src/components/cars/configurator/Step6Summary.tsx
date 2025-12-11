@@ -281,7 +281,8 @@ const Step6Summary: React.FC<Step6SummaryProps> = ({ state, onOrderCreate }) => 
                   className="me-2"
                   onClick={() => window.print()}
                 >
-                  📄 СКАЧАТЬ PDF
+                  <i className="bi bi-file-earmark-pdf me-2"></i>
+                  СКАЧАТЬ PDF
                 </Button>
                 <Button variant="success" size="lg" onClick={onOrderCreate}>
                   Оформить заказ

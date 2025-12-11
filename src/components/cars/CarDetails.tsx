@@ -221,7 +221,10 @@ const CarDetails: React.FC<CarDetailsProps> = ({ carId }) => {
                   disabled={car.status !== CAR_STATUS.AVAILABLE}
                 >
                   {car.status === CAR_STATUS.AVAILABLE ? (
-                    <>⚙️ Перейти к конфигурации и заказу</>
+                    <>
+                      <i className="bi bi-gear me-2"></i>
+                      Перейти к конфигурации и заказу
+                    </>
                   ) : (
                     'Автомобиль недоступен для заказа'
                   )}

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Card, Button } from 'react-bootstrap';
-import Icon from './Icon';
 
 interface EmptyStateProps {
   title: string;
@@ -15,14 +14,24 @@ interface EmptyStateProps {
 const EmptyState: React.FC<EmptyStateProps> = ({ 
   title, 
   message, 
-  icon = 'description',
+  icon = 'info-circle',
   action 
 }) => {
+  // Маппинг старых эмодзи на Bootstrap Icons
+  const iconMap: Record<string, string> = {
+    '🔍': 'search',
+    '🚗': 'car-front',
+    'search': 'search',
+    'car-front': 'car-front',
+  };
+
+  const iconName = iconMap[icon] || icon;
+
   return (
     <Card className="text-center border-0 bg-light">
       <Card.Body className="py-5">
         <div className="display-1 mb-3">
-          <Icon name={icon} style={{ fontSize: '4rem' }} />
+          <i className={`bi bi-${iconName}`} style={{ fontSize: '4rem' }}></i>
         </div>
         <h4 className="text-muted">{title}</h4>
         <p className="text-muted mb-4">{message}</p>

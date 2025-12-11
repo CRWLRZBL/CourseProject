@@ -163,7 +163,7 @@ const Catalog: React.FC = () => {
               <EmptyState
                 title="Ничего не найдено"
                 message="Попробуйте изменить параметры фильтрации"
-                icon="🔍"
+                icon="search"
                 action={{
                   label: 'Сбросить фильтры',
                   onClick: clearFilters
@@ -173,7 +173,7 @@ const Catalog: React.FC = () => {
               <EmptyState
                 title="Каталог пуст"
                 message="В данный момент нет доступных моделей"
-                icon="🚗"
+                icon="car-front"
               />
             ) : (
               <ModelList models={filteredModels} />
