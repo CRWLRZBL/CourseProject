@@ -110,6 +110,15 @@ namespace CourseProjectAPI.Services
                         var color = colorCell.Value?.ToString()?.Trim() ?? "Ледниковый";
                         var vin = vinCell.Value?.ToString()?.Trim() ?? "";
                         
+                        // Валидация цвета - проверяем, существует ли цвет в базе данных
+                        var colorExists = await _context.Colors.AnyAsync(c => c.ColorName == color);
+                        if (!colorExists)
+                        {
+                            result.Errors.Add($"Строка {row}: Цвет '{color}' не найден в базе данных");
+                            result.ErrorCount++;
+                            continue;
+                        }
+                        
                         // Преобразуем статус из русского в английский
                         var statusRu = statusCell.Value?.ToString()?.Trim() ?? "В наличии";
                         var status = statusRu switch
