@@ -36,6 +36,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      # Любой HTTP-ответ от Kestrel (в т.ч. 404 на /) — значит API поднялся
+      test: ["CMD-SHELL", "curl -sS --max-time 3 -o /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 45s
     networks:
       - app-network
     restart: unless-stopped
@@ -51,7 +58,8 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - app-network
     restart: unless-stopped
