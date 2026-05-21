@@ -15,5 +15,6 @@
         public string FuelType { get; set; }
         public decimal? EngineCapacity { get; set; }
         public string? ConfigurationName { get; set; } // Название комплектации (если есть заказ)
+        public string? ImageUrl { get; set; } // Изображение конкретного авто (или fallback на модель)
     }
 }

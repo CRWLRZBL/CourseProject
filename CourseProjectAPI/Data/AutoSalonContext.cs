@@ -38,6 +38,10 @@ public partial class AutoSalonContext : DbContext
 
     public virtual DbSet<UserProfiles> UserProfiles { get; set; }
 
+    public virtual DbSet<ChatConversation> ChatConversations { get; set; }
+
+    public virtual DbSet<ChatMessage> ChatMessages { get; set; }
+
     public virtual DbSet<Color> Colors { get; set; }
     public virtual DbSet<Engine> Engines { get; set; }
     public virtual DbSet<Transmission> Transmissions { get; set; }
@@ -99,6 +103,7 @@ public partial class AutoSalonContext : DbContext
             entity.Property(e => e.CarId).HasColumnName("CarID");
             entity.Property(e => e.Color).HasMaxLength(50).IsUnicode(true);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.ImageUrl).HasMaxLength(500).IsUnicode(true);
             entity.Property(e => e.Mileage).HasDefaultValue(0);
             entity.Property(e => e.ModelId).HasColumnName("ModelID");
             entity.Property(e => e.Status)
@@ -393,6 +398,60 @@ public partial class AutoSalonContext : DbContext
             entity.HasOne(d => d.User).WithOne(p => p.UserProfiles)
                 .HasForeignKey<UserProfiles>(d => d.UserId)
                 .HasConstraintName("FK_UserProfiles_Users");
+        });
+
+        modelBuilder.Entity<ChatConversation>(entity =>
+        {
+            entity.ToTable("ChatConversations");
+            entity.HasKey(e => e.ChatConversationId);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysutcdatetime())");
+
+            entity.HasIndex(e => e.ClientUserId, "IX_ChatConversations_ClientUserId")
+                .IsUnique()
+                .HasFilter("[ClientUserId] IS NOT NULL");
+
+            entity.HasIndex(e => new { e.StaffKeyUser1, e.StaffKeyUser2 }, "IX_ChatConversations_StaffPair")
+                .IsUnique()
+                .HasFilter("[ConversationType] = 1 AND [StaffKeyUser1] IS NOT NULL");
+
+            entity.HasOne(d => d.ClientUser)
+                .WithMany(p => p.ClientChatConversations)
+                .HasForeignKey(d => d.ClientUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_ChatConversations_ClientUser");
+
+            entity.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(e => e.StaffKeyUser1)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_ChatConversations_StaffKeyUser1");
+
+            entity.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(e => e.StaffKeyUser2)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_ChatConversations_StaffKeyUser2");
+        });
+
+        modelBuilder.Entity<ChatMessage>(entity =>
+        {
+            entity.ToTable("ChatMessages");
+            entity.HasKey(e => e.ChatMessageId);
+            entity.Property(e => e.Body).HasMaxLength(2000).IsUnicode(true);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+
+            entity.HasOne(d => d.Conversation)
+                .WithMany(p => p.Messages)
+                .HasForeignKey(d => d.ChatConversationId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ChatMessages_Conversation");
+
+            entity.HasOne(d => d.Sender)
+                .WithMany(p => p.SentChatMessages)
+                .HasForeignKey(d => d.SenderUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_ChatMessages_Sender");
         });
 
         OnModelCreatingPartial(modelBuilder);

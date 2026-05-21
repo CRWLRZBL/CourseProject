@@ -24,6 +24,12 @@ EXPOSE 443
 # Копируем опубликованное приложение
 COPY --from=publish /app/publish .
 
+# curl — для healthcheck в docker-compose (порт 80 внутри контейнера)
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+USER app
+
 # Устанавливаем переменную окружения для ASP.NET Core
 ENV ASPNETCORE_URLS=http://+:80
 ENV ASPNETCORE_ENVIRONMENT=Development

@@ -26,4 +26,8 @@ public partial class User
     public virtual Role Role { get; set; } = null!;
 
     public virtual UserProfiles? UserProfiles { get; set; }
+
+    public virtual ICollection<ChatMessage> SentChatMessages { get; set; } = new List<ChatMessage>();
+
+    public virtual ICollection<ChatConversation> ClientChatConversations { get; set; } = new List<ChatConversation>();
 }

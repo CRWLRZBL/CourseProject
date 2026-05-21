@@ -8,10 +8,104 @@ namespace CourseProjectAPI.Services
     public class OrderService : IOrderService
     {
         private readonly AutoSalonContext _context;
+        private const decimal NonBaseColorSurcharge = 20000m;
+        private static readonly TimeSpan ReservationTtl = TimeSpan.FromHours(24);
 
         public OrderService(AutoSalonContext context)
         {
             _context = context;
+        }
+
+        public async Task<PricingQuoteDto> GetPricingQuoteAsync(PricingQuoteRequestDto quoteDto)
+        {
+            // 1) Resolve model/base price
+            Model model;
+            if (quoteDto.CarId.HasValue)
+            {
+                var car = await _context.Cars
+                    .Include(c => c.Model)
+                    .FirstOrDefaultAsync(c => c.CarId == quoteDto.CarId.Value);
+
+                if (car == null) throw new InvalidOperationException("Car not found");
+                if (!string.Equals(car.Status, "Available", StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException("Car is not available");
+
+                model = car.Model;
+            }
+            else
+            {
+                if (!quoteDto.ModelId.HasValue || quoteDto.ModelId.Value <= 0)
+                    throw new InvalidOperationException("ModelId is required when CarId is not provided");
+
+                model = await _context.Models.FirstOrDefaultAsync(m => m.ModelId == quoteDto.ModelId.Value);
+                if (model == null) throw new InvalidOperationException("Model not found");
+            }
+
+            // 2) Configuration
+            var configuration = await _context.Configurations
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.ConfigurationId == quoteDto.ConfigurationId);
+            if (configuration == null) throw new InvalidOperationException("Configuration not found");
+
+            // 3) Options
+            var optionIds = quoteDto.OptionIds?.Distinct().ToList() ?? new List<int>();
+            var options = optionIds.Count == 0
+                ? new List<AdditionalOption>()
+                : await _context.AdditionalOptions
+                    .AsNoTracking()
+                    .Where(o => optionIds.Contains(o.OptionId))
+                    .ToListAsync();
+
+            // 4) Price calculation
+            var basePrice = model.BasePrice;
+            var configurationPrice = configuration.AdditionalPrice;
+            var optionsPrice = options.Sum(o => o.OptionPrice);
+            var colorName = quoteDto.Color;
+            var colorPrice =
+                !string.IsNullOrWhiteSpace(colorName) &&
+                !string.Equals(colorName.Trim(), "Ледниковый", StringComparison.OrdinalIgnoreCase)
+                    ? NonBaseColorSurcharge
+                    : 0m;
+
+            var total = basePrice + configurationPrice + optionsPrice + colorPrice;
+
+            var quote = new PricingQuoteDto
+            {
+                BasePrice = basePrice,
+                ConfigurationPrice = configurationPrice,
+                OptionsPrice = optionsPrice,
+                ColorPrice = colorPrice,
+                TotalPrice = total,
+                Lines = new List<PricingQuoteLineDto>()
+            };
+
+            quote.Lines.Add(new PricingQuoteLineDto { Code = "base", Label = "Базовая цена", Amount = basePrice });
+            quote.Lines.Add(new PricingQuoteLineDto
+            {
+                Code = "configuration",
+                Label = $"Комплектация: {configuration.ConfigurationName}",
+                Amount = configurationPrice
+            });
+            if (colorPrice > 0m)
+            {
+                quote.Lines.Add(new PricingQuoteLineDto
+                {
+                    Code = "color",
+                    Label = $"Цвет: {colorName}",
+                    Amount = colorPrice
+                });
+            }
+            foreach (var opt in options.OrderBy(o => o.Category).ThenBy(o => o.OptionName))
+            {
+                quote.Lines.Add(new PricingQuoteLineDto
+                {
+                    Code = "option",
+                    Label = opt.OptionName,
+                    Amount = opt.OptionPrice
+                });
+            }
+
+            return quote;
         }
 
         public async Task<OrderDto> CreateOrderAsync(CreateOrderDto orderDto)
@@ -76,7 +170,14 @@ namespace CourseProjectAPI.Services
                     .ToListAsync();
 
                 // 3. Рассчитываем общую цену
-                var totalPrice = model.BasePrice + configuration.AdditionalPrice + options.Sum(o => o.OptionPrice);
+                var colorName = orderDto.Color;
+                var colorPrice =
+                    !string.IsNullOrWhiteSpace(colorName) &&
+                    !string.Equals(colorName.Trim(), "Ледниковый", StringComparison.OrdinalIgnoreCase)
+                        ? NonBaseColorSurcharge
+                        : 0m;
+
+                var totalPrice = model.BasePrice + configuration.AdditionalPrice + options.Sum(o => o.OptionPrice) + colorPrice;
 
                 // 4. Создаем заказ
                 var order = new Order
@@ -133,6 +234,89 @@ namespace CourseProjectAPI.Services
             catch (Exception)
             {
                 await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<ReserveCarResponseDto> ReserveCar24hAsync(ReserveCarRequestDto dto)
+        {
+            using var tx = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var car = await _context.Cars
+                    .Include(c => c.Model)
+                    .FirstOrDefaultAsync(c => c.CarId == dto.CarId);
+
+                if (car == null) throw new InvalidOperationException("Car not found");
+                if (!string.Equals(car.Status, "Available", StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException("Car is not available");
+
+                var modelId = car.ModelId;
+                var configurationId = dto.ConfigurationId;
+                if (!configurationId.HasValue || configurationId.Value <= 0)
+                {
+                    configurationId = await _context.Configurations
+                        .AsNoTracking()
+                        .Where(c => c.ModelId == modelId)
+                        .OrderBy(c => c.AdditionalPrice)
+                        .Select(c => c.ConfigurationId)
+                        .FirstOrDefaultAsync();
+                }
+
+                if (!configurationId.HasValue || configurationId.Value <= 0)
+                    throw new InvalidOperationException("No configurations available for this model");
+
+                var quote = await GetPricingQuoteAsync(new PricingQuoteRequestDto
+                {
+                    CarId = dto.CarId,
+                    ModelId = null,
+                    ConfigurationId = configurationId.Value,
+                    Color = dto.Color ?? car.Color,
+                    OptionIds = dto.OptionIds ?? new List<int>()
+                });
+
+                var reservedUntil = DateTime.UtcNow.Add(ReservationTtl);
+
+                var order = new Order
+                {
+                    UserId = dto.UserId,
+                    CarId = car.CarId,
+                    ConfigurationId = configurationId.Value,
+                    TotalPrice = quote.TotalPrice,
+                    OrderStatus = "Hold24h",
+                    OrderDate = DateTime.Now,
+                    Notes = $"Auto-reservation. ReservedUntilUtc={reservedUntil:O}"
+                };
+
+                _context.Orders.Add(order);
+
+                // lock car
+                car.Status = "Reserved";
+                _context.Cars.Update(car);
+
+                await _context.SaveChangesAsync();
+
+                _context.OrderStatusHistories.Add(new OrderStatusHistory
+                {
+                    OrderId = order.OrderId,
+                    Status = "Hold24h",
+                    ChangedAt = DateTime.Now,
+                    Notes = $"Reserved for 24h until {reservedUntil:O}"
+                });
+
+                await _context.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                return new ReserveCarResponseDto
+                {
+                    OrderId = order.OrderId,
+                    ReservedUntil = reservedUntil,
+                    Quote = quote
+                };
+            }
+            catch
+            {
+                await tx.RollbackAsync();
                 throw;
             }
         }

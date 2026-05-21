@@ -4,6 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Не копировать CourseProjectAPI.exe в Debug: иначе сборка падает, пока запущен предыдущий dotnet run (файл занят). Запуск: dotnet run -->
+    <UseAppHost Condition="'$(Configuration)' == 'Debug'">false</UseAppHost>
   </PropertyGroup>
 
   <ItemGroup>

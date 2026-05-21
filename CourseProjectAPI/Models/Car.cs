@@ -21,6 +21,8 @@ public partial class Car
 
     public DateTime? CreatedAt { get; set; }
 
+    public string? ImageUrl { get; set; }
+
     public virtual Model Model { get; set; } = null!;
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();

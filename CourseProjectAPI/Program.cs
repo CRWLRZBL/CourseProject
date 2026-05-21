@@ -22,6 +22,7 @@ builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPdfReportService, PdfReportService>();
 builder.Services.AddScoped<IExcelImportService, ExcelImportService>();
+builder.Services.AddScoped<IChatService, ChatService>();
 
 
 builder.Services.AddDbContext<AutoSalonContext>(options =>
@@ -40,6 +41,13 @@ builder.Services.AddCors(options =>
 
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AutoSalonContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("ChatSchemaBootstrap");
+    await ChatSchemaBootstrap.EnsureTablesAsync(db, logger);
+}
 
 if (app.Environment.IsDevelopment())
 {

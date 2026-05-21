@@ -38,6 +38,41 @@ namespace CourseProjectAPI.Controllers
             }
         }
 
+        [HttpPost("quote")]
+        public async Task<ActionResult<PricingQuoteDto>> GetQuote([FromBody] PricingQuoteRequestDto quoteDto)
+        {
+            try
+            {
+                var quote = await _orderService.GetPricingQuoteAsync(quoteDto);
+                return Ok(quote);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.GetBaseException().Message });
+            }
+        }
+
+        [HttpPost("reserve-24h")]
+        public async Task<ActionResult<ReserveCarResponseDto>> ReserveCar24h([FromBody] ReserveCarRequestDto dto)
+        {
+            try
+            {
+                return Ok(await _orderService.ReserveCar24hAsync(dto));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.GetBaseException().Message });
+            }
+        }
+
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<List<OrderDto>>> GetUserOrders(int userId)
         {

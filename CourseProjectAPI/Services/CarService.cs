@@ -42,7 +42,8 @@ namespace CourseProjectAPI.Services
                     Vin = c.Vin,
                     ModelYear = c.Model.ModelYear,
                     FuelType = c.Model.FuelType,
-                    EngineCapacity = c.Model.EngineCapacity
+                    EngineCapacity = c.Model.EngineCapacity,
+                    ImageUrl = c.ImageUrl ?? c.Model.ImageUrl
                 })
                 .ToListAsync();
         }
@@ -135,7 +136,8 @@ namespace CourseProjectAPI.Services
                     ModelYear = c.Model.ModelYear,
                     FuelType = c.Model.FuelType,
                     EngineCapacity = c.Model.EngineCapacity,
-                    ConfigurationName = c.Orders.OrderByDescending(o => o.OrderDate).Select(o => o.Configuration.ConfigurationName).FirstOrDefault()
+                    ConfigurationName = c.Orders.OrderByDescending(o => o.OrderDate).Select(o => o.Configuration.ConfigurationName).FirstOrDefault(),
+                    ImageUrl = c.ImageUrl ?? c.Model.ImageUrl
                 })
                 .FirstOrDefaultAsync();
         }
@@ -161,7 +163,8 @@ namespace CourseProjectAPI.Services
                     ModelYear = c.Model.ModelYear,
                     FuelType = c.Model.FuelType,
                     EngineCapacity = c.Model.EngineCapacity,
-                    ConfigurationName = c.Orders.OrderByDescending(o => o.OrderDate).Select(o => o.Configuration.ConfigurationName).FirstOrDefault()
+                    ConfigurationName = c.Orders.OrderByDescending(o => o.OrderDate).Select(o => o.Configuration.ConfigurationName).FirstOrDefault(),
+                    ImageUrl = c.ImageUrl ?? c.Model.ImageUrl
                 })
                 .OrderByDescending(c => c.CarId)
                 .ToListAsync();
@@ -228,6 +231,9 @@ namespace CourseProjectAPI.Services
 
             if (updateDto.Mileage.HasValue)
                 car.Mileage = updateDto.Mileage.Value;
+
+            if (updateDto.ImageUrl != null)
+                car.ImageUrl = string.IsNullOrWhiteSpace(updateDto.ImageUrl) ? null : updateDto.ImageUrl.Trim();
 
             await _context.SaveChangesAsync();
 

@@ -6,6 +6,8 @@ namespace CourseProjectAPI.Services
     {
 
         Task<OrderDto> CreateOrderAsync(CreateOrderDto orderDto);
+        Task<PricingQuoteDto> GetPricingQuoteAsync(PricingQuoteRequestDto quoteDto);
+        Task<ReserveCarResponseDto> ReserveCar24hAsync(ReserveCarRequestDto dto);
         Task<List<OrderDto>> GetUserOrdersAsync(int userId);
         Task<List<OrderDto>> GetAllOrdersAsync();
         Task<bool> UpdateOrderStatusAsync(int orderId, string status, string notes = null);
