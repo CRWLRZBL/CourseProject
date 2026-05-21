@@ -38,6 +38,10 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
     navigate(`/configurator?modelId=${car.modelId}`);
   };
 
+  const handleTestDrive = () => {
+    navigate(`/test-drive?carId=${car.carId}`);
+  };
+
   /**
    * Обработчик успешной загрузки изображения.
    * Скрывает индикатор загрузки после того, как изображение загрузилось.
@@ -139,15 +143,24 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
           </div>
           
           {/* Кнопка выбора автомобиля: отключается, если автомобиль недоступен */}
-          <Button 
-            variant="primary" 
-            onClick={handleSelectCar}
-            disabled={car.status !== CAR_STATUS.AVAILABLE}
-            className="w-100"
-          >
-            {/* Меняем текст кнопки в зависимости от статуса автомобиля */}
-            {car.status === CAR_STATUS.AVAILABLE ? 'Выбрать' : 'Недоступно'}
-          </Button>
+          <div className="d-grid gap-2">
+            <Button
+              variant="primary"
+              onClick={handleSelectCar}
+              disabled={car.status !== CAR_STATUS.AVAILABLE}
+              className="w-100"
+            >
+              {car.status === CAR_STATUS.AVAILABLE ? 'Выбрать' : 'Недоступно'}
+            </Button>
+            <Button
+              variant="outline-secondary"
+              onClick={handleTestDrive}
+              disabled={car.status !== CAR_STATUS.AVAILABLE}
+              className="w-100"
+            >
+              Записаться на тест-драйв
+            </Button>
+          </div>
         </div>
       </Card.Body>
     </Card>

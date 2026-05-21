@@ -6,6 +6,7 @@ import LoginForm from '../components/auth/LoginForm';
 import RegisterForm from '../components/auth/RegisterForm';
 import OrderList from '../components/orders/OrderList';
 import { useSearchParams } from 'react-router-dom';
+import { MaintenanceReminders } from '../components/service/MaintenanceReminders';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -77,11 +78,20 @@ const Profile: React.FC = () => {
                           Мои заказы
                         </span>
                       } />
+                      <Tab
+                        eventKey="service"
+                        title={
+                          <span className="d-flex align-items-center">
+                            <i className="bi bi-wrench-adjustable-circle me-2"></i>
+                            Сервис
+                          </span>
+                        }
+                      />
                     </Tabs>
                   </Card.Header>
                   <Card.Body className="p-0">
                     <div className="p-4">
-                      <OrderList />
+                      {activeTab === 'service' ? <MaintenanceReminders /> : <OrderList />}
                     </div>
                   </Card.Body>
                 </Card>

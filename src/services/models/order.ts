@@ -18,6 +18,43 @@ export interface CreateOrderRequest {
   optionIds: number[];
 }
 
+export interface PricingQuoteRequest {
+  carId?: number;
+  modelId?: number;
+  configurationId: number;
+  color?: string;
+  optionIds: number[];
+}
+
+export interface PricingQuoteLine {
+  code: 'base' | 'configuration' | 'color' | 'option' | string;
+  label: string;
+  amount: number;
+}
+
+export interface PricingQuote {
+  basePrice: number;
+  configurationPrice: number;
+  optionsPrice: number;
+  colorPrice: number;
+  totalPrice: number;
+  lines: PricingQuoteLine[];
+}
+
+export interface ReserveCar24hRequest {
+  userId: number;
+  carId: number;
+  configurationId?: number;
+  color?: string;
+  optionIds: number[];
+}
+
+export interface ReserveCar24hResponse {
+  orderId: number;
+  reservedUntil: string;
+  quote: PricingQuote;
+}
+
 export interface OrderOption {
   optionName: string;
   price: number;

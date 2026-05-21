@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Button, Row, Col, Alert, Badge } from 'react-bootstrap';
 import { Car, Configuration, AdditionalOption, Model } from '../../services/models/car';
 import { carService } from '../../services/api/carService';
+import { orderService } from '../../services/api/orderService';
+import type { PricingQuote } from '../../services/models/order';
 import CarConfigurator from '../cars/CarConfigurator';
 import OrderSummary from './OrderSummary';
 import Icon from '../common/Icon';
@@ -34,6 +36,9 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
   const [model, setModel] = useState<Model | null>(null);
   const [configurations, setConfigurations] = useState<Configuration[]>([]);
   const [options, setOptions] = useState<AdditionalOption[]>([]);
+  const [quote, setQuote] = useState<PricingQuote | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState<string>('');
   const [currentConfig, setCurrentConfig] = useState<{
     colorId?: number;
     engineId?: number;
@@ -227,79 +232,66 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
     setLoading(false);
   }, [modelId, initialConfigurationId, initialOptionIds, loadOptions]);
 
-  // Инициализируем начальные значения из пропсов и рассчитываем цену
+  // Инициализируем начальные значения из пропсов (цену теперь считаем на сервере через quote)
   useEffect(() => {
-    const updateConfig = async () => {
-      if (!modelId && !car?.modelId) return;
-
-      const targetModelId = modelId || car?.modelId || 0;
-      const basePrice = model?.basePrice || car?.basePrice || 0;
-      let calculatedPrice = basePrice;
-
-      if (initialConfigurationId) {
-        setCurrentConfig(prev => ({
-          ...prev,
-          configurationId: initialConfigurationId,
-        }));
-
-        // Добавляем цену комплектации
-        try {
-          const configs = await carService.getConfigurationsByModelId(targetModelId);
-          const config = configs.find(c => c.configurationId === initialConfigurationId);
-          if (config) {
-            calculatedPrice += config.additionalPrice || 0;
-          }
-        } catch (err) {
-          console.error('Error loading configuration price:', err);
-        }
-      }
-
-      if (initialOptionIds && initialOptionIds.length > 0) {
-        setCurrentConfig(prev => ({
-          ...prev,
-          optionIds: initialOptionIds,
-        }));
-
-        // Добавляем цену опций
-        try {
-          const opts = await carService.getAdditionalOptions();
-          const selectedOptions = opts.filter(opt => initialOptionIds.includes(opt.optionId));
-          const optionsPrice = selectedOptions.reduce((sum, opt) => sum + opt.optionPrice, 0);
-          calculatedPrice += optionsPrice;
-        } catch (err) {
-          console.error('Error loading options price:', err);
-        }
-      }
-
-      // Добавляем цену цвета (если не Ледниковый)
-      if (initialColor && initialColor !== 'Ледниковый') {
-        calculatedPrice += 20000; // Стандартная доплата за цвет
-      }
-
+    if (initialConfigurationId) {
       setCurrentConfig(prev => ({
         ...prev,
-        totalPrice: calculatedPrice > basePrice ? calculatedPrice : prev.totalPrice || basePrice,
+        configurationId: initialConfigurationId,
       }));
-    };
-
-    if ((modelId || car?.modelId) && (initialConfigurationId || initialOptionIds)) {
-      updateConfig();
-    } else {
-      // Просто устанавливаем значения без расчета цены
-      if (initialConfigurationId) {
-        setCurrentConfig(prev => ({
-          ...prev,
-          configurationId: initialConfigurationId,
-        }));
-      }
-      if (initialOptionIds && initialOptionIds.length > 0) {
-        setCurrentConfig(prev => ({
-          ...prev,
-          optionIds: initialOptionIds,
-        }));
-      }
+    }
+    if (initialOptionIds && initialOptionIds.length > 0) {
+      setCurrentConfig(prev => ({
+        ...prev,
+        optionIds: initialOptionIds,
+      }));
     }
   }, [initialConfigurationId, initialOptionIds, initialColor, modelId, model, car]);
+
+  // Получаем прозрачный расчёт цены с сервера
+  useEffect(() => {
+    let cancelled = false;
+
+    const cfgId = currentConfig.configurationId;
+    const resolvedColor = initialColor || car?.color || 'Ледниковый';
+    const resolvedCarId = carId;
+    const resolvedModelId = modelId || car?.modelId;
+
+    if (!cfgId) return;
+    if (!resolvedCarId && !resolvedModelId) return;
+
+    (async () => {
+      setQuoteLoading(true);
+      setQuoteError('');
+      try {
+        const q = await orderService.getQuote({
+          carId: resolvedCarId,
+          modelId: resolvedCarId ? undefined : resolvedModelId,
+          configurationId: cfgId,
+          color: resolvedColor,
+          optionIds: currentConfig.optionIds || [],
+        });
+        if (cancelled) return;
+        setQuote(q);
+        setCurrentConfig(prev => ({ ...prev, totalPrice: q.totalPrice }));
+      } catch (e: any) {
+        if (cancelled) return;
+        const msg =
+          e?.response?.data?.error ||
+          e?.response?.data?.message ||
+          e?.message ||
+          'Не удалось рассчитать цену.';
+        setQuote(null);
+        setQuoteError(msg);
+      } finally {
+        if (!cancelled) setQuoteLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [carId, modelId, car?.modelId, car?.color, initialColor, currentConfig.configurationId, currentConfig.optionIds]);
 
   useEffect(() => {
     if (carId) {
@@ -333,7 +325,7 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
       configurationId: currentConfig.configurationId,
       color: initialColor,
       optionIds: currentConfig.optionIds,
-      totalPrice: currentConfig.totalPrice
+      totalPrice: quote?.totalPrice ?? currentConfig.totalPrice
     });
   };
 
@@ -466,8 +458,9 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
             configurationId={initialConfigurationId}
             color={initialColor}
             optionIds={initialOptionIds && initialOptionIds.length > 0 ? initialOptionIds : currentConfig.optionIds}
-            totalPrice={currentConfig.totalPrice || displayCar.basePrice}
+            totalPrice={(quote?.totalPrice ?? currentConfig.totalPrice) || displayCar.basePrice}
             basePrice={displayCar.basePrice}
+            quote={quote}
           />
         </>
       ) : (
@@ -501,6 +494,25 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
             initialOptionIds={initialOptionIds && initialOptionIds.length > 0 ? initialOptionIds : currentConfig.optionIds.length > 0 ? currentConfig.optionIds : undefined}
             onConfigurationChange={handleConfigurationChange}
           />
+
+          {quote?.lines?.length ? (
+            <Card className="mt-4 shadow-sm border-0">
+              <Card.Header className="bg-light">
+                <div className="d-flex justify-content-between align-items-center">
+                  <span className="fw-semibold">Расчёт стоимости</span>
+                  <Badge bg="primary">{formatPrice(quote.totalPrice)}</Badge>
+                </div>
+              </Card.Header>
+              <Card.Body>
+                {quote.lines.map((line, idx) => (
+                  <div key={`${line.code}-${idx}`} className="d-flex justify-content-between mb-2">
+                    <span className="text-muted">{line.label}</span>
+                    <span className="fw-semibold">{formatPrice(line.amount)}</span>
+                  </div>
+                ))}
+              </Card.Body>
+            </Card>
+          ) : null}
         </>
       )}
 
@@ -515,11 +527,18 @@ const OrderWizard: React.FC<OrderWizardProps> = ({
                     <small>{error}</small>
                   </Alert>
                 )}
+                {!error && quoteError && (
+                  <Alert variant="warning" className="mb-0 py-2">
+                    <small>{quoteError}</small>
+                  </Alert>
+                )}
                 {!error && (
                   <div>
                     <div className="text-muted small mb-1">Итоговая стоимость</div>
                     <div className="h3 mb-0 text-primary fw-bold">
-                      {formatPrice(currentConfig.totalPrice || displayCar.basePrice)}
+                      {quoteLoading
+                        ? 'Расчёт…'
+                        : formatPrice((quote?.totalPrice ?? currentConfig.totalPrice) || displayCar.basePrice)}
                     </div>
                   </div>
                 )}

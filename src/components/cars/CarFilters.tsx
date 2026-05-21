@@ -63,6 +63,13 @@ const CarFilters: React.FC<CarFiltersProps> = ({
     onClearFilters();
   };
 
+  const applyPreset = (preset: Partial<Filters>) => {
+    onFilterChange({
+      ...filters,
+      ...preset,
+    });
+  };
+
   const hasActiveFilters = () => {
     return Object.values(filters).some(value => value !== '');
   };
@@ -101,6 +108,43 @@ const CarFilters: React.FC<CarFiltersProps> = ({
         )}
       </Card.Header>
       <Card.Body>
+        <div className="mb-3">
+          <div className="text-muted small mb-2">Быстрые пресеты</div>
+          <div className="d-flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline-secondary"
+              onClick={() => applyPreset({ maxPrice: '2000000' })}
+            >
+              До 2 млн ₽
+            </Button>
+            <Button
+              size="sm"
+              variant="outline-secondary"
+              onClick={() => applyPreset({ bodyType: 'Hatchback' })}
+            >
+              Для города
+            </Button>
+            <Button
+              size="sm"
+              variant="outline-secondary"
+              onClick={() => applyPreset({ bodyType: 'SUV' })}
+            >
+              Для семьи
+            </Button>
+            <Button
+              size="sm"
+              variant="outline-secondary"
+              onClick={() => applyPreset({ searchQuery: 'lada' })}
+            >
+              LADA
+            </Button>
+          </div>
+          <div className="text-muted small mt-2">
+            Пресеты работают по тем данным, которые уже есть в каталоге (цена/кузов/текстовый поиск).
+          </div>
+        </div>
+
         <Accordion defaultActiveKey="0" flush>
           {/* Поиск */}
           <Accordion.Item eventKey="0">
@@ -119,6 +163,14 @@ const CarFilters: React.FC<CarFiltersProps> = ({
                   Найдите автомобиль по названию марки, модели или цвету
                 </Form.Text>
               </Form.Group>
+
+              <div className="mt-3 p-2 border rounded bg-light">
+                <div className="small fw-semibold mb-1">Поиск по фото (скоро)</div>
+                <div className="small text-muted mb-2">
+                  Сейчас можно загрузить фото — в следующем шаге подключим распознавание и поиск аналогов.
+                </div>
+                <Form.Control type="file" accept="image/*" disabled />
+              </div>
             </Accordion.Body>
           </Accordion.Item>
 

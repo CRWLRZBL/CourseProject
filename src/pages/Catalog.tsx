@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Badge, Button, Alert } from 'react-bootstrap';
 import ModelList from '../components/cars/ModelList';
 import CarFilters from '../components/cars/CarFilters';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -7,6 +7,7 @@ import ErrorAlert from '../components/common/ErrorAlert';
 import EmptyState from '../components/common/EmptyState';
 import { Model } from '../services/models/car';
 import { carService } from '../services/api/carService';
+import { ModelCompareModal } from '../components/cars/ModelCompareModal';
 
 const Catalog: React.FC = () => {
   const [models, setModels] = useState<Model[]>([]);
@@ -14,6 +15,9 @@ const Catalog: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [retryCount, setRetryCount] = useState(0);
+  const [compareIds, setCompareIds] = useState<number[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [compareWarn, setCompareWarn] = useState('');
 
   const [filters, setFilters] = useState({
     brand: '',
@@ -76,6 +80,20 @@ const Catalog: React.FC = () => {
 
     setFilteredModels(filtered);
   };
+
+  const toggleCompare = (modelId: number) => {
+    setCompareWarn('');
+    setCompareIds((prev) => {
+      if (prev.includes(modelId)) return prev.filter((id) => id !== modelId);
+      if (prev.length >= 5) {
+        setCompareWarn('Можно сравнить максимум 5 моделей.');
+        return prev;
+      }
+      return [...prev, modelId];
+    });
+  };
+
+  const compareModels = models.filter((m) => compareIds.includes(m.modelId));
 
   const handleFilterChange = (newFilters: typeof filters) => {
     setFilters(newFilters);
@@ -159,6 +177,38 @@ const Catalog: React.FC = () => {
                 </div>
               </div>
 
+              {compareWarn && (
+                <Alert variant="warning" dismissible onClose={() => setCompareWarn('')} className="mb-3">
+                  {compareWarn}
+                </Alert>
+              )}
+
+              {compareIds.length > 0 && (
+                <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 p-3 border rounded bg-light">
+                  <div className="small">
+                    В сравнении: <strong>{compareIds.length}</strong> / 5
+                  </div>
+                  <div className="d-flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      onClick={() => setCompareIds([])}
+                    >
+                      Очистить
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      onClick={() => setCompareOpen(true)}
+                      disabled={compareIds.length < 2}
+                      title={compareIds.length < 2 ? 'Выберите минимум 2 модели' : undefined}
+                    >
+                      Сравнить
+                    </Button>
+                  </div>
+                </div>
+              )}
+
             {filteredModels.length === 0 && models.length > 0 ? (
               <EmptyState
                 title="Ничего не найдено"
@@ -176,12 +226,24 @@ const Catalog: React.FC = () => {
                 icon="car-front"
               />
             ) : (
-              <ModelList models={filteredModels} />
+              <ModelList
+                models={filteredModels}
+                compareSelectedIds={compareIds}
+                onToggleCompare={toggleCompare}
+              />
             )}
           </Col>
         </Row>
       </Container>
     </Container>
+
+    <ModelCompareModal
+      show={compareOpen}
+      onHide={() => setCompareOpen(false)}
+      models={compareModels}
+      onRemove={(id) => setCompareIds((prev) => prev.filter((x) => x !== id))}
+      onClear={() => setCompareIds([])}
+    />
     </div>
   );
 };

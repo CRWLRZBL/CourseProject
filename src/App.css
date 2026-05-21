@@ -1213,50 +1213,14 @@ html, body {
   max-width: 100%;
 }
 
-/* Footer Specific Styles */
-footer {
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
-  position: relative; /* Для правильного позиционирования */
-  z-index: 1; /* Выше фона, но ниже модальных окон */
-  margin-top: auto; /* Прижимаем к низу */
-  flex-shrink: 0; /* Не сжимается */
-  width: 100%; /* Занимает всю ширину */
-}
-
-/* Классы для текста в футере */
-.footer-text-secondary {
-  color: rgba(255, 255, 255, 0.8) !important;
-}
-
-.footer-link {
-  color: rgba(255, 255, 255, 0.9) !important;
-  transition: all 0.2s ease;
-  text-decoration: none !important;
-}
-
-.footer-link:hover {
-  color: #4da8ff !important;
-  transform: translateX(5px);
-}
-
-.footer-social-link {
-  color: rgba(255, 255, 255, 0.9) !important;
-  transition: all 0.2s ease;
-  text-decoration: none !important;
-}
-
-.footer-social-link:hover {
-  color: #4da8ff !important;
-  transform: scale(1.2);
-}
-
-/* Переопределение Bootstrap классов в контексте футера */
-.bg-dark .text-muted {
-  color: rgba(255, 255, 255, 0.7) !important;
-}
-
-.bg-dark .text-primary {
-  color: #4da8ff !important;
+/* Footer — светлая тема (см. Footer.css) */
+footer.site-footer {
+  background: #fff !important;
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  flex-shrink: 0;
+  width: 100%;
 }
 
 /* Оптимизация масштабирования для всех элементов */

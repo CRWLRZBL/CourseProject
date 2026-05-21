@@ -1,0 +1,19 @@
+/* Модалка в body: фиксированное центрирование во viewport */
+.consultation-modal.modal {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+}
+
+.consultation-modal .modal-dialog {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 480px;
+}
+
+.consultation-modal .modal-content {
+  border-radius: 12px;
+  border: 1px solid #eee;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+}

@@ -175,7 +175,7 @@ const Step5Color: React.FC<Step5ColorProps> = ({
   const getCarImagePath = (): string => {
     if (!modelName) {
       // Если нет модели, возвращаем базовое изображение Granta в цвете Ледниковый
-      return '/images/cars/Granta/Sedan-Ледниковый.png';
+      return '/images/cars/default.svg';
     }
 
     // Используем функцию getModelImagePath из imageUtils для правильного формирования пути

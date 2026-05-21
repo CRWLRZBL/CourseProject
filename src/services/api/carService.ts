@@ -95,7 +95,10 @@ export const carService = {
     }
   },
 
-  async updateCar(carId: number, updates: { color?: string; status?: string; vin?: string; mileage?: number }): Promise<Car> {
+  async updateCar(
+    carId: number,
+    updates: { color?: string; status?: string; vin?: string; mileage?: number; imageUrl?: string | null }
+  ): Promise<Car> {
     const response = await apiClient.put<Car>(`/cars/${carId}`, updates);
     return response.data;
   }

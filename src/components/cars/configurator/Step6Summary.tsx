@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, Row, Col, Badge, Spinner } from 'react-bootstrap';
 import { ConfiguratorState } from '../CarConfiguratorWizard';
 import { carService } from '../../../services/api/carService';
+import { orderService } from '../../../services/api/orderService';
 import { Configuration, AdditionalOption } from '../../../services/models/car';
+import { useAuth } from '../../../context/AuthContext';
 import { getModelImagePath, getModelFolderName, getConfigurationPrefix } from '../../../utils/imageUtils';
 import './Step6Summary.css';
 
@@ -20,8 +22,15 @@ interface SummaryData {
 }
 
 const Step6Summary: React.FC<Step6SummaryProps> = ({ state, onOrderCreate }) => {
+  const { user } = useAuth();
   const [summaryData, setSummaryData] = useState<SummaryData>({});
   const [loading, setLoading] = useState(true);
+  const [availableCarId, setAvailableCarId] = useState<number | null>(null);
+  const [reserveLoading, setReserveLoading] = useState(false);
+  const [reserveResult, setReserveResult] = useState<{ orderId: number; reservedUntil: string } | null>(
+    null
+  );
+  const [reserveError, setReserveError] = useState<string>('');
 
   useEffect(() => {
     loadSummaryData();
@@ -31,6 +40,7 @@ const Step6Summary: React.FC<Step6SummaryProps> = ({ state, onOrderCreate }) => 
     try {
       setLoading(true);
       const data: SummaryData = {};
+      setAvailableCarId(null);
 
       // Загружаем комплектацию
       if (state.selectedConfigurationId && state.selectedModel) {
@@ -44,6 +54,7 @@ const Step6Summary: React.FC<Step6SummaryProps> = ({ state, onOrderCreate }) => 
               c.modelName === model.modelName
             );
             if (car) {
+              setAvailableCarId(car.carId);
               const configs = await carService.getConfigurations(car.carId);
               data.configuration = configs.find(c => c.configurationId === state.selectedConfigurationId);
             }
@@ -139,6 +150,32 @@ const Step6Summary: React.FC<Step6SummaryProps> = ({ state, onOrderCreate }) => 
     }
   };
 
+  const handleReserve24h = async () => {
+    if (!user?.userId || !availableCarId) return;
+    setReserveLoading(true);
+    setReserveError('');
+    setReserveResult(null);
+    try {
+      const res = await orderService.reserveCar24h({
+        userId: user.userId,
+        carId: availableCarId,
+        configurationId: state.selectedConfigurationId || undefined,
+        color: state.selectedColorName || undefined,
+        optionIds: state.selectedOptionIds || [],
+      });
+      setReserveResult({ orderId: res.orderId, reservedUntil: res.reservedUntil });
+    } catch (e: any) {
+      const msg =
+        e?.response?.data?.error ||
+        e?.response?.data?.message ||
+        e?.message ||
+        'Не удалось забронировать автомобиль.';
+      setReserveError(msg);
+    } finally {
+      setReserveLoading(false);
+    }
+  };
+
   const formatEngineName = (engine?: { capacity: number; fuelType: string; power?: number }) => {
     if (!engine) return '';
     const capacity = engine.capacity.toFixed(1);
@@ -184,7 +221,7 @@ const Step6Summary: React.FC<Step6SummaryProps> = ({ state, onOrderCreate }) => 
                         summaryData.configuration?.configurationName,
                         state.selectedColorName || summaryData.color?.name
                       )
-                    : '/images/cars/Granta/Sedan-Ледниковый.png')
+                    : '/images/cars/default.svg')
                 }
                 alt={`${state.selectedModel?.brandName} ${state.selectedModel?.modelName}`}
                 className="summary-car-img"
@@ -200,7 +237,7 @@ const Step6Summary: React.FC<Step6SummaryProps> = ({ state, onOrderCreate }) => 
                     );
                     (e.target as HTMLImageElement).src = fallbackPath;
                   } else {
-                    (e.target as HTMLImageElement).src = '/images/cars/Granta/Sedan-Ледниковый.png';
+                    (e.target as HTMLImageElement).src = '/images/cars/default.svg';
                   }
                 }}
               />
@@ -284,10 +321,30 @@ const Step6Summary: React.FC<Step6SummaryProps> = ({ state, onOrderCreate }) => 
                   <i className="bi bi-file-earmark-pdf me-2"></i>
                   СКАЧАТЬ PDF
                 </Button>
+                <Button
+                  variant="outline-secondary"
+                  className="me-2"
+                  disabled={!user?.userId || !availableCarId || reserveLoading}
+                  onClick={handleReserve24h}
+                  title={!availableCarId ? 'Нет доступных автомобилей для резерва' : undefined}
+                >
+                  {reserveLoading ? 'Бронирование…' : 'Забронировать на 24 часа'}
+                </Button>
                 <Button variant="success" size="lg" onClick={onOrderCreate}>
                   Оформить заказ
                 </Button>
               </div>
+
+              {reserveError && (
+                <div className="mt-3 text-danger small">
+                  {reserveError}
+                </div>
+              )}
+              {reserveResult && (
+                <div className="mt-3 text-success small">
+                  Авто зарезервировано. Заказ №{reserveResult.orderId}. До: {reserveResult.reservedUntil}
+                </div>
+              )}
             </Card.Body>
           </Card>
         </Col>

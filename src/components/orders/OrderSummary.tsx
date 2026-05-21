@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Badge, Spinner, Alert } from 'react-bootstrap';
 import { Car, Configuration, AdditionalOption } from '../../services/models/car';
 import { carService } from '../../services/api/carService';
+import type { PricingQuote } from '../../services/models/order';
 import { getModelImagePath } from '../../utils/imageUtils';
 import Icon from '../common/Icon';
 
@@ -13,6 +14,7 @@ interface OrderSummaryProps {
   optionIds?: number[];
   totalPrice: number;
   basePrice: number;
+  quote?: PricingQuote | null;
 }
 
 interface SummaryData {
@@ -31,6 +33,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   optionIds = [],
   totalPrice,
   basePrice,
+  quote,
 }) => {
   const [summaryData, setSummaryData] = useState<SummaryData>({});
   const [loading, setLoading] = useState(true);
@@ -135,7 +138,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     return type;
   };
 
-  const additionalCost = totalPrice - basePrice;
+  const effectiveBasePrice = quote?.basePrice ?? basePrice;
+  const effectiveTotalPrice = quote?.totalPrice ?? totalPrice;
 
   return (
     <div className="order-summary">
@@ -261,19 +265,26 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
                   {/* Цены */}
                   <div className="price-section border-top pt-3">
-                    <div className="d-flex justify-content-between mb-2">
-                      <span className="text-muted">Базовая цена:</span>
-                      <span className="fw-semibold">{formatPrice(basePrice)}</span>
-                    </div>
-                    {additionalCost > 0 && (
+                    {quote?.lines?.length ? (
+                      <>
+                        {quote.lines.map((line, idx) => (
+                          <div key={`${line.code}-${idx}`} className="d-flex justify-content-between mb-2">
+                            <span className="text-muted">{line.label}:</span>
+                            <span className="fw-semibold">
+                              {line.amount >= 0 ? formatPrice(line.amount) : `-${formatPrice(Math.abs(line.amount))}`}
+                            </span>
+                          </div>
+                        ))}
+                      </>
+                    ) : (
                       <div className="d-flex justify-content-between mb-2">
-                        <span className="text-muted">Доплата:</span>
-                        <span className="fw-semibold text-primary">+{formatPrice(additionalCost)}</span>
+                        <span className="text-muted">Базовая цена:</span>
+                        <span className="fw-semibold">{formatPrice(effectiveBasePrice)}</span>
                       </div>
                     )}
                     <div className="d-flex justify-content-between pt-2 border-top">
                       <strong className="fs-5">Итого:</strong>
-                      <strong className="fs-4 text-primary">{formatPrice(totalPrice)}</strong>
+                      <strong className="fs-4 text-primary">{formatPrice(effectiveTotalPrice)}</strong>
                     </div>
                   </div>
                 </>

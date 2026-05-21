@@ -12,6 +12,7 @@ export interface Car {
   fuelType: string;
   engineCapacity: number;
   configurationName?: string; // Название комплектации
+  imageUrl?: string;
 }
 
 export interface Configuration {

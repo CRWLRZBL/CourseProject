@@ -1,9 +1,26 @@
 import { apiClient } from './apiClient';
-import { Order, CreateOrderRequest } from '../models/order';
+import {
+  Order,
+  CreateOrderRequest,
+  PricingQuote,
+  PricingQuoteRequest,
+  ReserveCar24hRequest,
+  ReserveCar24hResponse,
+} from '../models/order';
 
 export const orderService = {
   async createOrder(orderData: CreateOrderRequest): Promise<{ message: string; orderId: number; totalPrice: number }> {
     const response = await apiClient.post('/orders', orderData);
+    return response.data;
+  },
+
+  async getQuote(quote: PricingQuoteRequest): Promise<PricingQuote> {
+    const response = await apiClient.post<PricingQuote>('/orders/quote', quote);
+    return response.data;
+  },
+
+  async reserveCar24h(dto: ReserveCar24hRequest): Promise<ReserveCar24hResponse> {
+    const response = await apiClient.post<ReserveCar24hResponse>('/orders/reserve-24h', dto);
     return response.data;
   },
 

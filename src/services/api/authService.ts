@@ -29,8 +29,10 @@ export const authService = {
     if (token) {
       localStorage.setItem('authToken', token);
     }
-    
-    return userData;
+
+    const withId = userData as User & { id?: number };
+    const userId = typeof withId.userId === 'number' ? withId.userId : (withId.id ?? 0);
+    return { ...userData, userId };
   },
 
   async register(userData: RegisterRequest): Promise<{ message: string; userId: number }> {
@@ -45,7 +47,32 @@ export const authService = {
 
   getCurrentUser(): User | null {
     const userStr = localStorage.getItem('currentUser');
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr) return null;
+    try {
+      const p = JSON.parse(userStr) as Record<string, unknown>;
+      const uidRaw = p.userId ?? p.id ?? p.UserId ?? p.Id;
+      const userId =
+        typeof uidRaw === 'number' && !Number.isNaN(uidRaw)
+          ? uidRaw
+          : typeof uidRaw === 'string'
+            ? parseInt(uidRaw, 10)
+            : NaN;
+      if (!Number.isFinite(userId) || userId <= 0) return null;
+      const user: User = {
+        userId,
+        email: String(p.email ?? p.Email ?? ''),
+        firstName: String(p.firstName ?? p.FirstName ?? ''),
+        lastName: String(p.lastName ?? p.LastName ?? ''),
+        phone: String(p.phone ?? p.Phone ?? ''),
+        roleName: String(p.roleName ?? p.RoleName ?? ''),
+      };
+      if (typeof p.userId !== 'number' || p.userId !== userId) {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+      }
+      return user;
+    } catch {
+      return null;
+    }
   },
 
   isAuthenticated(): boolean {

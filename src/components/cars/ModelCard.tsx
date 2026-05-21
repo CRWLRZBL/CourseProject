@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Badge, Spinner } from 'react-bootstrap';
+import { Card, Button, Badge, Spinner, Form } from 'react-bootstrap';
 import { Model } from '../../services/models/car';
 import { useNavigate } from 'react-router-dom';
 import { utils, BODY_TYPE_LABELS, FUEL_TYPE_LABELS } from '../../utils/constants';
@@ -7,9 +7,11 @@ import { getModelImagePath } from '../../utils/imageUtils';
 
 interface ModelCardProps {
   model: Model;
+  compareSelected?: boolean;
+  onToggleCompare?: () => void;
 }
 
-const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
+const ModelCard: React.FC<ModelCardProps> = ({ model, compareSelected = false, onToggleCompare }) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -82,8 +84,8 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
         <Card.Img 
           variant="top" 
           src={imageError 
-            ? '/images/cars/Granta/Sedan-Ледниковый.png' 
-            : (currentImagePath || imagePath || '/images/cars/Granta/Sedan-Ледниковый.png')
+            ? '/images/cars/default.svg' 
+            : (currentImagePath || imagePath || '/images/cars/default.svg')
           }
           alt={`${model.brandName || ''} ${model.modelName || ''}`}
           className="car-card-image"
@@ -96,14 +98,28 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
         />
         
         <Badge 
-          bg="success" 
+          bg={model.availableCount > 0 ? 'success' : 'secondary'} 
           className="position-absolute top-0 end-0 m-2"
         >
-          В наличии
+          {model.availableCount > 0 ? `В наличии: ${model.availableCount}` : 'Нет в наличии'}
         </Badge>
       </div>
       
       <Card.Body className="d-flex flex-column">
+        {onToggleCompare && (
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <Form.Check
+              type="checkbox"
+              id={`cmp-${model.modelId}`}
+              label="Сравнить"
+              checked={compareSelected}
+              onChange={onToggleCompare}
+            />
+            {compareSelected && (
+              <Badge bg="primary">Выбрано</Badge>
+            )}
+          </div>
+        )}
         <div className="mb-2">
           <Badge bg="light" text="dark" className="me-2">
             {model.bodyType ? (BODY_TYPE_LABELS[model.bodyType] || model.bodyType) : 'Не указано'}
@@ -138,11 +154,11 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
           <Button 
             variant="primary" 
             onClick={handleSelectModel}
-            disabled={!model.isActive || model.availableCount === 0}
+            disabled={!model.isActive}
             className="w-100"
             style={{ fontWeight: 500 }}
           >
-            {model.isActive && model.availableCount > 0 ? 'Выбрать' : 'Недоступно'}
+            {model.isActive ? 'Выбрать' : 'Недоступно'}
           </Button>
         </div>
       </Card.Body>

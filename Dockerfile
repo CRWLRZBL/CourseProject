@@ -10,8 +10,9 @@ RUN npm ci
 # Копируем остальные файлы проекта
 COPY frontend/ ./
 
-# Устанавливаем переменные окружения для сборки (Vite требует их во время сборки)
-ARG VITE_API_URL=http://localhost:5171/api
+# По умолчанию относительный /api — браузер бьёт в тот же хост (nginx :3000), прокси на backend.
+# Для npm run dev на ПК задайте в .env: VITE_API_URL=http://localhost:5171/api
+ARG VITE_API_URL=/api
 ENV VITE_API_URL=$VITE_API_URL
 
 # Собираем проект

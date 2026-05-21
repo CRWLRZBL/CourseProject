@@ -1,0 +1,29 @@
+/* Тема в духе «Авторитет»: типографика и акценты (без глобальной смены Bootstrap primary). */
+.dealership-ui {
+  font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.dealership-ui .btn-dealership-dark {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #1a1a1a;
+  --bs-btn-border-color: #1a1a1a;
+  --bs-btn-hover-bg: #333;
+  --bs-btn-hover-border-color: #333;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: #000;
+  --bs-btn-active-border-color: #000;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.65rem 1.25rem;
+}
+
+.dealership-ui .btn-dealership-coral {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #e96b5d;
+  --bs-btn-border-color: #e96b5d;
+  --bs-btn-hover-bg: #d85a4c;
+  --bs-btn-hover-border-color: #d85a4c;
+  --bs-btn-hover-color: #fff;
+  font-weight: 600;
+  border-radius: 999px;
+}

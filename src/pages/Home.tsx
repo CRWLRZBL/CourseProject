@@ -1,294 +1,451 @@
-import React from 'react';
-import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
+import React, { useRef } from 'react';
+import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Icon from '../components/common/Icon';
+import { MARKETING_HERO_WEBP } from '../constants/marketingAssets';
 import { getModelImagePath } from '../utils/imageUtils';
+import './HomePage.css';
 
 const Home: React.FC = () => {
   const { user } = useAuth();
+  const stripRef = useRef<HTMLDivElement>(null);
 
-  const features = [
-    {
-      icon: 'directions_car',
-      title: 'Широкий выбор',
-      description: 'Большой каталог новых автомобилей LADA с различными комплектациями'
-    },
-    {
-      icon: 'tune',
-      title: 'Онлайн-конфигуратор',
-      description: 'Соберите автомобиль своей мечты с помощью удобного конфигуратора'
-    },
-    {
-      icon: 'attach_money',
-      title: 'Лучшие цены',
-      description: 'Прямые поставки от производителя гарантируют выгодные условия'
-    },
-    {
-      icon: 'inventory_2',
-      title: 'Быстрое оформление',
-      description: 'Весь процесс заказа от выбора до оформления занимает несколько минут'
-    }
-  ];
+  const openConsultation = () => {
+    window.dispatchEvent(new CustomEvent('open-consultation', { detail: { source: 'home' } }));
+  };
 
   const popularModels = [
     {
       id: 4,
       name: 'LADA Vesta Седан',
+      shortTitle: 'LADA Vesta 1.6 MT',
       price: 1239900,
-      image: '/images/cars/Vesta/Sedan-Ледниковый.png',
-      type: 'Sedan'
+      type: 'Sedan',
+      tag: 'В наличии',
+      mileage: 'Новый',
+      owners: 'Гарантия 3 года',
+      drive: 'Передний'
     },
     {
       id: 1,
       name: 'LADA Granta Седан',
+      shortTitle: 'LADA Granta 1.6 MT',
       price: 749900,
-      image: '/images/cars/Granta/Sedan-Ледниковый.png',
-      type: 'Sedan'
+      type: 'Sedan',
+      tag: 'Под заказ',
+      mileage: 'Новый',
+      owners: 'Гарантия 3 года',
+      drive: 'Передний'
     },
     {
       id: 9,
       name: 'LADA Niva Travel',
+      shortTitle: 'LADA Niva Travel 1.7 MT',
       price: 1314000,
-      image: '/images/cars/Niva Travel/Travel-Ледниковый.png',
-      type: 'SUV'
+      type: 'SUV',
+      tag: 'В наличии',
+      mileage: 'Новый',
+      owners: 'Гарантия 3 года',
+      drive: 'Полный'
+    },
+    {
+      id: 3,
+      name: 'LADA Granta Cross',
+      shortTitle: 'LADA Granta Cross 1.6 MT',
+      price: 899900,
+      type: 'SUV',
+      tag: 'В наличии',
+      mileage: 'Новый',
+      owners: 'Гарантия 3 года',
+      drive: 'Передний'
+    },
+    {
+      id: 5,
+      name: 'LADA Granta Sportline',
+      shortTitle: 'LADA Granta Sportline 1.6 MT',
+      price: 999900,
+      type: 'Sedan',
+      tag: 'Под заказ',
+      mileage: 'Новый',
+      owners: 'Гарантия 3 года',
+      drive: 'Передний'
+    },
+    {
+      id: 7,
+      name: 'LADA Vesta SW',
+      shortTitle: 'LADA Vesta SW 1.6 MT',
+      price: 1299900,
+      type: 'StationWagon',
+      tag: 'Под заказ',
+      mileage: 'Новый',
+      owners: 'Гарантия 3 года',
+      drive: 'Передний'
+    },
+    {
+      id: 10,
+      name: 'LADA Largus Универсал',
+      shortTitle: 'LADA Largus 1.6 MT',
+      price: 1099900,
+      type: 'StationWagon',
+      tag: 'Под заказ',
+      mileage: 'Новый',
+      owners: 'Гарантия 3 года',
+      drive: 'Передний'
+    },
+    {
+      id: 15,
+      name: 'LADA Iskra Седан',
+      shortTitle: 'LADA Iskra 1.6 MT',
+      price: 899900,
+      type: 'Sedan',
+      tag: 'В наличии',
+      mileage: 'Новый',
+      owners: 'Гарантия 3 года',
+      drive: 'Передний'
+    },
+    {
+      id: 18,
+      name: 'LADA Aura',
+      shortTitle: 'LADA Aura 1.8 AT',
+      price: 1599900,
+      type: 'Sedan',
+      tag: 'Под заказ',
+      mileage: 'Новый',
+      owners: 'Гарантия 3 года',
+      drive: 'Передний'
     }
   ];
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('ru-RU', {
+  const serviceCards = [
+    {
+      title: 'Новые автомобили',
+      text: 'Официальный дилер LADA: модели в наличии и под заказ',
+      icon: 'directions_car',
+      to: '/catalog'
+    },
+    {
+      title: 'Онлайн-конфигуратор',
+      text: 'Соберите комплектацию и получите прозрачный расчёт',
+      icon: 'tune',
+      to: '/configurator'
+    },
+    {
+      title: 'Оформление и бронь',
+      text: 'Заявка, бронь на 24 часа и запись на тест-драйв',
+      icon: 'receipt_long',
+      to: user ? '/order' : '/profile?redirect=/order'
+    },
+    {
+      title: 'Поддержка',
+      text: 'Задайте вопрос менеджеру — ответим в чате или по телефону',
+      icon: 'support_agent',
+      onClick: () => setShowConsultation(true)
+    }
+  ];
+
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat('ru-RU', {
       style: 'currency',
       currency: 'RUB',
-      minimumFractionDigits: 0,
+      minimumFractionDigits: 0
     }).format(price);
+
+  const estMonthly = (price: number) =>
+    new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(Math.max(1, Math.round(price / 96)));
+
+  const scrollStrip = (dir: -1 | 1) => {
+    stripRef.current?.scrollBy({ left: dir * 300, behavior: 'smooth' });
   };
 
+  const promoDate = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+
   return (
-    <div className="home-page">
-      <section className="hero-section text-white py-5 mb-5">
-        <div className="hero-background"></div>
-        <Container fluid className="position-relative px-0">
-          <Container className="position-relative">
-            <Row className="align-items-center min-vh-50 py-5">
-              <Col lg={6}>
-                <div className="hero-content">
-                  <Badge bg="primary" className="mb-3 px-3 py-2 fs-6">
-                    <Icon name="emoji_events" className="me-1" style={{ fontSize: '1rem', verticalAlign: 'middle' }} />
-                    Официальный дилер
-                  </Badge>
-                  <h1 className="display-3 fw-bold mb-4">
-                    Автомобили LADA
-                    <br />
-                    <span className="text-warning">С заботой о вас</span>
-                  </h1>
-                  <p className="lead mb-4 opacity-90">
-                    Новые автомобили с гарантией от производителя. 
-                    Онлайн-заказ и индивидуальный подбор комплектации.
-                  </p>
-                  <div className="d-flex gap-3 flex-wrap">
-                    <Button 
-                      as={Link as any}
-                      to="/catalog" 
-                      variant="primary" 
-                      size="lg"
-                      className="px-5 shadow-lg"
-                    >
-                      <Icon name="directions_car" className="me-2" style={{ verticalAlign: 'middle' }} />
-                      Смотреть каталог
-                    </Button>
-                    {!user && (
-                      <Button 
-                        as={Link as any} 
-                        to="/profile" 
-                        variant="outline-light" 
-                        size="lg"
-                        className="px-5"
-                      >
-                        <Icon name="person" className="me-2" style={{ verticalAlign: 'middle' }} />
-                        Войти в аккаунт
-                      </Button>
+    <div className="home-page home-page--dealership">
+      <div className="hp-heroFrame">
+        <section
+          className="hp-heroShell"
+          style={{ ['--hp-hero-img' as string]: `url(${MARKETING_HERO_WEBP})` }}
+        >
+          <div className="hp-heroTop">
+            <Container fluid="xxl" className="px-lg-4">
+              <h1 className="hp-heroTitle mb-0">Автосалон LADA. Автомобили доверяют нам!</h1>
+              <p className="hp-heroLead mb-0">
+                Большой выбор новых автомобилей. Онлайн-конфигуратор, прозрачный расчёт, сопровождение сделки и сервис.
+              </p>
+              <div className="hp-heroActions">
+                <Button as={Link as any} to="/catalog" className="btn-dealership-dark">
+                  Купить авто
+                  <Icon name="north_east" className="ms-2" style={{ fontSize: '1rem', verticalAlign: 'middle' }} />
+                </Button>
+                <Button as={Link as any} to="/configurator" className="hp-heroBtnSecondary fw-semibold">
+                  Конфигуратор
+                </Button>
+                {!user && (
+                  <Button as={Link as any} to="/profile" className="hp-heroBtnGhost fw-semibold">
+                    Войти
+                  </Button>
+                )}
+              </div>
+            </Container>
+          </div>
+
+          <div className="hp-serviceRow mt-auto">
+            <Container fluid="xxl" className="px-lg-4">
+              <Row className="g-2 g-md-3">
+                {serviceCards.map((item, idx) => (
+                  <Col key={idx} md={6} xl={3}>
+                    {item.to ? (
+                      <Card as={Link as any} to={item.to} className="hp-serviceCard text-decoration-none">
+                        <Card.Body>
+                          <div className="hp-serviceIcon">
+                            <Icon name={item.icon} style={{ fontSize: '1.5rem' }} />
+                          </div>
+                          <div>
+                            <div className="hp-serviceTitle">{item.title}</div>
+                            <div className="hp-serviceText">{item.text}</div>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    ) : (
+                      <Card role="button" className="hp-serviceCard" onClick={item.onClick}>
+                        <Card.Body>
+                          <div className="hp-serviceIcon">
+                            <Icon name={item.icon} style={{ fontSize: '1.5rem' }} />
+                          </div>
+                          <div>
+                            <div className="hp-serviceTitle">{item.title}</div>
+                            <div className="hp-serviceText">{item.text}</div>
+                          </div>
+                        </Card.Body>
+                      </Card>
                     )}
-                  </div>
-                </div>
-              </Col>
-              <Col lg={6} className="text-center">
-                <div className="hero-image mt-4 mt-lg-0">
-                  <div className="hero-image-wrapper">
-                    <img 
-                      src={getModelImagePath('Vesta Седан', 'Sedan', undefined, undefined, 'Ледниковый')}
-                      alt="LADA Vesta" 
-                      className="img-fluid"
-                      style={{ maxHeight: '450px', filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.3))' }}
+                  </Col>
+                ))}
+              </Row>
+            </Container>
+          </div>
+        </section>
+      </div>
+
+      <section className="hp-section">
+        <Container>
+          <div className="hp-sectionHead">
+            <div>
+              <h2 className="hp-sectionTitle mb-0">Популярные модели</h2>
+              <p className="hp-sectionSub mb-0">Спрос и лучшие предложения в каталоге новых LADA</p>
+            </div>
+            <Link to="/catalog" className="hp-linkAll">
+              Все авто
+              <Icon name="north_east" style={{ fontSize: '1.1rem' }} />
+            </Link>
+          </div>
+
+          <div className="hp-stripWrap">
+            <div ref={stripRef} className="hp-carStrip">
+              {popularModels.map((car) => (
+                <article key={car.id} className="hp-modelCard">
+                  <div className="position-relative">
+                    <Card.Img
+                      className="hp-modelCard__img"
+                      src={getModelImagePath(car.name, car.type, undefined, undefined, 'Ледниковый')}
+                      alt={car.name}
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/images/cars/Vesta/Sedan-Ледниковый.png';
+                        (e.target as HTMLImageElement).src = '/images/cars/default.svg';
                       }}
                     />
-                  </div>
-                </div>
-              </Col>
-            </Row>
-          </Container>
-        </Container>
-      </section>
-
-      {/* Популярные модели */}
-      <Container className="mb-5">
-        <Row className="mb-5">
-          <Col>
-            <div className="text-center">
-              <Badge bg="light" text="dark" className="mb-3 px-3 py-2">
-                <Icon name="local_fire_department" className="me-1" style={{ fontSize: '1rem', verticalAlign: 'middle' }} />
-                Популярное
-              </Badge>
-              <h2 className="display-5 fw-bold mb-3 text-dark">Популярные модели</h2>
-              <p className="text-dark lead mb-0" style={{ fontSize: '1.125rem' }}>
-                Самые востребованные автомобили в нашем каталоге
-              </p>
-            </div>
-          </Col>
-        </Row>
-        
-        <Row>
-          {popularModels.map(car => (
-            <Col key={car.id} md={6} lg={4} className="mb-4">
-              <Card className="h-100 shadow-sm hover-card border-0 overflow-hidden">
-                <div className="position-relative car-image-overlay">
-                  <Card.Img 
-                    variant="top" 
-                    src={car.image}
-                    alt={car.name}
-                    style={{ height: '220px', objectFit: 'cover', transition: 'transform 0.3s ease' }}
-                    className="car-card-image"
-                    onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/images/cars/Granta/Sedan-Ледниковый.png';
-                    }}
-                  />
-                  <Badge 
-                    bg="primary" 
-                    className="position-absolute top-0 start-0 m-3 px-3 py-2"
-                  >
-                    {car.type}
-                  </Badge>
-                  <div className="position-absolute top-0 end-0 m-3">
-                    <Badge bg="success" className="px-2 py-1">
-                      В наличии
+                    <Badge bg="light" text="dark" className="position-absolute top-0 start-0 m-2 px-2 py-1 fw-semibold shadow-sm">
+                      {car.tag}
                     </Badge>
                   </div>
-                </div>
-                <Card.Body className="d-flex flex-column p-4">
-                  <Card.Title className="h5 mb-2">{car.name}</Card.Title>
-                  <Card.Text className="text-muted flex-grow-1 small mb-3">
-                    Отличное сочетание цены и качества
-                  </Card.Text>
-                  <div className="mt-auto">
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                      <span className="h3 text-primary mb-0 fw-bold">
-                        {formatPrice(car.price)}
+                  <div className="hp-modelCard__body">
+                    <div className="hp-modelCard__title">{car.shortTitle}</div>
+                    <div className="hp-modelSpecs">
+                      <span>
+                        <Icon name="straighten" style={{ fontSize: '1rem' }} />
+                        {car.mileage}
+                      </span>
+                      <span>
+                        <Icon name="verified_user" style={{ fontSize: '1rem' }} />
+                        {car.owners}
+                      </span>
+                      <span>
+                        <Icon name="route" style={{ fontSize: '1rem' }} />
+                        {car.drive}
                       </span>
                     </div>
-                    <Button 
-                      as={Link as any} 
+                    <div className="hp-priceRow">
+                      <span className="hp-priceMain">{formatPrice(car.price)}</span>
+                      <span className="hp-priceNote">от {estMonthly(car.price)} ₽/мес</span>
+                    </div>
+                    <Button
+                      as={Link as any}
                       to={`/configurator?modelId=${car.id}`}
-                      variant="primary" 
-                      className="w-100"
+                      className="btn-dealership-dark w-100 mt-3"
+                      size="sm"
                     >
-                      <Icon name="tune" className="me-2" style={{ verticalAlign: 'middle' }} />
                       Настроить
                     </Button>
                   </div>
+                </article>
+              ))}
+            </div>
+            <div className="hp-stripNav d-none d-md-flex">
+              <button type="button" className="hp-stripBtn" aria-label="Назад" onClick={() => scrollStrip(-1)}>
+                <Icon name="chevron_left" />
+              </button>
+              <button type="button" className="hp-stripBtn" aria-label="Вперёд" onClick={() => scrollStrip(1)}>
+                <Icon name="chevron_right" />
+              </button>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      <section className="hp-section pt-0">
+        <Container>
+          <div className="hp-brands">
+            <h2 className="hp-sectionTitle mb-0">Официальный дилер LADA</h2>
+            <p className="hp-sectionSub mb-0 mx-auto" style={{ maxWidth: '42rem' }}>
+              Новые автомобили в наличии и под заказ, гарантия производителя и сервисное обслуживание.
+            </p>
+            <div className="hp-brands__logos">
+              <span className="hp-brandBadge">LADA</span>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      <section className="hp-section pt-0">
+        <Container>
+          <div className="hp-sectionHead">
+            <div>
+              <h2 className="hp-sectionTitle mb-0">Спецпредложения</h2>
+              <p className="hp-sectionSub mb-0">Выгодные условия на покупку и обмен</p>
+            </div>
+            <Link to="/catalog" className="hp-linkAll">
+              Все акции
+              <Icon name="north_east" style={{ fontSize: '1.1rem' }} />
+            </Link>
+          </div>
+          <Row className="g-4">
+            <Col md={6}>
+              <Card className="hp-promoCard">
+                <div className="ratio ratio-16x9 position-relative bg-light">
+                  <Card.Img
+                    variant="top"
+                    src={getModelImagePath('LADA Granta Седан', 'Sedan', undefined, undefined, 'Ледниковый')}
+                    alt="Акция"
+                    style={{ objectFit: 'cover' }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/cars/default.svg';
+                    }}
+                  />
+                  <span className="hp-promoDate">{promoDate}</span>
+                </div>
+                <Card.Body>
+                  <Card.Text className="mb-0 fw-semibold" style={{ color: '#1a1a1a' }}>
+                    Скидка при покупке в кредит — уточняйте у менеджера актуальные программы банков-партнёров.
+                  </Card.Text>
                 </Card.Body>
               </Card>
             </Col>
-          ))}
-        </Row>
-
-        <Row className="mt-4">
-          <Col className="text-center">
-            <Button 
-              as={Link as any} 
-              to="/catalog" 
-              variant="outline-secondary" 
-              size="lg"
-            >
-              Посмотреть все модели
-            </Button>
-          </Col>
-        </Row>
-      </Container>
-
-      {/* Преимущества */}
-      <section className="bg-light py-5">
-        <Container>
-          <Row className="mb-5">
-            <Col>
-              <h2 className="text-center mb-3 text-dark">Почему выбирают нас</h2>
-              <p className="text-center text-dark lead" style={{ fontSize: '1.125rem' }}>
-                Мы делаем процесс покупки автомобиля простым и удобным
-              </p>
+            <Col md={6}>
+              <Card className="hp-promoCard">
+                <div className="ratio ratio-16x9 position-relative bg-light">
+                  <Card.Img
+                    variant="top"
+                    src={getModelImagePath('LADA Niva Travel', 'SUV', undefined, undefined, 'Ледниковый')}
+                    alt="Акция"
+                    style={{ objectFit: 'cover' }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/cars/default.svg';
+                    }}
+                  />
+                  <span className="hp-promoDate">{promoDate}</span>
+                </div>
+                <Card.Body>
+                  <Card.Text className="mb-0 fw-semibold" style={{ color: '#1a1a1a' }}>
+                    Trade-in и дополнительное оборудование — индивидуальный расчёт в конфигураторе и у менеджера.
+                  </Card.Text>
+                </Card.Body>
+              </Card>
             </Col>
-          </Row>
-          
-          <Row>
-            {features.map((feature, index) => (
-              <Col key={index} md={6} lg={3} className="mb-4">
-                <Card className="h-100 border-0 text-center shadow-sm feature-card">
-                  <Card.Body className="p-4">
-                    <div className="feature-icon-wrapper mb-3">
-                      <div className="feature-icon display-1">
-                        <Icon name={feature.icon} style={{ fontSize: '4rem' }} />
-                      </div>
-                    </div>
-                    <Card.Title className="h5 mb-3">{feature.title}</Card.Title>
-                    <Card.Text className="text-muted small">
-                      {feature.description}
-                    </Card.Text>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
           </Row>
         </Container>
       </section>
 
-      {/* CTA секция */}
-      <Container className="py-5">
-        <Row className="justify-content-center">
-          <Col lg={8} className="text-center">
-            <Card className="bg-primary text-white border-0 shadow">
-              <Card.Body className="py-5">
-                <h2 className="display-5 fw-bold mb-3">
-                  Готовы выбрать свой автомобиль?
-                </h2>
-                <p className="lead mb-4 opacity-75">
-                  Начните с просмотра каталога или сразу перейдите к конфигуратору
-                </p>
-                <div className="d-flex gap-3 justify-content-center flex-wrap">
-                  <Button 
-                    as={Link as any} 
-                    to="/catalog" 
-                    variant="light" 
-                    size="lg"
-                    className="px-4"
-                  >
-                    <Icon name="description" className="me-2" style={{ verticalAlign: 'middle' }} />
-                    Смотреть каталог
-                  </Button>
-                  <Button 
-                    as={Link as any } 
-                    to="/order" 
-                    variant="outline-light" 
-                    size="lg"
-                    className="px-4"
-                  >
-                    <Icon name="tune" className="me-2" style={{ verticalAlign: 'middle' }} />
-                    Начать конфигурацию
-                  </Button>
+      <section className="hp-section hp-about pt-0">
+        <Container>
+          <Row className="align-items-start gy-5">
+            <Col lg={6}>
+              <h2 className="hp-sectionTitle mb-3">Мы рядом на каждом этапе</h2>
+              <p className="hp-about__text mb-3">
+                Помогаем выбрать комплектацию, оформить заказ онлайн и пройти путь от заявки до передачи ключей без
+                лишней суеты. Прозрачные цены, чат с менеджером и напоминания о сервисе после покупки.
+              </p>
+              <p className="hp-about__text mb-4">
+                Работаем для частных и корпоративных клиентов. Если нужна доставка в другой регион или особые условия —
+                оставьте заявку, мы предложим решение.
+              </p>
+              <Button as={Link as any} to="/about" className="btn-dealership-dark">
+                О компании
+                <Icon name="north_east" className="ms-2" style={{ fontSize: '1rem', verticalAlign: 'middle' }} />
+              </Button>
+            </Col>
+            <Col lg={6}>
+              <div className="hp-stats">
+                <div className="hp-stat hp-stat--wide">
+                  <div className="hp-stat__num">15+</div>
+                  <div className="hp-stat__label">лет опыта команды в автобизнесе</div>
                 </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+                <div className="hp-stat">
+                  <div className="hp-stat__num">1000+</div>
+                  <div className="hp-stat__label">довольных клиентов</div>
+                </div>
+                <div className="hp-stat">
+                  <div className="hp-stat__num">24ч</div>
+                  <div className="hp-stat__label">бронь выбранной комплектации</div>
+                </div>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
+      <section className="hp-ctaBand">
+        <Container className="hp-ctaInner">
+          <Row className="align-items-center gy-4">
+            <Col lg={7}>
+              <h2 className="hp-sectionTitle mb-2">Появились вопросы? Задайте их менеджеру!</h2>
+              <p className="hp-sectionSub mb-4" style={{ maxWidth: '36rem' }}>
+                Оставьте контакты — перезвоним или ответим в чате и поможем с комплектацией, кредитом и тест-драйвом.
+              </p>
+              <Button type="button" className="btn-dealership-dark" onClick={() => setShowConsultation(true)}>
+                Получить консультацию
+                <Icon name="north_east" className="ms-2" style={{ fontSize: '1rem', verticalAlign: 'middle' }} />
+              </Button>
+            </Col>
+            <Col lg={5}>
+              <div className="hp-ctaVisual" aria-hidden>
+                <div className="hp-ctaBlob">
+                  <Icon name="support_agent" />
+                </div>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
+      <button
+        type="button"
+        className="hp-fab"
+        aria-label="Получить консультацию"
+        onClick={openConsultation}
+      >
+        <Icon name="call" style={{ fontSize: '1.5rem' }} />
+      </button>
+
     </div>
   );
 };

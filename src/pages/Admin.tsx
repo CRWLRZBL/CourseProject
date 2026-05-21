@@ -26,7 +26,7 @@ const Admin: React.FC = () => {
   const [error, setError] = useState('');
   const [editingCar, setEditingCar] = useState<Car | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editForm, setEditForm] = useState({ color: '', status: '', vin: '', mileage: 0 });
+  const [editForm, setEditForm] = useState({ color: '', status: '', vin: '', mileage: 0, imageUrl: '' });
   
   // Состояния для поиска и фильтрации заказов
   const [orderSearch, setOrderSearch] = useState('');
@@ -135,7 +135,8 @@ const Admin: React.FC = () => {
       color: car.color || '',
       status: car.status || '',
       vin: car.vin || '',
-      mileage: 0
+      mileage: 0,
+      imageUrl: car.imageUrl || ''
     });
     setShowEditModal(true);
   };
@@ -148,7 +149,8 @@ const Admin: React.FC = () => {
         color: editForm.color,
         status: editForm.status,
         vin: editForm.vin,
-        mileage: editForm.mileage || undefined
+        mileage: editForm.mileage || undefined,
+        imageUrl: editForm.imageUrl.trim() ? editForm.imageUrl.trim() : null
       });
       setShowEditModal(false);
       setEditingCar(null);
@@ -833,6 +835,19 @@ const Admin: React.FC = () => {
                   onChange={(e) => setEditForm({ ...editForm, mileage: parseInt(e.target.value) || 0 })}
                   placeholder="Введите пробег"
                 />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Фото (путь/URL)</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={editForm.imageUrl}
+                  onChange={(e) => setEditForm({ ...editForm, imageUrl: e.target.value })}
+                  placeholder="Напр.: /images/cars/vesta.png или https://..."
+                />
+                <Form.Text className="text-muted">
+                  Если оставить пустым — будет использоваться фото модели (Models.ImageUrl), если оно задано.
+                </Form.Text>
               </Form.Group>
             </Form>
           </Modal.Body>

@@ -5,14 +5,20 @@ import ModelCard from './ModelCard';
 
 interface ModelListProps {
   models: Model[];
+  compareSelectedIds?: number[];
+  onToggleCompare?: (modelId: number) => void;
 }
 
-const ModelList: React.FC<ModelListProps> = ({ models }) => {
+const ModelList: React.FC<ModelListProps> = ({ models, compareSelectedIds = [], onToggleCompare }) => {
   return (
     <Row>
       {models.map(model => (
         <Col key={model.modelId} xs={12} sm={6} lg={4} className="mb-4">
-          <ModelCard model={model} />
+          <ModelCard
+            model={model}
+            compareSelected={compareSelectedIds.includes(model.modelId)}
+            onToggleCompare={onToggleCompare ? () => onToggleCompare(model.modelId) : undefined}
+          />
         </Col>
       ))}
     </Row>
